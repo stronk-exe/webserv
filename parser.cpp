@@ -1,13 +1,6 @@
 
 #include "webserv.hpp"
 
-typedef struct s_server
-{
-	std::string port;
-	std::string host;
-	struct s_server *next;
-}	t_server;
-
 void _get_ports( t_server *_server, std::string* _servers, int c )
 {
 	for (int i=0; i< c; i++)
@@ -44,6 +37,34 @@ void _get_hosts( t_server *_server, std::string* _servers, int c )
 	}
 }
 
+void _get_location_block( t_server *_server, std::string* _servers, int c )
+{
+	for (int i=0; i< c; i++)
+	{
+		std::string location="";
+		int location_block_index = _servers[i].find("location");
+		int x=location_block_index+8;
+		// std::cerr << "indexxxxxx: " << location_block_index << "\n***\n"<< _servers[i] << "---------" << std::endl;
+		// std::cout << "1--------" << std::endl;
+		while (_servers[i][x] != '\n')
+		{
+			// std::cout << _servers[i][x];
+			x++;
+		}
+		// std::cout << "2--------" << std::endl;
+		x++;
+		while (_servers[i][x] != '\n')
+		{
+			// std::cout << _servers[i][x];
+			location+=_servers[i][x++];
+			// x++;
+		}
+		// std::cout << "3--------" << std::endl;
+		// std::cout << "location: " << location << std::endl;
+		_server[i].location = location;
+	}
+}
+
 void _parser( std::string s )
 {
 	int count = 0;
@@ -70,15 +91,15 @@ void _parser( std::string s )
 				i++;
 				while (s[i] != '}' && s[i])
 				{
-					_servers[c] += s[i];
-					i++;
+					_servers[c] += s[i++];
+					// i++;
 				}
 				i++;
 			}
 			else
 			{
-				_servers[c] += s[i];
-				i++;
+				_servers[c] += s[i++];
+				// i++;
 			}
 		}
 		c++;
@@ -92,6 +113,7 @@ void _parser( std::string s )
 
 	_get_ports(_server, _servers, c);
 	_get_hosts(_server, _servers, c);
+	_get_location_block(_server, _servers, c);
 	// for (int i=0; i< c; i++)
 	// {
 	// 	// std::string port="";
@@ -125,8 +147,9 @@ void _parser( std::string s )
 	// }
 	for (int i=0; i<count; i++)
 	{
-		std::cout << _server[i].host << std::endl;
-		std::cout << _server[i].port << std::endl;
+		std::cout << "host: " << _server[i].host << std::endl;
+		std::cout << "port: " << _server[i].port << std::endl;
+		std::cout << "location: " << _server[i].location << std::endl;
 	}
 
 	// while (s[i])

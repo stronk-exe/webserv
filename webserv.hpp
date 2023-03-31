@@ -12,6 +12,14 @@
 
 #define PORT 8080
 
+typedef struct s_server
+{
+	std::string port;
+	std::string host;
+	std::string location;
+	struct s_server *next;
+}	t_server;
+
 // Parsing
 void _parser( std::string txt );
 
