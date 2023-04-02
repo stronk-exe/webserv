@@ -1,48 +1,54 @@
-/*    int server_fd, new_socket; long valread;
-        struct sockaddr_in address;
-        int addrlen = sizeof(address);
-        
-        // Only this line has been changed. Everything is same.
-        char *hello = strdup("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nwebserv hh!");
-        
-        // Creating socket file descriptor
-        if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
-        {
-            perror("In socket");
-            exit(EXIT_FAILURE);
-        }
-        
+#include "webserv.hpp"
 
-        address.sin_family = AF_INET;
-        address.sin_addr.s_addr = INADDR_ANY;
-        address.sin_port = htons( PORT );
-        
-        memset(address.sin_zero, '\0', sizeof address.sin_zero);
-        
-        
-        if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
+int main()
+{
+    int _socket_fd;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
+
+    if ((_socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        std::cerr << "socket creation failed!" << std::endl;
+        exit(1);
+    }
+
+    memset((char *)&address, 0, sizeof(address));
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(8000);
+
+    if ((bind(_socket_fd, (struct sockaddr *)&address, sizeof(address))) < 0)
+    {
+        std::cerr << "binding failed!" << std::endl;
+        exit(1);
+    }
+
+    if ((listen(_socket_fd, 10)) < 0)
+    {
+        std::cerr << "listining failed!" << std::endl;
+        exit(1);
+    }
+
+    while (1)
+    {
+        int coming_socket;
+        std::cout << "listening on port " << 8000 << "..." << std::endl;
+        if ((coming_socket = accept(_socket_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
         {
-            perror("In bind");
-            exit(EXIT_FAILURE);
+            std::cerr << "acception failed!" << std::endl;
+            exit(1);
         }
-        if (listen(server_fd, 10) < 0)
+
+        char buffer[9999] = {0};
+        int data = read(coming_socket, buffer, 1024);
+        if (data < 0)
         {
-            perror("In listen");
-            exit(EXIT_FAILURE);
+            std::cerr << "empty data!" << std::endl;
+            exit(1);
         }
-        while(1)
-        {
-            printf("\n+++++++ Waiting for new connection ++++++++\n\n");
-            if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
-            {
-                perror("In accept");
-                exit(EXIT_FAILURE);
-            }
-            
-            char buffer[30000] = {0};
-            valread = read( new_socket , buffer, 30000);
-            printf("%s\n",buffer );
-            write(new_socket , hello , strlen(hello));
-            printf("------------------Hello message sent-------------------");
-            close(new_socket);
-        }*/
+
+        char *_server_message = strdup("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\ngreets from server!");
+        write(coming_socket, _server_message, strlen(_server_message));
+        close(coming_socket);
+    }
+}

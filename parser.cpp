@@ -5,35 +5,41 @@ void _get_ports( t_server *_server, std::string* _servers, int c )
 {
 	for (int i=0; i< c; i++)
 	{
-		std::string port="";
-		int port_index = _servers[i].find("listen");
-		int x=port_index+6;
-		while (_servers[i][x] == ' ')
-			x++;
-		while (_servers[i][x] != ';')
+		std::string t="";
+		int _index;// = _servers[i].find("listen");
+		if ((_index = _servers[i].find("listen")) > 0)
 		{
-			port+=_servers[i][x++];
-			// x++;
+			int x=_index+6;
+			while (_servers[i][x] == ' ')
+				x++;
+			while (_servers[i][x] != ';')
+			{
+				t+=_servers[i][x++];
+				// x++;
+			}
 		}
-		_server[i].port = port;
+		_server[i].port = t;
 	}
 }
 
-void _get_hosts( t_server *_server, std::string* _servers, int c )
+void _get_server_name( t_server *_server, std::string* _servers, int c )
 {
 	for (int i=0; i< c; i++)
 	{
-		std::string host="";
-		int host_index = _servers[i].find("server_name");
-		int x=host_index+11;
-		while (_servers[i][x] == ' ')
-			x++;
-		while (_servers[i][x] != ';')
+		std::string t="";
+		int _index;// = _servers[i].find("server_name");
+		if ((_index = _servers[i].find("server_name")) > 0)
 		{
-			host+=_servers[i][x++];
-			// y++;
+			int x=_index+11;
+			while (_servers[i][x] == ' ')
+				x++;
+			while (_servers[i][x] != ';')
+			{
+				t+=_servers[i][x++];
+				// y++;
+			}
 		}
-		_server[i].host = host;
+		_server[i].server_name = t;
 	}
 }
 
@@ -41,27 +47,106 @@ void _get_location_block( t_server *_server, std::string* _servers, int c )
 {
 	for (int i=0; i< c; i++)
 	{
-		std::string location="";
-		int location_block_index = _servers[i].find("location");
-		int x=location_block_index+8;
-		// std::cerr << "indexxxxxx: " << location_block_index << "\n***\n"<< _servers[i] << "---------" << std::endl;
-		// std::cout << "1--------" << std::endl;
-		while (_servers[i][x] != '\n')
+		std::string t="";
+		int _index;// = _servers[i].find("location");
+		if ((_index = _servers[i].find("location")) > 0)
 		{
-			// std::cout << _servers[i][x];
+			int x=_index+8;
+			// std::cerr << "indexxxxxx: " << location_block_index << "\n***\n"<< _servers[i] << "---------" << std::endl;
+			// std::cout << "1--------" << std::endl;
+			while (_servers[i][x] != '{')
+			{
+				// std::cout << _servers[i][x];
+				x++;
+			}
+			// std::cout << "2--------" << std::endl;
 			x++;
-		}
-		// std::cout << "2--------" << std::endl;
-		x++;
-		while (_servers[i][x] != '\n')
-		{
-			// std::cout << _servers[i][x];
-			location+=_servers[i][x++];
-			// x++;
+			while (_servers[i][x] != '}')
+			{
+				// std::cout << _servers[i][x];
+				t+=_servers[i][x++];
+				// x++;
+			}
 		}
 		// std::cout << "3--------" << std::endl;
 		// std::cout << "location: " << location << std::endl;
-		_server[i].location = location;
+		_server[i].location = t;
+	}
+}
+
+void _get_client_max_body_size( t_server *_server, std::string* _servers, int c )
+{
+	for (int i=0; i< c; i++)
+	{
+		std::string t="";
+		int _index;// = _servers[i].find("client_max_body_size");
+		if ((_index = _servers[i].find("client_max_body_size")) > 0)
+		{
+			int x=_index+20;
+			while (_servers[i][x] == ' ')
+				x++;
+			while (_servers[i][x] != ';')
+			{
+				t+=_servers[i][x++];
+				// y++;
+			}
+		}
+		_server[i].client_max_body_size = t;
+	}
+}
+
+void _get_error_page( t_server *_server, std::string* _servers, int c )
+{
+	for (int i=0; i< c; i++)
+	{
+		std::string t="";
+		int _index;// = _servers[i].find("error_page");
+		if ((_index = _servers[i].find("error_page")) > 0)
+		{
+			int x=_index+11;
+			while (_servers[i][x] == ' ')
+				x++;
+			while (_servers[i][x] != ';')
+			{
+				t+=_servers[i][x++];
+				// y++;
+			}
+		}
+		_server[i].error_page = t;
+	}
+}
+
+void _get_http_redirection( t_server *_server, std::string* _servers, int c )
+{
+	for (int i=0; i< c; i++)
+	{
+		std::string t="";
+		int _index;// = _servers[i].find("return");
+		if ((_index = _servers[i].find("return")) > 0)
+		{
+			// std::cerr << _index << std::endl;
+			int x=_index+6;
+			while (_servers[i][x] == ' ')
+				x++;
+			while (_servers[i][x] != ';')
+			{
+				t+=_servers[i][x++];
+				// y++;
+			}
+		}
+		_server[i].http_redirection = t;
+
+		if (t.length())
+		{
+			char *r = &t[0];
+			char *s;
+			s = strtok(r, " ");
+			// std::cout << s << std::endl;
+			s = strtok(NULL, " ");
+			_server[i].http_path = std::string(s);
+			// std::cout << s << std::endl;
+			// (*s)++;
+		}
 	}
 }
 
@@ -88,12 +173,14 @@ void _parser( std::string s )
 		{
 			if (s[i] == '{')
 			{
+				_servers[c] += s[i++];
 				i++;
 				while (s[i] != '}' && s[i])
 				{
 					_servers[c] += s[i++];
 					// i++;
 				}
+				_servers[c] += s[i++];
 				i++;
 			}
 			else
@@ -112,8 +199,14 @@ void _parser( std::string s )
 	t_server _server[count];
 
 	_get_ports(_server, _servers, c);
-	_get_hosts(_server, _servers, c);
+	_get_server_name(_server, _servers, c);
 	_get_location_block(_server, _servers, c);
+	_get_client_max_body_size(_server, _servers, c);
+	_get_error_page(_server, _servers, c);
+
+	_get_http_redirection(_server, _servers, c);
+	// _get_http_path(_server, _servers, c);
+	
 	// for (int i=0; i< c; i++)
 	// {
 	// 	// std::string port="";
@@ -147,9 +240,15 @@ void _parser( std::string s )
 	// }
 	for (int i=0; i<count; i++)
 	{
-		std::cout << "host: " << _server[i].host << std::endl;
+		std::cout << "server_name: " << _server[i].server_name << std::endl;
 		std::cout << "port: " << _server[i].port << std::endl;
 		std::cout << "location: " << _server[i].location << std::endl;
+		std::cout << "client_max_body_size: " << _server[i].client_max_body_size << std::endl;
+		std::cout << "error_page: " << _server[i].error_page << std::endl;
+		std::cout << "----------------------" << std::endl;
+		std::cout << "http_redirection: " << _server[i].http_redirection << std::endl;
+		std::cout << "http_path: " << _server[i].http_path << std::endl;
+		std::cout << std::endl;
 	}
 
 	// while (s[i])

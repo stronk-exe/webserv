@@ -10,13 +10,17 @@
 #include <string.h>
 #include <fstream>
 
-#define PORT 8080
-
 typedef struct s_server
 {
 	std::string port;
 	std::string host;
+	std::string server_name;
+	std::string error_page;
+	std::string client_max_body_size;
 	std::string location;
+
+	std::string http_redirection;
+	std::string http_path;
 	struct s_server *next;
 }	t_server;
 
