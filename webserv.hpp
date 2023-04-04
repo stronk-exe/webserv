@@ -9,8 +9,8 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <fstream>
+#include <vector>
 #include <map>
-
 
 typedef struct s_server
 {
@@ -19,7 +19,8 @@ typedef struct s_server
 	std::string server_name;
 	std::string error_page;
 	std::string client_max_body_size;
-	std::string location;
+	// std::string location;
+	std::vector<std::string> location;
 
 	std::string http_redirection;
 	std::string http_path;
@@ -28,7 +29,9 @@ typedef struct s_server
 
 typedef struct s_request
 {
+	std::string uri;
 	std::string method;
+	std::string http_version;
 }	t_request;
 
 // Parsing

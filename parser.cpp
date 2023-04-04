@@ -70,8 +70,77 @@ void _get_location_block( t_server *_server, std::string* _servers, int c )
 			}
 		}
 		// std::cout << "3--------" << std::endl;
-		// std::cout << "location: " << location << std::endl;
-		_server[i].location = t;
+		_server[i].location.push_back(t);
+		// std::cerr << "malna" << std::endl;
+	}
+}
+
+std::string _trim(std::string s) {
+	int atstart = 0, atend = s.size()-1;
+
+	for(size_t i=0;i<s.size();i++)
+	{
+		if(s[i] != ' ')
+		{
+			atstart = i;
+			break;
+		}
+	}
+	for(size_t i = s.size()-1;i>=0;i--)
+	{
+		if(s[i] != ' ')
+		{
+			atend = i;
+			break;
+		}
+	}
+	std::string fistr = "";
+	for(int i=atstart;i<=atend;i++)
+		fistr += s[i];
+	return fistr;
+}
+
+void _get_location( t_server *_server, std::string* _servers, std::string s, int c )
+{
+	(void)c;
+	for (int i=0; i< c; i++)
+	{
+		std::string str= "location";
+		size_t nPos = s.find(str, 0); 
+		int count = 0;
+		while (nPos != std::string::npos)
+		{
+			count++;
+			nPos = s.find(str, nPos + str.size());
+		}
+		for (int j=0; j < count; j++)
+		{
+			std::string t="";
+			int _index;
+			if ((_index = _servers[i].find("location")) > 0)
+			{
+				int x=_index+8;
+				// std::cerr << "indexxxxxx: " << location_block_index << "\n***\n"<< _servers[i] << "---------" << std::endl;
+				// std::cout << "1--------" << std::endl;
+				while (_servers[i][x] != '{')
+				{
+					// std::cout << _servers[i][x];
+					t+=_servers[i][x++];
+					// x++;
+				}
+				// std::cout << "2--------" << std::endl;
+				// x++;
+				// while (_servers[i][x] != '}')
+				// {
+				// 	// std::cout << _servers[i][x];
+				// 	// x++;
+				// }
+			}
+			// std::cout << "3--------" << std::endl;
+			// t.trim_to_left();
+			_server[i].location.push_back(_trim(t));
+			// std::cerr << "malna" << std::endl;
+		}
 	}
 }
 
@@ -201,7 +270,8 @@ void _parser( t_server *_server, std::string s, int count )
 
 	_get_ports(_server, _servers, c);
 	_get_server_name(_server, _servers, c);
-	_get_location_block(_server, _servers, c);
+	// _get_location_block(_server, _servers, c);
+	_get_location(_server, _servers, s, c);
 	_get_client_max_body_size(_server, _servers, c);
 	_get_error_page(_server, _servers, c);
 
@@ -243,7 +313,8 @@ void _parser( t_server *_server, std::string s, int count )
 	{
 		std::cout << "server_name: " << _server[i].server_name << std::endl;
 		std::cout << "port: " << _server[i].port << std::endl;
-		std::cout << "location: " << _server[i].location << std::endl;
+		for (size_t j=0; j<_server[i].location.size(); j++)
+			std::cout << "location: " << _server[i].location[j] << std::endl;
 		std::cout << "client_max_body_size: " << _server[i].client_max_body_size << std::endl;
 		std::cout << "error_page: " << _server[i].error_page << std::endl;
 		std::cout << "----------------------" << std::endl;

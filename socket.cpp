@@ -1,9 +1,20 @@
 #include "webserv.hpp"
 
+int _location_not_found( t_server *_server, t_request *_request )
+{
+    for (size_t i=0; i < _server->location.size(); i++)
+    {
+        std::cerr << _server->location[i] << " - " << _request->uri << std::endl;
+        if (_server->location[i] == _request->uri)
+            return 1;
+    }
+    return 0;
+}
+
 int _valid_url_chars( std::string s )
 {
     std::string t = "ABCDEFGHIJKLMNOPQRSTUVWXYZazcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
-    int x=0;
+    size_t x=0;
     for (int i=0; s[i]; i++)
     {
         for (int j=0; t[j]; j++)
@@ -17,39 +28,69 @@ int _valid_url_chars( std::string s )
 
 void _validate_request( std::map<std::string, std::string> m, t_request *_request, t_server *_server )
 {
-    (void)m;
+    (void)_server;
+    std::map<std::string, std::string>::iterator _transfer_encoding_it = m.find("Transfer-Ecoding"),
+    _content_length_it = m.find("Content-Length");
     std::cerr << _request->method << std::endl;
     if (_request->method == "GET")
     {
-        std::cout << "get" << std::endl;
-        std::map<std::string, std::string>::iterator _transfer_encoding_it = m.find("Transfer-Ecoding"),
-        _content_length_it = m.find("Content-Length");
+        std::cout << "GET" << std::endl;
 
         if (_transfer_encoding_it != m.end() && _transfer_encoding_it->second != "chunked")
         {
             std::cerr << "502 Not Emplemented" << std::endl;
             exit(1);
         }
-        else if (_transfer_encoding_it == m.end() && _content_length_it == m.end())
+        
+
+        if (_request->uri.length() > 2048)
+        {
+            std::cerr << "414 Request-URI Too Long" << std::endl;
+            exit(1);
+        }
+        if (!_valid_url_chars(_request->uri))
         {
             std::cerr << "400 Bad Request" << std::endl;
             exit(1);
         }
 
-        if (_server->host.length() > 2048)
+        if (!_location_not_found(_server, _request))
         {
-            std::cerr << "414 Request-URI Too Long" << std::endl;
-            exit(1);
-        }
-        if (!_valid_url_chars(_server->host))
-        {
-            std::cerr << "400 Bad Request" << std::endl;
+            std::cerr << "404 Not Found" << std::endl;
             exit(1);
         }
     }
     else
     {
-        std::cout << "post" << std::endl;
+        std::cout << "POST" << std::endl;
+        if (_transfer_encoding_it == m.end() && _content_length_it == m.end())
+        {
+            std::cerr << "400 Bad Request" << std::endl;
+            exit(1);
+        }
+    }
+}
+
+void _extract_first_line( t_request *_request, char *s )
+{
+    std::vector<std::string> v;
+    char *_line = strtok(s, " ");
+    while (_line != NULL)
+    {
+        v.push_back(_line);
+        _line = strtok(NULL, " ");
+    }
+
+    if (v.size() == 3)
+    {
+        _request->method = v[0];
+        _request->uri = v[1];
+        _request->http_version = v[2];
+    }
+    else
+    {
+        std::cerr << "missing method or uri or http-version here!" << std::endl;
+        exit(1);
     }
 }
 
@@ -75,11 +116,16 @@ void _parse_request( t_server *_server, char *s )
 
     std::map<std::string, std::string> m;
 
-    std::cerr << _req[0].find("GET") << std::endl;
-    if (_req[0].find("GET") >= 0)
-        _request.method = "GET";
-    else
-        _request.method = "POST";
+
+
+    // extract the method, the uri and the http-version
+    _extract_first_line(&_request, &_req[0][0]);
+    
+    // std::cerr << "liner: " << _line << std::endl;
+    // if (_req[0].find("GET") >= 0)
+    //     _request.method = "GET";
+    // else
+    //     _request.method = "POST";
     for (int x=1; x < i; x++)
     {
     
@@ -172,7 +218,7 @@ void _socket( t_server *_server )
         _parse_request(_server, buffer);
         
 
-        char *_server_message = strdup("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\ngreets from server");
+        char *_server_message = strdup("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 18\n\ngreets from server");
         write(coming_socket, _server_message, strlen(_server_message));
         close(coming_socket);
     }
