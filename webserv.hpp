@@ -9,6 +9,8 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <fstream>
+#include <map>
+
 
 typedef struct s_server
 {
@@ -24,7 +26,15 @@ typedef struct s_server
 	struct s_server *next;
 }	t_server;
 
+typedef struct s_request
+{
+	std::string method;
+}	t_request;
+
 // Parsing
-void _parser( std::string txt );
+void _parser( t_server *_server, std::string s, int count );
+
+// Socket
+void _socket( t_server *_server );
 
 #endif

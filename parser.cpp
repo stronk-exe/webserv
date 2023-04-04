@@ -39,6 +39,7 @@ void _get_server_name( t_server *_server, std::string* _servers, int c )
 				// y++;
 			}
 		}
+	// std::cerr << "Poo"<< c << std::endl;
 		_server[i].server_name = t;
 	}
 }
@@ -150,16 +151,16 @@ void _get_http_redirection( t_server *_server, std::string* _servers, int c )
 	}
 }
 
-void _parser( std::string s )
+void _parser( t_server *_server, std::string s, int count )
 {
-	int count = 0;
-	std::string str= "server {";
-    size_t nPos = s.find(str, 0); 
-	while (nPos != std::string::npos)
-	{
-		count++;
-		nPos = s.find(str, nPos + str.size());
-	}
+	// int count = 0;
+	// std::string str= "server {";
+    // size_t nPos = s.find(str, 0); 
+	// while (nPos != std::string::npos)
+	// {
+	// 	count++;
+	// 	nPos = s.find(str, nPos + str.size());
+	// }
 
 	std::string _servers[count];
 	int i=0;
@@ -196,7 +197,7 @@ void _parser( std::string s )
 
 
 	// allocating and constracting the servers
-	t_server _server[count];
+	
 
 	_get_ports(_server, _servers, c);
 	_get_server_name(_server, _servers, c);
