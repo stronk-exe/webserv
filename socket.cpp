@@ -101,17 +101,19 @@ void _parse_request( t_server *_server, char *s )
     // std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^" << std::endl;
     t_request _request;
 
-    std::string _req[99];
+    // std::string _req[99];
+    std::vector<std::string> _req;
     char *p;
     // Here, the delimiter is white space.
     p = strtok(s, "\n");
-    int i=0;
+    // int i=0;
     while (p != NULL) {
         // std::cout << p << std::endl;
-        _req[i] = std::string(p);
-        std::cerr << _req[i] << std::endl;
+        _req.push_back(std::string(p));
+        // _req[i] = std::string(p);
+        // std::cerr << _req[i] << std::endl;
         p = strtok(NULL, "\n");
-        i++;
+        // i++;
     }
 
     std::map<std::string, std::string> m;
@@ -126,7 +128,7 @@ void _parse_request( t_server *_server, char *s )
     //     _request.method = "GET";
     // else
     //     _request.method = "POST";
-    for (int x=1; x < i; x++)
+    for (size_t x=1; x < _req.size(); x++)
     {
     
         char *r = &_req[x][0];
