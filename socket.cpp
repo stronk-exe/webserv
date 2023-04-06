@@ -29,12 +29,11 @@ int _valid_url_chars( std::string s )
 void _validate_request( std::map<std::string, std::string> m, t_request *_request, t_server *_server )
 {
     (void)_server;
-    std::map<std::string, std::string>::iterator _transfer_encoding_it = m.find("Transfer-Ecoding"),
-    _content_length_it = m.find("Content-Length");
+    std::map<std::string, std::string>::iterator _transfer_encoding_it = m.find("Transfer-Ecoding");
     std::cerr << _request->method << std::endl;
-    if (_request->method == "GET")
-    {
-        std::cout << "GET" << std::endl;
+    // if (_request->method == "GET")
+    // {
+        // std::cout << "GET" << std::endl;
 
         if (_transfer_encoding_it != m.end() && _transfer_encoding_it->second != "chunked")
         {
@@ -54,21 +53,40 @@ void _validate_request( std::map<std::string, std::string> m, t_request *_reques
             exit(1);
         }
 
-        if (!_location_not_found(_server, _request))
+        // if (!_location_not_found(_server, _request))
+        // {
+        //     std::cerr << "404 Not Found" << std::endl;
+        //     exit(1);
+        // }
+
+        // checking the method
+        if (_request->method == "GET")
         {
-            std::cerr << "404 Not Found" << std::endl;
+            _get();
+        }
+        else if (_request->method == "POST")
+        {
+            _post();
+        }
+        else if (_request->method == "DELETE")
+        {
+            _delete();
+        }
+        else
+        {
+            std::cerr << "405 Method Not Allowed" << std::endl;
             exit(1);
         }
-    }
-    else
-    {
-        std::cout << "POST" << std::endl;
-        if (_transfer_encoding_it == m.end() && _content_length_it == m.end())
-        {
-            std::cerr << "400 Bad Request" << std::endl;
-            exit(1);
-        }
-    }
+    // }
+    // else
+    // {
+    //     std::cout << "POST" << std::endl;
+    //     if (_transfer_encoding_it == m.end() && _content_length_it == m.end())
+    //     {
+    //         std::cerr << "400 Bad Request" << std::endl;
+    //         exit(1);
+    //     }
+    // }
 }
 
 void _extract_first_line( t_request *_request, char *s )

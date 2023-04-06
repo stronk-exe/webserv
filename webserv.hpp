@@ -40,4 +40,9 @@ void _parser( t_server *_server, std::string s, int count );
 // Socket
 void _socket( t_server *_server );
 
+// Methodes
+void _get();
+void _post();
+void _delete();
+
 #endif
