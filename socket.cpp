@@ -60,9 +60,10 @@ void _validate_request( std::map<std::string, std::string> m, t_request *_reques
         // }
 
         // checking the method
+        t_resource _resource;
         if (_request->method == "GET")
         {
-            _get();
+            _get(&_resource);
         }
         else if (_request->method == "POST")
         {

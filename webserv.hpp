@@ -34,6 +34,12 @@ typedef struct s_request
 	std::string http_version;
 }	t_request;
 
+typedef struct s_resource
+{
+	std::string content;
+	std::string type;
+}	t_resource;
+
 // Parsing
 void _parser( t_server *_server, std::string s, int count );
 
@@ -41,7 +47,7 @@ void _parser( t_server *_server, std::string s, int count );
 void _socket( t_server *_server );
 
 // Methodes
-void _get();
+void _get( t_resource *_resource );
 void _post();
 void _delete();
 
