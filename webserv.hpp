@@ -21,6 +21,7 @@ typedef struct s_server
 	std::string client_max_body_size;
 	// std::string location;
 	std::vector<std::string> location;
+	std::vector<std::string> index;
 
 	std::string http_redirection;
 	std::string http_path;
@@ -32,6 +33,7 @@ typedef struct s_request
 	std::string uri;
 	std::string method;
 	std::string http_version;
+	std::string type;
 }	t_request;
 
 typedef struct s_resource
@@ -47,7 +49,7 @@ void _parser( t_server *_server, std::string s, int count );
 void _socket( t_server *_server );
 
 // Methodes
-void _get( t_resource *_resource );
+void _get( t_request *_request, t_server *_server );
 void _post();
 void _delete();
 

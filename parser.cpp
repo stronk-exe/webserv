@@ -165,6 +165,37 @@ void _get_client_max_body_size( t_server *_server, std::string* _servers, int c 
 	}
 }
 
+void _get_index( t_server *_server, std::string s, int c )
+{
+	for (int i=0; i< c; i++)
+	{
+		std::string t="";
+		int _index;// = _servers[i].find("client_max_body_size");
+		if ((_index = s.find("index")) > 0)
+		{
+			int x=_index+5;
+			while (s[x] == ' ')
+				x++;
+			while (s[x] != ';')
+			{
+				t+=s[x++];
+				// y++;
+			}
+		}
+		// std::vector<std::string> _req;
+		char *p;
+		p = strtok(&t[0], " ");
+		while (p != NULL) {
+			_server->index.push_back(std::string(p));
+			p = strtok(NULL, " ");
+    	}
+		// for (size_t i=0 ; i<_server->index.size(); i++)
+		// 	std::cout << "index: " << _server->index[i] << std::endl;
+		// exit(1);
+		// _server[i].index[0] = t;
+	}
+}
+
 void _get_error_page( t_server *_server, std::string* _servers, int c )
 {
 	for (int i=0; i< c; i++)
@@ -273,6 +304,7 @@ void _parser( t_server *_server, std::string s, int count )
 	// _get_location_block(_server, _servers, c);
 	_get_location(_server, _servers, s, c);
 	_get_client_max_body_size(_server, _servers, c);
+	_get_index(_server, s, c);
 	_get_error_page(_server, _servers, c);
 
 	_get_http_redirection(_server, _servers, c);

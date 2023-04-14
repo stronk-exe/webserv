@@ -63,7 +63,8 @@ void _validate_request( std::map<std::string, std::string> m, t_request *_reques
         t_resource _resource;
         if (_request->method == "GET")
         {
-            _get(&_resource);
+            std::cout << "location: " << _server->location[0] << std::endl;
+            _get(_request, _server);
         }
         else if (_request->method == "POST")
         {
