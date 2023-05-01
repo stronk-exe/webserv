@@ -34,6 +34,7 @@ typedef struct s_request
 	std::string method;
 	std::string http_version;
 	std::string type;
+	int			autoindex;
 }	t_request;
 
 typedef struct s_resource
@@ -52,5 +53,8 @@ void _socket( t_server *_server );
 void _get( t_request *_request, t_server *_server );
 void _post();
 void _delete();
+
+// CGI
+void _cgi();
 
 #endif

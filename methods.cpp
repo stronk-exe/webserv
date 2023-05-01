@@ -10,19 +10,20 @@ void _get( t_request *_request, t_server *_server )
 	{
 		std::string t = _server->location[0]+_server->index[i];
 		std::ifstream _file;
-		_file.open(t);
+		_file.open("./root"+t);
 		if (_file)
 			_resource_found = 1;
-		// if (t)
-		std::cout << "index: " << t << std::endl;
+		// std::cout << "index: " << t << std::endl;
 	}
 	if (!_resource_found)
 	{
 		std::cerr << "404 Not Found" << std::endl;
         exit(1);
 	}
+
 	// Check resource type
-	if (_request->uri[_request->uri.size()-1] == '\\')
+	std::cerr << "uri: " << _request->uri << " ~ " << _request->uri[(_request->uri).size()-1] << std::endl;
+	if (_request->uri[_request->uri.size()-1] == '/')
 	{
 		_request->type = "directory";
 	}
@@ -31,9 +32,37 @@ void _get( t_request *_request, t_server *_server )
 		_request->type = "file";
 	}
 
+	std::cerr << "type: " << _request->type << std::endl;
+
 	if (_request->type == "directory")
 	{
-
+		if (_request->uri[_request->uri.size()-1] != '/')
+		{
+			std::cout << "301 Moved Permanently" << std::endl;
+			exit(1);
+		}
+		else
+		{
+			if (_server->index.size() != 0)
+			{
+				// cgi
+				_cgi();
+			}
+			else
+			{
+				// autoindex
+				if (!_request->autoindex)
+				{
+					std::cerr << "403 Forbidden" << std::endl;
+					exit(1);
+				}
+				else
+				{
+					std::cout << "200 OK" << std::endl;
+					exit(1);
+				}
+			}
+		}
 	}
 }
 
