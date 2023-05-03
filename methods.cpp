@@ -2,7 +2,7 @@
 
 void _get( t_request *_request, t_server *_server )
 {
-	int _resource_found = 0;
+	/*int _resource_found = 0;
 
 	std::cout << "GET" << std::endl;
 	// Check if resource found
@@ -19,7 +19,8 @@ void _get( t_request *_request, t_server *_server )
 	{
 		std::cerr << "404 Not Found" << std::endl;
         exit(1);
-	}
+	}*/
+	
 
 	// Check resource type
 	std::cerr << "uri: " << _request->uri << " ~ " << _request->uri[(_request->uri).size()-1] << std::endl;
