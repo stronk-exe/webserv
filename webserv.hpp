@@ -19,7 +19,7 @@ typedef struct s_server
 	std::string server_name;
 	std::string error_page;
 	std::string client_max_body_size;
-	// std::string location;
+	std::string root;
 	std::vector<std::string> location;
 	std::vector<std::string> index;
 

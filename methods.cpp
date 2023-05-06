@@ -1,29 +1,41 @@
 #include "webserv.hpp"
 
+void print_error(std::string s)
+{
+	std::cerr << s << std::endl;
+    exit(1);
+}
+
 void _get( t_request *_request, t_server *_server )
 {
-	/*int _resource_found = 0;
+	int _resource_found = 0;
 
 	std::cout << "GET" << std::endl;
+
 	// Check if resource found
+	std::cerr << _server->root+_request->uri << std::endl;
+	// if (_request->uri != _server->root)
+	// 	print_error("404 Not Found");
 	for (size_t i=0 ; i<_server->index.size(); i++)
 	{
 		std::string t = _server->location[0]+_server->index[i];
 		std::ifstream _file;
-		_file.open("./root"+t);
+		_file.open(_server->root+_request->uri);
+		std::cerr << "_file: " << _file << std::endl;
 		if (_file)
 			_resource_found = 1;
 		// std::cout << "index: " << t << std::endl;
 	}
 	if (!_resource_found)
 	{
-		std::cerr << "404 Not Found" << std::endl;
-        exit(1);
-	}*/
+		// std::cerr << "404 Not Found" << std::endl;
+        // exit(1);
+		print_error("404 Not Found");
+	}
 	
 
 	// Check resource type
-	std::cerr << "uri: " << _request->uri << " ~ " << _request->uri[(_request->uri).size()-1] << std::endl;
+	// std::cerr << "uri: " << _request->uri << " ~ " << _request->uri[(_request->uri).size()-1] << std::endl;
 	if (_request->uri[_request->uri.size()-1] == '/')
 	{
 		_request->type = "directory";
@@ -33,7 +45,7 @@ void _get( t_request *_request, t_server *_server )
 		_request->type = "file";
 	}
 
-	std::cerr << "type: " << _request->type << std::endl;
+	// std::cerr << "type: " << _request->type << std::endl;
 
 	if (_request->type == "directory")
 	{
