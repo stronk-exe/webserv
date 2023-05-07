@@ -12,6 +12,10 @@
 #include <vector>
 #include <map>
 
+// #include <sys/types.h>
+#include <sys/stat.h>
+// struct stat info;
+
 typedef struct s_server
 {
 	std::string port;
@@ -20,6 +24,7 @@ typedef struct s_server
 	std::string error_page;
 	std::string client_max_body_size;
 	std::string root;
+	std::string cgi;
 	std::vector<std::string> location;
 	std::vector<std::string> index;
 
@@ -55,6 +60,6 @@ void _post();
 void _delete();
 
 // CGI
-void _cgi();
+void _cgi( t_server *_server, t_request *_request );
 
 #endif
