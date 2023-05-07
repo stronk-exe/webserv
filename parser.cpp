@@ -223,6 +223,24 @@ void _get_root( t_server *_server, std::string* _servers, int c )
 	}
 }
 
+void _get_cgi( t_server *_server, std::string* _servers, int c )
+{
+	for (int i=0; i< c; i++)
+	{
+		std::string t="";
+		int _index;
+		if ((_index = _servers[i].find("cgi_pass")) > 0)
+		{
+			int x=_index+8;
+			while (_servers[i][x] == ' ')
+				x++;
+			while (_servers[i][x] != ';')
+				t+=_servers[i][x++];
+		}
+		_server[i].cgi = t;
+	}
+}
+
 void _parser( t_server *_server, std::string s, int count )
 {
 	std::string _servers[count];
@@ -261,6 +279,7 @@ void _parser( t_server *_server, std::string s, int count )
 	_get_client_max_body_size(_server, _servers, c);
 	_get_index(_server, s, c);
 	_get_root(_server, _servers, c);
+	_get_cgi(_server, _servers, c);
 	_get_error_page(_server, _servers, c);
 	_get_http_redirection(_server, _servers, c);
 
