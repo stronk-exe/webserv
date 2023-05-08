@@ -10,6 +10,7 @@ void _cgi( t_server *_server, t_request *_request )
 	else
 	{
 		std::cout << "200 OK" << std::endl;
+		_response();
 		exit(1);
 	}
 }

@@ -42,6 +42,20 @@ typedef struct s_request
 	int			autoindex;
 }	t_request;
 
+// typedef struct s_response
+// {
+// 	std::string content_length;
+// 	std::string content_type;
+// }	t_response;
+
+class t_response
+{
+	public:
+		t_response() {};
+		~t_response() {};
+		int content_length;
+		std::string content_type;
+};
 typedef struct s_resource
 {
 	std::string content;
@@ -55,11 +69,14 @@ void _parser( t_server *_server, std::string s, int count );
 void _socket( t_server *_server );
 
 // Methodes
-void _get( t_request *_request, t_server *_server );
+t_response *_get( t_request *_request, t_server *_server );
 void _post();
 void _delete();
 
 // CGI
 void _cgi( t_server *_server, t_request *_request );
+
+// Response
+t_response *_response();
 
 #endif

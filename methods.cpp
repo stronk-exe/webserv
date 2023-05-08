@@ -19,7 +19,7 @@ int has_index_files( t_server *_server, t_request *_request )
 	return 0;
 }
 
-void _get( t_request *_request, t_server *_server )
+t_response *_get( t_request *_request, t_server *_server )
 {
 	int _resource_found = 0;
 
@@ -92,7 +92,8 @@ void _get( t_request *_request, t_server *_server )
 				else
 				{
 					std::cout << "200 OK" << std::endl;
-					exit(1);
+					// return _response();
+					// exit(1);
 				}
 				// {
 				// 	std::cerr << "403 Forbidden" << std::endl;
@@ -107,8 +108,26 @@ void _get( t_request *_request, t_server *_server )
 	}
 	else if (_request->type == "file")
 	{
-		//
+		if (has_index_files(_server, _request))
+			_cgi(_server, _request);
+		else
+		{
+			// autoindex
+			if (!_request->autoindex)
+				print_error("403 Forbidden");
+			else
+			{
+				std::cout << "200 OK" << std::endl;
+				// return _response();
+				// exit(1);
+			}
+			// {
+			// 	std::cerr << "403 Forbidden" << std::endl;
+			// 	exit(1);
+			// }
+		}
 	}
+	return _response();
 }
 
 void _post()

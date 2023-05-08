@@ -26,9 +26,10 @@ int _valid_url_chars( std::string s )
     return 1;
 }
 
-void _validate_request( std::map<std::string, std::string> m, t_request *_request, t_server *_server )
+t_response *_validate_request( std::map<std::string, std::string> m, t_request *_request, t_server *_server )
 {
     (void)_server;
+	t_response *_response=NULL;
     std::map<std::string, std::string>::iterator _transfer_encoding_it = m.find("Transfer-Ecoding");
     std::cerr << _request->method << std::endl;
     // if (_request->method == "GET")
@@ -63,8 +64,8 @@ void _validate_request( std::map<std::string, std::string> m, t_request *_reques
         t_resource _resource;
         if (_request->method == "GET")
         {
-            std::cout << "location: " << _server->location[0] << std::endl;
-            _get(_request, _server);
+            // std::cout << "location: " << _server->location[0] << std::endl;
+            _response = _get(_request, _server);
         }
         else if (_request->method == "POST")
         {
@@ -89,6 +90,7 @@ void _validate_request( std::map<std::string, std::string> m, t_request *_reques
     //         exit(1);
     //     }
     // }
+    return _response;
 }
 
 void _extract_first_line( t_request *_request, char *s )
@@ -114,7 +116,7 @@ void _extract_first_line( t_request *_request, char *s )
     }
 }
 
-void _parse_request( t_server *_server, char *s )
+t_response *_parse_request( t_server *_server, char *s )
 {
     // std::cout << "^^^^^^^^^^request^^^^^^^^^^" << std::endl;
     // // std::cout << _req << std::endl;
@@ -185,7 +187,12 @@ void _parse_request( t_server *_server, char *s )
     // {
     //   std::cout<<(*iter).first<<"   ---   "<<(*iter).second<<"\n";
     // }
-    _validate_request(m, &_request, _server);
+	t_response *_response;
+   _response = _validate_request(m, &_request, _server);
+   std::cout << "wssa3 ya kho response jat:" << std::endl;
+   std::cout << "response content_length " << _response->content_length << std::endl;
+   std::cout << "response content_type " << _response->content_type << std::endl;
+   return _response;
 }
 
 void _socket( t_server *_server )
@@ -237,11 +244,14 @@ void _socket( t_server *_server )
             std::cerr << "empty data!" << std::endl;
             exit(1);
         }
-        _parse_request(_server, buffer);
+        t_response *_response;
+		_response = _parse_request(_server, buffer);
         
 
-        char *_server_message = strdup("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 18\n\ngreets from server");
-        write(coming_socket, _server_message, strlen(_server_message));
+        // char *_server_message = strdup("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 18\n\ngreets from server");
+		std::string s = "HTTP/1.1 200 OK\nContent-Type: "+_response->content_type+"\nContent-Length: "+std::to_string(_response->content_length)+"\n\ngreets from server";
+        // char *v = strdup(s.c_str());
+		write(coming_socket, s.c_str(), strlen(s.c_str()));
         close(coming_socket);
     }
 }
