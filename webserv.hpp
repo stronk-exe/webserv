@@ -18,6 +18,7 @@
 
 typedef struct s_server
 {
+	std::string version;
 	std::string port;
 	std::string host;
 	std::string server_name;
@@ -53,9 +54,13 @@ class t_response
 	public:
 		t_response() {};
 		~t_response() {};
+
+		std::string http_version;
+		std::string status;
 		int content_length;
 		std::string content_type;
 };
+
 typedef struct s_resource
 {
 	std::string content;
@@ -76,7 +81,10 @@ void _delete();
 // CGI
 void _cgi( t_server *_server, t_request *_request );
 
+// Request
+t_response *_request( t_server *_server, char *s );
+
 // Response
-t_response *_response();
+t_response *_response( t_request *_request, std::string _msg );
 
 #endif

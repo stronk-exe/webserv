@@ -19,6 +19,24 @@ void _get_ports( t_server *_server, std::string* _servers, int c )
 	}
 }
 
+void _get_version( t_server *_server, std::string* _servers, int c )
+{
+	for (int i=0; i< c; i++)
+	{
+		std::string t="";
+		int _index;
+		if ((_index = _servers[i].find("version")) > 0)
+		{
+			int x=_index+7;
+			while (_servers[i][x] == ' ')
+				x++;
+			while (_servers[i][x] != ';')
+				t+=_servers[i][x++];
+		}
+		_server[i].version = t;
+	}
+}
+
 void _get_server_name( t_server *_server, std::string* _servers, int c )
 {
 	for (int i=0; i< c; i++)
@@ -274,6 +292,7 @@ void _parser( t_server *_server, std::string s, int count )
 	// allocating and constracting the servers
 	
 	_get_ports(_server, _servers, c);
+	_get_version(_server, _servers, c);
 	_get_server_name(_server, _servers, c);
 	_get_location(_server, _servers, s, c);
 	_get_client_max_body_size(_server, _servers, c);

@@ -22,6 +22,7 @@ int has_index_files( t_server *_server, t_request *_request )
 t_response *_get( t_request *_request, t_server *_server )
 {
 	int _resource_found = 0;
+	std::string _msg;
 
 	std::cout << "GET" << std::endl;
 
@@ -91,7 +92,8 @@ t_response *_get( t_request *_request, t_server *_server )
 					print_error("403 Forbidden");
 				else
 				{
-					std::cout << "200 OK" << std::endl;
+					// std::cout << "200 OK" << std::endl;
+					_msg = "200 OK";
 					// return _response();
 					// exit(1);
 				}
@@ -117,7 +119,8 @@ t_response *_get( t_request *_request, t_server *_server )
 				print_error("403 Forbidden");
 			else
 			{
-				std::cout << "200 OK" << std::endl;
+				// std::cout << "200 OK" << std::endl;
+				_msg = "200 OK";
 				// return _response();
 				// exit(1);
 			}
@@ -127,7 +130,7 @@ t_response *_get( t_request *_request, t_server *_server )
 			// }
 		}
 	}
-	return _response();
+	return _response(_request, _msg);
 }
 
 void _post()

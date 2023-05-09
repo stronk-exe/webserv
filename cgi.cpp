@@ -9,8 +9,8 @@ void _cgi( t_server *_server, t_request *_request )
 	}
 	else
 	{
-		std::cout << "200 OK" << std::endl;
-		_response();
+		// std::cout << "200 OK" << std::endl;
+		_response(_request, "200 OK");
 		exit(1);
 	}
 }
