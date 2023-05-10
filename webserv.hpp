@@ -27,21 +27,38 @@ typedef struct s_server
 	std::string root;
 	std::string cgi;
 	std::vector<std::string> location;
-	std::vector<std::string> index;
+	std::string index;
 
 	std::string http_redirection;
 	std::string http_path;
 	struct s_server *next;
 }	t_server;
 
-typedef struct s_request
+class t_req
 {
-	std::string uri;
-	std::string method;
-	std::string http_version;
-	std::string type;
-	int			autoindex;
-}	t_request;
+	public:
+		t_req() {};
+		~t_req() {};
+
+		std::string uri;
+		std::string method;
+		std::string http_version;
+		std::string type;
+		int			autoindex;
+		std::string path;
+		std::string index;
+};
+
+// typedef struct s_request
+// {
+// 	std::string uri;
+// 	std::string method;
+// 	std::string http_version;
+// 	std::string type;
+// 	int			autoindex;
+// 	std::string path;
+// 	std::string index;
+// }	t_request;
 
 // typedef struct s_response
 // {
@@ -49,42 +66,46 @@ typedef struct s_request
 // 	std::string content_type;
 // }	t_response;
 
-class t_response
+class t_res
 {
 	public:
-		t_response() {};
-		~t_response() {};
+		t_res() {};
+		~t_res() {};
 
 		std::string http_version;
-		std::string status;
-		int content_length;
+		int			status;
+		std::string status_message;
+		int			content_length;
 		std::string content_type;
+		std::string path;
+		std::string data;
+		std::string body;
 };
 
-typedef struct s_resource
-{
-	std::string content;
-	std::string type;
-}	t_resource;
+// typedef struct s_resource
+// {
+// 	std::string content;
+// 	std::string type;
+// }	t_resource;
 
 // Parsing
-void _parser( t_server *_server, std::string s, int count );
+void _config_parser( t_server *_server, std::string s, int count );
 
 // Socket
-void _socket( t_server *_server );
+void _socket( t_server *_server, t_req *_request, t_res *_response );
 
 // Methodes
-t_response *_get( t_request *_request, t_server *_server );
+void	_get( t_res *_response, t_req *_request, t_server *_server );
 void _post();
 void _delete();
 
 // CGI
-void _cgi( t_server *_server, t_request *_request );
+void _cgi( t_server *_server, t_res *_response );
 
 // Request
-t_response *_request( t_server *_server, char *s );
+void	_request( t_server *_server, t_req *_request, char *s );
 
 // Response
-t_response *_response( t_request *_request, std::string _msg );
+void	_response( t_res *_response, t_req *_request );
 
 #endif

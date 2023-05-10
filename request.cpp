@@ -1,6 +1,6 @@
 #include "webserv.hpp"
 
-int _location_not_found( t_server *_server, t_request *_request )
+int _location_not_found( t_server *_server, t_req *_request )
 {
     for (size_t i=0; i < _server->location.size(); i++)
     {
@@ -26,10 +26,10 @@ int _valid_url_chars( std::string s )
     return 1;
 }
 
-t_response *_validate_request( std::map<std::string, std::string> m, t_request *_request, t_server *_server )
+void	_validate_request( std::map<std::string, std::string> m, t_req *_request )
 {
-    (void)_server;
-	t_response *_response=NULL;
+    // (void)_server;
+	// t_response *_response=NULL;
     std::map<std::string, std::string>::iterator _transfer_encoding_it = m.find("Transfer-Ecoding");
     std::cerr << _request->method << std::endl;
     // if (_request->method == "GET")
@@ -60,26 +60,26 @@ t_response *_validate_request( std::map<std::string, std::string> m, t_request *
         //     exit(1);
         // }
 
-        // checking the method
-        t_resource _resource;
-        if (_request->method == "GET")
-        {
-            // std::cout << "location: " << _server->location[0] << std::endl;
-            _response = _get(_request, _server);
-        }
-        else if (_request->method == "POST")
-        {
-            _post();
-        }
-        else if (_request->method == "DELETE")
-        {
-            _delete();
-        }
-        else
-        {
-            std::cerr << "405 Method Not Allowed" << std::endl;
-            exit(1);
-        }
+        // // checking the method
+        // // t_resource _resource;
+        // if (_request->method == "GET")
+        // {
+        //     // std::cout << "location: " << _server->location[0] << std::endl;
+        //     _response = _get(_request, _server);
+        // }
+        // else if (_request->method == "POST")
+        // {
+        //     _post();
+        // }
+        // else if (_request->method == "DELETE")
+        // {
+        //     _delete();
+        // }
+        // else
+        // {
+        //     std::cerr << "405 Method Not Allowed" << std::endl;
+        //     exit(1);
+        // }
     // }
     // else
     // {
@@ -90,10 +90,10 @@ t_response *_validate_request( std::map<std::string, std::string> m, t_request *
     //         exit(1);
     //     }
     // }
-    return _response;
+    // return _response;
 }
 
-void _extract_first_line( t_request *_request, char *s )
+void _extract_first_line( t_req *_request, char *s )
 {
     std::vector<std::string> v;
     char *_line = strtok(s, " ");
@@ -116,9 +116,10 @@ void _extract_first_line( t_request *_request, char *s )
     }
 }
 
-t_response *_request( t_server *_server, char *s )
+void	_request( t_server *_server, t_req *_request, char *s )
 {
-    t_request _request;
+    // t_request _request;
+	// t_request *_request = new t_request;
 
     std::vector<std::string> _req;
     char *p;
@@ -134,7 +135,7 @@ t_response *_request( t_server *_server, char *s )
 
 
     // extract the method, the uri and the http-version
-    _extract_first_line(&_request, &_req[0][0]);
+    _extract_first_line(_request, &_req[0][0]);
     for (size_t x=1; x < _req.size(); x++)
     {
     
@@ -144,7 +145,8 @@ t_response *_request( t_server *_server, char *s )
         t = strtok(r, ":");
         int y=0;
         std::string _key, _value;
-        while (t != NULL) {
+        while (t != NULL)
+        {
             if (!y%2)
                 _key = t;
             else
@@ -160,16 +162,17 @@ t_response *_request( t_server *_server, char *s )
             y++;
         }
     }
+	_request->index = _server->index;
 
     // std::map<std::string, std::string>::iterator iter;
     // for (iter = m.begin(); iter != m.end(); iter++)
     // {
     //   std::cout<<(*iter).first<<"   ---   "<<(*iter).second<<"\n";
     // }
-	t_response *_response;
-    _response = _validate_request(m, &_request, _server);
-    std::cout << "wssa3 ya kho response jat:" << std::endl;
-    std::cout << "response content_length " << _response->content_length << std::endl;
-    std::cout << "response content_type " << _response->content_type << std::endl;
-    return _response;
+	// t_response *_response;
+    _validate_request(m, _request);
+    // std::cout << "wssa3 ya kho response jat:" << std::endl;
+    // std::cout << "response content_length " << _response->content_length << std::endl;
+    // std::cout << "response content_type " << _response->content_type << std::endl;
+    // return _validate_request(m, _request, _response);
 }

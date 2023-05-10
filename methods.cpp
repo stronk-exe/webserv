@@ -6,7 +6,7 @@ void print_error(std::string s)
     exit(1);
 }
 
-int has_index_files( t_server *_server, t_request *_request )
+int has_index_files( t_server *_server, t_req *_request )
 {
 	std::ifstream _file;
 	std::cerr << _server->root+_request->uri+"index.php" << std::endl;
@@ -19,7 +19,7 @@ int has_index_files( t_server *_server, t_request *_request )
 	return 0;
 }
 
-t_response *_get( t_request *_request, t_server *_server )
+void	_get( t_res *_response, t_req *_request, t_server *_server )
 {
 	int _resource_found = 0;
 	std::string _msg;
@@ -37,7 +37,10 @@ t_response *_get( t_request *_request, t_server *_server )
 			_resource_found = 1;
 	}
 	if (!_resource_found)
-		print_error("404 Not Found");
+		_response->status = 404;
+		// return _response(_request, 404);
+		// _msg = "404 Not Found";
+		// print_error("404 Not Found");
 	
 	// std::cerr << _server->root+_request->uri << std::endl;
 	// if (_request->uri != _server->root)
@@ -46,6 +49,7 @@ t_response *_get( t_request *_request, t_server *_server )
 
 	// Check resource type
 	// std::cerr << "uri: " << _request->uri << " ~ " << _request->uri[(_request->uri).size()-1] << std::endl;
+	_request->path = _server->root +_request->uri;
 	const char* path = (_server->root +_request->uri).c_str();
 
     struct stat info;
@@ -77,23 +81,29 @@ t_response *_get( t_request *_request, t_server *_server )
 		{
 			_request->uri+='/';
 			// std::cerr << _request->uri << std::endl;
+
 			std::cout << "301 Moved Permanently" << std::endl;
 			exit(1);
 		}
 		else
 		{
+			std::cerr << "ddd" << std::endl;
 			// Check if directory has index files
 			if (has_index_files(_server, _request))
-				_cgi(_server, _request);
+				_cgi(_server, _response);
 			else
 			{
 				// autoindex
 				if (!_request->autoindex)
-					print_error("403 Forbidden");
+					// return _response(_request, 403);
+					_response->status = 403;
+					// print_error("403 Forbidden");
 				else
 				{
 					// std::cout << "200 OK" << std::endl;
-					_msg = "200 OK";
+					// _msg = "200 OK";
+					_response->status = 200;
+					std::cerr << "9status: " << _response->status << std::endl;
 					// return _response();
 					// exit(1);
 				}
@@ -111,16 +121,20 @@ t_response *_get( t_request *_request, t_server *_server )
 	else if (_request->type == "file")
 	{
 		if (has_index_files(_server, _request))
-			_cgi(_server, _request);
+			_cgi(_server, _response);
 		else
 		{
 			// autoindex
 			if (!_request->autoindex)
-				print_error("403 Forbidden");
+				_response->status = 403;
+				// return _response(_request, 403);
+				// print_error("403 Forbidden");
 			else
 			{
 				// std::cout << "200 OK" << std::endl;
-				_msg = "200 OK";
+				// _response->path = _server->root+_request->uri;
+				// _msg = "200 OK";
+				_response->status = 200;
 				// return _response();
 				// exit(1);
 			}
@@ -130,7 +144,9 @@ t_response *_get( t_request *_request, t_server *_server )
 			// }
 		}
 	}
-	return _response(_request, _msg);
+	// return _response(_request, 200);
+	// _response(_response, _request);
+	
 }
 
 void _post()

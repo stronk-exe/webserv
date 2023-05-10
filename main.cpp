@@ -15,6 +15,11 @@ int _servers_count( std::string s )
 
 int main(int ac, char **av)
 {
+    // t_request *_request;
+    // t_response *_response;
+    t_req *_request = new t_req;
+    t_res *_response = new t_res;
+
     if (ac == 2)
     {
         std::fstream file(av[1]);
@@ -26,8 +31,18 @@ int main(int ac, char **av)
         int count = _servers_count(_file);
         t_server _server[count];
 
-        _parser(_server, _file, count);
-        _socket(_server);
+        
+        // 1- Config File:
+        _config_parser(_server, _file, count);
+
+        // 2- Socket connection
+        _socket(_server, _request, _response);
+
+        // 3- Request:
+        // _request();
+
+        // 4- Response:
+        // _response();
     }
     else
         std::cerr << "invalid number of arguments!" << std::endl;

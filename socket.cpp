@@ -1,6 +1,6 @@
 #include "webserv.hpp"
 
-void _socket( t_server *_server )
+void _socket( t_server *_server, t_req *request, t_res *response )
 {
     int _socket_fd;
     struct sockaddr_in address;
@@ -49,12 +49,43 @@ void _socket( t_server *_server )
             std::cerr << "empty data!" << std::endl;
             exit(1);
         }
-        t_response *_response;
-		_response = _request(_server, buffer);
+        // t_response *_response;
+		_request(_server, request, buffer);
+
+        // checking the method
+        if (request->method == "GET")
+        {
+            // std::cout << "location: " << _server->location[0] << std::endl;
+            _get(response, request, _server);
+        }
+        else if (request->method == "POST")
+        {
+            _post();
+        }
+        else if (request->method == "DELETE")
+        {
+            _delete();
+        }
+        else
+        {
+            std::cerr << "405 Method Not Allowed" << std::endl;
+            exit(1);
+        }
+
+        // Response
+        _response(response, request);
+        std::cout << "wssa3 ya kho response jat:" << std::endl;
+        std::cout << "response content_length " << response->content_length << std::endl;
+        std::cout << "response content_type " << response->content_type << std::endl;
+        std::cout << "response status " << response->status << std::endl;
+        // std::cout << "response content_type " << response->content_type << std::endl;
         
 
         // char *_server_message = strdup("HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 18\n\ngreets from server");
-		std::string s = _response->http_version+" "+_response->status+"\nContent-Type: "+_response->content_type+"\nContent-Length: "+std::to_string(_response->content_length)+"\n\ngreets from server";
+        // _response->data = "<html><body><h1>server says: 9oraydiss</h1></body></html>";
+        std::cerr << "was here" << std::endl;
+        // std::cerr << "HTTP/1.1 "+ std::to_string(_response->status)+" "+_response->status_message << std::endl;
+		std::string s = "HTTP/1.1 "+ std::to_string(response->status)+" "+response->status_message+"\nContent-Type: "+response->content_type+"\nContent-Length: "+std::to_string(response->content_length)+"\n\n"+response->body;
         // char *v = strdup(s.c_str());
 		write(coming_socket, s.c_str(), strlen(s.c_str()));
         close(coming_socket);
