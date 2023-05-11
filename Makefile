@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2023/05/11 11:16:24 by ael-asri          #+#    #+#              #
+#    Updated: 2023/05/11 11:16:25 by ael-asri         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME = webserv
 
 SRCS =  main.cpp config_parser.cpp socket.cpp methods.cpp cgi.cpp request.cpp response.cpp

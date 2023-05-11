@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   config_parser.cpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/11 11:15:23 by ael-asri          #+#    #+#             */
+/*   Updated: 2023/05/11 11:54:02 by ael-asri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "webserv.hpp"
 
@@ -127,7 +138,7 @@ void _get_location( t_server *_server, std::string* _servers, std::string s, int
 	}
 }
 
-void _get_client_max_body_size( t_server *_server, std::string* _servers, int c )
+void _get_max_body_size( t_server *_server, std::string* _servers, int c )
 {
 	for (int i=0; i< c; i++)
 	{
@@ -141,7 +152,8 @@ void _get_client_max_body_size( t_server *_server, std::string* _servers, int c 
 			while (_servers[i][x] != ';')
 				t+=_servers[i][x++];
 		}
-		_server[i].client_max_body_size = t;
+		if (t.size())
+			_server[i].max_body_size = std::stoi(t);
 	}
 }
 
@@ -319,7 +331,7 @@ void _config_parser( t_server *_server, std::string s, int count )
 	_get_version(_server, _servers, c);
 	_get_server_name(_server, _servers, c);
 	_get_location(_server, _servers, s, c);
-	_get_client_max_body_size(_server, _servers, c);
+	_get_max_body_size(_server, _servers, c);
 	_get_index(_server, _servers, c);
 	_get_root(_server, _servers, c);
 	_get_cgi(_server, _servers, c);

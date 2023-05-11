@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
+/*   Updated: 2023/05/11 11:14:49 by ael-asri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "webserv.hpp"
 
 int _servers_count( std::string s )
@@ -15,10 +27,10 @@ int _servers_count( std::string s )
 
 int main(int ac, char **av)
 {
-    // t_request *_request;
-    // t_response *_response;
-    t_req *_request = new t_req;
-    t_res *_response = new t_res;
+    // Requestuest *_request;
+    // Responseponse *_response;
+    Request *_request = new Request;
+    Response *_response = new Response;
 
     if (ac == 2)
     {
@@ -38,11 +50,7 @@ int main(int ac, char **av)
         // 2- Socket connection
         _socket(_server, _request, _response);
 
-        // 3- Request:
-        // _request();
-
-        // 4- Response:
-        // _response();
+        
     }
     else
         std::cerr << "invalid number of arguments!" << std::endl;
