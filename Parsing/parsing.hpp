@@ -1,7 +1,9 @@
 #ifndef  PARSING_HPP
 #define  PARSING_HPP
 
+# include <iostream>
 # include <fstream>
+# include <sstream>
 # include <string>
 # include <vector>
 # include <stdlib.h>
