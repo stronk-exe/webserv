@@ -39,7 +39,7 @@ namespace  http_server
     {
         std::string     file;
         std::vector<std::string> data;
-        server  server;
+        std::vector<server>  servers;
     };
     
 }
