@@ -63,6 +63,7 @@ void info_(std::vector<std::string>  &vec, std::vector<std::string>::iterator &i
 {
     for (; * (it + 1) != ";" ; it++)
         vec.push_back(*it);
+    vec.push_back(*it);
 }
 
 void info_autoindex(http_server::location &loc, std::string &str) 
