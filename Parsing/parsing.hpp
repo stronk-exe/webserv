@@ -29,7 +29,7 @@ namespace  http_server
     struct server
     {
         std::string  name, root_location;
-        std::vector<std::string>  indexs, allow_methods;
+        std::vector<std::string>  indexs;
         std::vector<location>   locations;
         std::vector<error_page>  errors;
         size_t  listen_port;

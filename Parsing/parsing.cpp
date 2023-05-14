@@ -142,6 +142,71 @@ void parss_info(http_server::parsing &parss)
     }
 }
 
+
+void print_str(std::vector<std::string> &vec, const char *str)
+{
+    std::vector<std::string>::iterator it;
+    std::cout << str << " ";
+    for ( it = vec.begin(); it != vec.end(); it++)
+        std::cout  << (*it) <<" ";
+    std::cout << "\n";
+}
+
+ void print_int(std::vector<int> &vec)
+{
+    std::vector<int>::iterator it;
+    for ( it = vec.begin(); it != vec.end(); it++)
+        std::cout << (*it) << " ";
+}
+
+void print_err(std::vector<http_server::error_page> &vec)
+{
+    std::vector<http_server::error_page>::iterator it;
+    int i = 0;
+    for ( it = vec.begin(); it != vec.end(); it++, i++) {
+        std::cout <<"\n" <<  i << ":  " << "errors.path" << (*it).path << std::endl;
+        print_int((*it).error_status);
+    }
+}
+
+void print_loc(std::vector<http_server::location> &vec)
+{
+    std::vector<http_server::location>::iterator it;
+    int i = 0;
+    for ( it = vec.begin(); it != vec.end(); it++, i++) {
+        std::cout << "\n---------------location----------------" << std::endl;
+
+        std::cout << i << ":  "<< "location.autoindex "  <<  (*it).autoindex << std::endl;
+        std::cout << i << ":  "<< "location.name "  <<  (*it).name << std::endl;
+        std::cout << i << ":  "<< "location.root_location " <<  (*it).root_location << std::endl;
+        print_str((*it).indexs, "index ");
+        print_str((*it).allows_methods, "allows_methods ");
+        print_str((*it).cgi_pass, "cgi_pass ");
+
+        std::cout << "\n-------------------------------" << std::endl;
+    }
+}
+
+void print_data(http_server::parsing &parss)
+{
+    std::vector<http_server::server>::iterator it;
+    int i = 0;
+    for ( it = parss.servers.begin(); it != parss.servers.end(); it++, i++)
+    {
+        std::cout << "---------------server----------------" << std::endl;
+        std::cout << i << ":  "<< "server.name "  <<  (*it).name << std::endl;
+        std::cout << i << ":  "<< "server.root_location " <<  (*it).root_location << std::endl;
+        std::cout << i << ":  "<< "server.listen_port " <<  (*it).listen_port << std::endl;
+        print_str((*it).indexs, "index ");
+        print_err((*it).errors);
+        print_loc((*it).locations);
+        // std::cout << "server.name " << i << " " <<  (it).name << std::endl;
+        std::cout << "\n-------------------------------" << std::endl;
+        // std::cout << "server.name " << i << " " <<  (*it).name << std::endl;
+    }
+
+}
+
 int main(int ac, char *av[])
 {
     std::string  str;
@@ -154,6 +219,7 @@ int main(int ac, char *av[])
         while (std::getline(file, str))
             split_conf(parss.data, str);
         parss_info(parss);
+        print_data(parss);
         file.close();
     }
     return 0;
