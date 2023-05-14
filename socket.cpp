@@ -21,13 +21,13 @@ const char *generate_response_str(Response *_response)
 	return s.c_str();
 }
 
-void _socket( t_server *_server, Request *request, Response *response )
+void _socket( Parsing &_server, Request *request, Response *response )
 {
     int _socket_fd;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
 
-    (void)_server;
+    // (void)_server;
 
     if ((_socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -38,8 +38,9 @@ void _socket( t_server *_server, Request *request, Response *response )
     memset((char *)&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    int p = stoi(_server[0].port);
-    address.sin_port = htons(p);
+	std::cerr << "ha7na hna " << _server.servers[0].listen_port << std::endl;
+    int  default_port = 80;
+    address.sin_port = htons(default_port);
 
     if ((bind(_socket_fd, (struct sockaddr *)&address, sizeof(address))) < 0)
     {
@@ -53,52 +54,78 @@ void _socket( t_server *_server, Request *request, Response *response )
         exit(1);
     }
 
+	// int server_socket = 1;
+	fd_set current_sockets, ready_sockets;
+	FD_ZERO(&current_sockets);
+	FD_SET(_socket_fd, &current_sockets);
+
     while (1)
     {
+        std::cout << "listening ..." << std::endl;
+		ready_sockets = current_sockets;
+		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
+			print_error("error in select");
+		
         int coming_socket;
-        std::cout << "listening on port " << p << "..." << std::endl;
         if ((coming_socket = accept(_socket_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
         {
             std::cerr << "acception failed!" << std::endl;
             exit(1);
         }
 
-        char buffer[99999] = {0};
-        int data = read(coming_socket, buffer, 99999);
-        if (data < 0)
-        {
-            std::cerr << "empty data!" << std::endl;
-            exit(1);
-        }
-        std::cout << "buffer: " << buffer << std::endl;
+		for (int i=0; i < FD_SETSIZE; i++)
+		{
+			if (FD_ISSET(i, &ready_sockets))
+			{
+				if (i == _socket_fd)
+				{
+					char buffer[99999] = {0};
+					int data = read(coming_socket, buffer, 99999);
+					if (data < 0)
+					{
+						std::cerr << "empty data!" << std::endl;
+						exit(1);
+					}
+					std::cout << "buffer: " << buffer  << "~" << std::endl;
 
-        // 3- Request:
-		_request(_server, request, response, buffer);
+					// 3- Request:
+					_request(_server, request, response, buffer);
 
-        // checking the method
-        if (request->method == "GET")
-            _get(response, request, _server);
-        else if (request->method == "POST")
-            _post(response, request, _server);
-        else if (request->method == "DELETE")
-            _delete();
-        else
-            response->status = 405;
-        // {
-        //     std::cerr << "405 Method Not Allowed" << std::endl;
-        //     exit(1);
-        // }
+					// Response
+        			_response(response, request);
 
-        // Response
-        _response(response, request);
-        // std::cout << "wssa3 ya kho response jat:" << std::endl;
-        // std::cout << "response content_length " << response->content_length << std::endl;
-        // std::cout << "response content_type " << response->content_type << std::endl;
-        // std::cout << "response status " << response->status << std::endl;
-        // std::cout << "response content_type " << response->content_type << std::endl;
+					const char *s = generate_response_str(response);
+					write(coming_socket, s, strlen(s));
+				}
+			}
+		}
+		//////////////////////////////////
+
+
+        // exit(1);
+
+        // // checking the method
+        // if (request->method == "GET")
+        //     _get(response, request, _server);
+        // else if (request->method == "POST")
+        //     _post(response, request, _server);
+        // else if (request->method == "DELETE")
+        //     _delete();
+        // else
+        //     response->status = 405;
+        // // {
+        // //     std::cerr << "405 Method Not Allowed" << std::endl;
+        // //     exit(1);
+        // // }
+
         
-		const char *s = generate_response_str(response);
-		write(coming_socket, s, strlen(s));
+        // // std::cout << "wssa3 ya kho response jat:" << std::endl;
+        // // std::cout << "response content_length " << response->content_length << std::endl;
+        // // std::cout << "response content_type " << response->content_type << std::endl;
+        // // std::cout << "response status " << response->status << std::endl;
+        // // std::cout << "response content_type " << response->content_type << std::endl;
+        
+		
         close(coming_socket);
     }
 }

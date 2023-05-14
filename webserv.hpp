@@ -28,6 +28,43 @@
 #include <sys/stat.h>
 // struct stat info;
 
+// #include "Parsing/Parsing.hpp"
+
+
+struct error_page
+    {
+        std::vector<int>  error_status;
+        std::string       path;
+    };
+
+    struct location
+    {
+        bool            autoindex;
+        std::string  root_location, name;
+        std::vector<std::string>  index;
+        std::vector<std::string>  allows_methods;
+        std::vector<std::string>  cgi_pass;
+    };
+    
+
+struct Server
+{
+    std::string  name, root_location;
+    std::vector<std::string>  index;
+    std::vector<location>   locations;
+    std::vector<error_page>  errors;
+    size_t  listen_port;
+};
+
+struct Parsing
+{
+	std::string     file;
+	std::vector<std::string> data;
+	std::vector<Server>  servers;
+};
+
+
+
 typedef struct s_server
 {
 	std::string version;
@@ -93,10 +130,12 @@ class Request
 		std::string type;
 		int			autoindex;
 		std::string path;
-		std::string index;
+		std::vector<std::string> index;
 		std::string redirection;
 		std::string cgi;
 		int			client_body_upload;
+		std::map<std::string, std::string>	headers;
+		std::string	body;
 };
 
 // typedef struct s_request
@@ -139,21 +178,21 @@ class Response
 // }	Responseource;
 
 // Parsing
-void _config_parser( t_server *_server, std::string s, int count );
+void	_config_parser( t_server *_server, std::string s, int count );
 
 // Socket
-void _socket( t_server *_server, Request *_request, Response *_response );
+void	_socket( Parsing &_server, Request *_request, Response *_response );
 
 // Methodes
 void	_get( Response *_response, Request *_request, t_server *_server );
-void _post( Response *_response, Request *_request, t_server *_server );
-void _delete();
+void	_post( Response *_response, Request *_request, t_server *_server );
+void	_delete();
 
 // CGI
-void _cgi( t_server *_server, Response *_response );
+void	_cgi( t_server *_server, Response *_response );
 
 // Request
-void	_request( t_server *_server, Request *_request, Response *_response, char *s );
+void	_request( Parsing &_server, Request *_request, Response *_response, char *s );
 
 // Response
 void	_response( Response *_response, Request *_request );
@@ -161,5 +200,20 @@ int		_get_res_body( Request *_request, Response *_response );
 
 // Utils
 void	print_error(std::string s);
+
+
+
+
+
+
+void error(std::string err);
+int str_to_num(std::string str);
+void parss_info(Parsing &parss);
+void info_autoindex(location &loc, std::string &str);
+void info_(std::vector<std::string>  &vec, std::vector<std::string>::iterator &it);
+void split_conf(std::vector<std::string> &data, std::string str);
+void info_err_status(std::vector<error_page> &errors, std::vector<std::string>::iterator &it);
+void info_location(std::vector<location> &locations, std::vector<std::string>::iterator &it);
+void print_data(Parsing &parss);
 
 #endif

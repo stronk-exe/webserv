@@ -32,20 +32,33 @@ int main(int ac, char **av)
     Request *_request = new Request;
     Response *_response = new Response;
 
+    
+    std::string  str;
+    Parsing _server;
+
     if (ac == 2)
     {
-        std::fstream file(av[1]);
-        std::string _file, s;
+        // std::fstream file(av[1]);
+        // std::string _file, s;
 
-        while (std::getline(file, s))
-            (_file+=s).push_back('\n');
+        // while (std::getline(file, s))
+        //     (_file+=s).push_back('\n');
         
-        int count = _servers_count(_file);
-        t_server _server[count];
+        // int count = _servers_count(_file);
+        // t_server _server[count];
+        _server.file = av[1];
+        std::ifstream file(_server.file);
+        while (std::getline(file, str))
+            split_conf(_server.data, str);
 
         
         // 1- Config File:
-        _config_parser(_server, _file, count);
+        // _config_parser(_server, _file, count);
+        (void)_request;
+        (void)_response;
+        parss_info(_server);
+        print_data(_server);
+        // exit(1);
 
         // 2- Socket connection
         _socket(_server, _request, _response);
