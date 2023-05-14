@@ -15,10 +15,16 @@ namespace  http_server
         std::vector<int>  error_status;
         std::string       path;
     };
+    struct redirection
+    {
+        size_t            return_status;
+        std::string       path;
+    };
 
     struct location
     {
         bool            autoindex;
+        redirection      _redirect;
         std::string  root_location, name;
         std::vector<std::string>  indexs;
         std::vector<std::string>  allows_methods;
@@ -28,11 +34,12 @@ namespace  http_server
 
     struct server
     {
-        std::string  name, root_location;
+        size_t  listen_port;
+        redirection      _redirect;
         std::vector<std::string>  indexs;
         std::vector<location>   locations;
         std::vector<error_page>  errors;
-        size_t  listen_port;
+        std::string  name, root_location, client_max_body_size;
     };
 
     struct parsing

@@ -83,7 +83,7 @@ void info_location(std::vector<http_server::location> &locations, std::vector<st
     if (!(*it != "{" && *(it + 1) == "{"))
         error("location bracket error");
     loc.name = *it;
-    for (it += 2; *it != "}"; it++)
+    for (it += 2; *it != "}"; it += 2)
     {
         if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
             loc.root_location = *(++it);
@@ -95,9 +95,12 @@ void info_location(std::vector<http_server::location> &locations, std::vector<st
             info_(loc.cgi_pass, ++it); 
         else if (*it == "autoindex" && *(it + 1) != ";" && *(it + 2) == ";") 
             info_autoindex(loc, *(++it));
+        else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
+            loc._redirect.return_status = str_to_num(*(++it));
+            loc._redirect.path = *(++it);
+        }
         else 
             error("not understood");
-        it++;
     }
     if (*it == "}")
         locations.push_back(loc);
@@ -115,12 +118,14 @@ void parss_info(http_server::parsing &parss)
     {
         if (*it == "server" && *(++it) == "{")
         {
-            for (it++; *it != "}"; it++)
+            for (it++; *it != "}"; it += 2)
             {
                 if (*it == "server_name" && *(it + 1) != ";" && *(it + 2) == ";")
                     serv.name = *(++it);
                 else if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
                     serv.root_location = *(++it);
+                else if (*it == "client_max_body_size" && *(it + 1) != ";" && *(it + 2) == ";")
+                    serv.client_max_body_size = *(++it);   
                 else if (*it == "listen" && *(it + 1) != ";" && *(it + 2) == ";")
                     serv.listen_port = str_to_num(*(++it));
                 else if (*it == "error_page")
@@ -129,9 +134,12 @@ void parss_info(http_server::parsing &parss)
                     info_(serv.indexs, ++it);   
                 else if (*it == "location")
                     info_location(serv.locations, ++it);
+                else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
+                    serv._redirect.return_status = str_to_num(*(++it));
+                    serv._redirect.path = *(++it);
+                }
                 else
                     error("not understood");
-                it++;
             }
             if (*it == "}")
                 parss.servers.push_back(serv);
