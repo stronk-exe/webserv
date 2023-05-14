@@ -78,15 +78,7 @@ void	_get( Response *_response, Request *_request, t_server *_server )
 					_response->status = 200;
 					_response->body = "<html><body><h1>Directory file listing: </h1></body></html>";
 				}
-				// {
-				// 	std::cerr << "403 Forbidden" << std::endl;
-				// 	exit(1);
-				// }
 			}
-			// if (_server->index.size() != 0)
-			// {
-			// 	// cgi
-			// }
 		}
 	}
 	else if (_request->type == "file")
@@ -107,6 +99,7 @@ void _post( Response *_response, Request *_request, t_server *_server )
 	if (_request->client_body_upload)
 	{
 		// Upload the shit
+		// std::cerr << "body: " << body << std::endl;
 	}
 	else
 	{

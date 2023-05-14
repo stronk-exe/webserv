@@ -12,10 +12,10 @@
 
 #include "webserv.hpp"
 
-int _get_matched_location( t_server *_server, Request *_request )
+int _get_matched_location( Server *_server, Request *_request )
 {
-    for (size_t i=0; i < _server->location.size(); i++)
-        if (_server->location[i] == _request->uri)
+    for (size_t i=0; i < _server->locations.size(); i++)
+        if (_server->locations[i].name == _request->uri)
             return 1;
     return 0;
 }
@@ -29,21 +29,21 @@ int _valid_url_chars( std::string s )
     return 1;
 }
 
-void	_validate_request( std::map<std::string, std::string> m, t_server *_server, Response *_response, Request *_request )
+void	_validate_request( Server *_server, Request *_request, Response *_response )
 {
-    std::map<std::string, std::string>::iterator _transfer_encoding_iter = m.find("Transfer-Ecoding");
-	std::map<std::string, std::string>::iterator _content_length_iter = m.find("Content-Length");
-	std::map<std::string, std::string>::iterator _req_body_iter = m.find("body");
+    std::map<std::string, std::string>::iterator _transfer_encoding_iter = _request->headers.find("Transfer-Ecoding");
+	std::map<std::string, std::string>::iterator _content_length_iter = _request->headers.find("Content-Length");
+	std::map<std::string, std::string>::iterator _req_body_iter = _request->headers.find("body");
 
-	if (_transfer_encoding_iter != m.end() && _transfer_encoding_iter->second != "chunked")
+	if (_transfer_encoding_iter != _request->headers.end() && _transfer_encoding_iter->second != "chunked")
 		_response->status = 501;
-	if (_transfer_encoding_iter == m.end() && _content_length_iter == m.end() && _request->method == "Post")
+	if (_transfer_encoding_iter == _request->headers.end() && _content_length_iter == _request->headers.end() && _request->method == "Post")
 		_response->status = 400;
 	if (!_valid_url_chars(_request->uri))
 		_response->status = 400;
 	if ((_request->uri).size() > 2048)
 		_response->status = 414;
-	if (static_cast<int>(_req_body_iter->second.size()) > _server->max_body_size)
+	if (static_cast<int>(_req_body_iter->second.size()) > /* max_body_size _server.servers[0].max_body_size here */98 )
 		_response->status = 413;
 	if (!_get_matched_location(_server, _request))
 		_response->status = 404;
@@ -73,37 +73,121 @@ void _extract_first_line( Request *_request, char *s )
 		print_error("missing method or uri or http-version here!");
 }
 
-void _fill_request(t_server *_server, Request *_request )
+void _fill_request(Server _server, Request *_request )
 {
-	_request->index = _server->index;
-	_server->http_redirection.size() ? _request->redirection = _server->http_redirection :  _request->redirection = "";
+    // - Fill the index
+	// for (_server.index.size)
+	// memcopy();
+    // _request->index.insert(_request->index, _server->index, sizeof(_server->index) / sizeof(std::string));
+	// std::cerr << "aaww: " << _server->index.size() << std::endl;
+	// for (size_t i=0; i<_server->index.size(); i++)
+	// 	std::cerr << _server->index[i] << std::endl;
+	if (_server.index.size())
+	{
+		for (size_t i=0; i<_server.index.size(); i++)
+			_request->index.push_back(_server.index[i]);
+	}
+	// for (size_t i=0; i<_server.locations.size(); i++)
+	// {
+	// 	for (size_t i=0; i<_server.index.size(); i++)
+	// 		_request->index.push_back(_server.index[i]);
+	// }
+    
+    // _server->http_redirection.size() ? _request->redirection = _server->http_redirection :  _request->redirection = "";
 	
 	// hadi ghi binmaa wsf
-	if (_request->uri == "/")
-		_request->path = _server->root+_request->uri+"index.html";
-	else
-		_request->path = _server->root+_request->uri;
-    _server->cgi.size() ? _request->cgi = _server->cgi :  _request->cgi = "";
+	// if (_request->uri == "/")
+	// 	_request->path = _server.servers[0].locations[0].name+_request->uri+"index.html";
+	// else
+		// _request->path = _server.servers[0].locations[0].name+_request->uri;
+    // _server.servers.locations[0].cgi_pass.size() ? _request->cgi = _server.servers[0].locations[0].cgi_pass :  _request->cgi = "";
 }
 
-void	_request( t_server *_server, Request *_request, Response *_response, char *s )
+
+// void _requset_parser( Request *_request, char *s )
+// {
+//     std::string delimiter = "\r\n\r\n";
+//     std::string r = s;
+//     size_t pos = r.find(delimiter);
+//     std::string headersStr = r.substr(0, pos);
+//     _request->body = r.substr(pos + delimiter.length());
+
+//     std::cerr << "poos: " << pos << std::endl;
+
+//     // Split the headers into individual lines
+//     std::vector<std::string> headerLines;
+//     delimiter = "\r\n";
+//     pos = 0;
+//     std::string line;
+//     while ((pos = headersStr.find(delimiter)) != std::string::npos) {
+//         line = headersStr.substr(0, pos);
+//         headerLines.push_back(line);
+//         headersStr.erase(0, pos + delimiter.length());
+//     }
+//     headerLines.push_back(headersStr);
+
+//     // Parse the headers into key-value pairs
+//     std::string key, value;
+//     // for (std::string headerLine : headerLines)
+//     for (size_t i=0; i < headerLines.size(); i++)
+//     {
+//         pos = headerLines[i].find(":");
+//         if (pos != std::string::npos) {
+//             key = headerLines[i].substr(0, pos);
+//             value = headerLines[i].substr(pos + 2);
+//             _request->headers[key] = value;
+//         }
+//     }
+// }
+
+Server	*_match_theServer( Parsing &_server, Request *_request)
 {
-    std::map<std::string, std::string> m;
+	
+    for (size_t i=0; i<_server.servers.size(); i++)
+    {
+		std::cerr << _server.servers[i].name << " - " << _request->headers["Host"] << std::endl;
+        if (_server.servers[i].name == _request->headers["Host"])
+		{
+			Server s = _server.servers[i];
+            _fill_request(s, _request);
+            return &(_server.servers[i]);
+		}
+    }
+	return NULL;
+}
+
+void	_request( Parsing &_server, Request *_request, Response *_response, char *s )
+{
+    // std::map<std::string, std::string> m;
     std::vector<std::string> _req;
     char *p;
 
+    std::string delimiter = "\r\n\r\n";
+    std::string r = s;
+    size_t pos = r.find(delimiter);
+
+    std::string header = r.substr(0, pos);
+    _request->body = r.substr(pos + delimiter.length());
+    // std::cerr << "raw req[0]: " << header << std::endl;
+    // std::cerr << "raw req[1]: " << r.substr(pos + delimiter.length()) << std::endl;
+
     // Here, the delimiter is white space.
-    p = strtok(s, "\n");
-    while (p != NULL) {
+    p = strtok(&header[0], "\n");
+    while (p != NULL)
+    {
         _req.push_back(std::string(p));
         p = strtok(NULL, "\n");
     }
 
+    // for (size_t i=0; i<_req.size(); i++)
+    //     std::cerr << "headers req: " <<_req[i] << std::endl;
+    // exit(1);
 
-
+	
 
     // extract the method, the uri and the http-version
     _extract_first_line(_request, &_req[0][0]);
+    // _requset_parser(_request, s);
     for (size_t x=1; x < _req.size(); x++)
     {
         char *r = &_req[x][0];
@@ -118,7 +202,7 @@ void	_request( t_server *_server, Request *_request, Response *_response, char *
             (!y%2) ? _key = t : _value = t;
             if (_key != "\0" && _value != "\0")
             {
-                m.insert(std::make_pair(_key, _value));
+                _request->headers.insert(std::make_pair(_key, _value));
                 _key = "";
                 _value = "";
             }
@@ -126,15 +210,31 @@ void	_request( t_server *_server, Request *_request, Response *_response, char *
             y++;
         }
     }
-	_fill_request(_server, _request);
+
+    // We must match the server first!
+    Server *_s = _match_theServer(_server, _request);
+	std::cerr << "aaww: " << _s->name << std::endl;
+	if (s)
+		_fill_request(*_s, _request);
+	else
+		print_error("ghayarha mamsalich lik db!");
+
+	// _fill_request(_server, _request);
+    std::cerr << "ha7na hna" << std::endl;
+    // (void)_response;
+    // exit(1);
 	// _request->index = _server->index;
 	// _server->http_redirection.size() ? _request->redirection = _server->http_redirection :  _request->redirection = "";
 
-    // std::map<std::string, std::string>::iterator iter;
-    // for (iter = m.begin(); iter != m.end(); iter++)
-    // {
-    //   std::cout<<(*iter).first<<"   ---   "<<(*iter).second<<"\n";
-    // }
+ /*   std::cerr << "request parsed headers: " << std::endl;
+    std::map<std::string, std::string>::iterator iter;
+    for (iter = _request->headers.begin(); iter != _request->headers.end(); iter++)
+    {
+        std::cout<<(*iter).first<<"   ---   "<<(*iter).second<<"\n";
+    }
+    std::cerr << "request parsed body: " << std::endl;
+    std::cerr << _request->body << std::endl;*/
+    // exit(1);
 	// Responseponse *_response;
-    _validate_request(m, _server, _response, _request);
+    _validate_request(_s, _request, _response);
 }

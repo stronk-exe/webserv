@@ -1,4 +1,4 @@
-#include "parsing.hpp"
+#include "webserv.hpp"
 
 void split_conf(std::vector<std::string> &data, std::string str) 
 {
@@ -33,7 +33,7 @@ void error(std::string err)
     exit(1337);
 }
 
-size_t str_to_num(std::string str)
+int str_to_num(std::string str)
 {
     char *_p;
     size_t _int;
@@ -44,9 +44,9 @@ size_t str_to_num(std::string str)
     return _int;
 }
 
-void info_err_status(std::vector<http_server::error_page> &errors, std::vector<std::string>::iterator &it)
+void info_err_status(std::vector<error_page> &errors, std::vector<std::string>::iterator &it)
 {
-    http_server::error_page err;
+    error_page err;
 
     for (; * (it + 1) != ";" ; it++)
         err.error_status.push_back(str_to_num(*it));
@@ -66,7 +66,7 @@ void info_(std::vector<std::string>  &vec, std::vector<std::string>::iterator &i
     vec.push_back(*it);
 }
 
-void info_autoindex(http_server::location &loc, std::string &str) 
+void info_autoindex(location &loc, std::string &str) 
 {
     if (str == "on")
         loc.autoindex = true;
@@ -76,9 +76,9 @@ void info_autoindex(http_server::location &loc, std::string &str)
         error("autoindex error");
 }
 
-void info_location(std::vector<http_server::location> &locations, std::vector<std::string>::iterator &it)
+void info_location(std::vector<location> &locations, std::vector<std::string>::iterator &it)
 {
-    http_server::location loc;
+    location loc;
 
     if (!(*it != "{" && *(it + 1) == "{"))
         error("location bracket error");
@@ -88,7 +88,7 @@ void info_location(std::vector<http_server::location> &locations, std::vector<st
         if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
             loc.root_location = *(++it);
         else if (*it == "index")
-            info_(loc.indexs, ++it); 
+            info_(loc.index, ++it); 
         else if (*it == "allow_methods")
             info_(loc.allows_methods, ++it); 
         else if (*it == "cgi_pass")
@@ -106,9 +106,9 @@ void info_location(std::vector<http_server::location> &locations, std::vector<st
     it--;
 }
 
-void parss_info(http_server::parsing &parss)
+void parss_info(Parsing &parss)
 {
-    http_server::server serv;
+    Server serv;
     std::vector<std::string>::iterator it;
     
     for (it = parss.data.begin(); it != parss.data.end(); it++)
@@ -126,7 +126,7 @@ void parss_info(http_server::parsing &parss)
                 else if (*it == "error_page")
                     info_err_status(serv.errors, ++it);
                 else if (*it == "index")
-                    info_(serv.indexs, ++it);   
+                    info_(serv.index, ++it);   
                 else if (*it == "location")
                     info_location(serv.locations, ++it);
                 else
@@ -160,9 +160,9 @@ void print_str(std::vector<std::string> &vec, const char *str)
         std::cout << (*it) << " ";
 }
 
-void print_err(std::vector<http_server::error_page> &vec)
+void print_err(std::vector<error_page> &vec)
 {
-    std::vector<http_server::error_page>::iterator it;
+    std::vector<error_page>::iterator it;
     int i = 0;
     for ( it = vec.begin(); it != vec.end(); it++, i++) {
         std::cout <<"\n" <<  i << ":  " << "errors.path" << (*it).path << std::endl;
@@ -170,9 +170,9 @@ void print_err(std::vector<http_server::error_page> &vec)
     }
 }
 
-void print_loc(std::vector<http_server::location> &vec)
+void print_loc(std::vector<location> &vec)
 {
-    std::vector<http_server::location>::iterator it;
+    std::vector<location>::iterator it;
     int i = 0;
     for ( it = vec.begin(); it != vec.end(); it++, i++) {
         std::cout << "\n---------------location----------------" << std::endl;
@@ -180,7 +180,7 @@ void print_loc(std::vector<http_server::location> &vec)
         std::cout << i << ":  "<< "location.autoindex "  <<  (*it).autoindex << std::endl;
         std::cout << i << ":  "<< "location.name "  <<  (*it).name << std::endl;
         std::cout << i << ":  "<< "location.root_location " <<  (*it).root_location << std::endl;
-        print_str((*it).indexs, "index ");
+        print_str((*it).index, "index ");
         print_str((*it).allows_methods, "allows_methods ");
         print_str((*it).cgi_pass, "cgi_pass ");
 
@@ -188,9 +188,9 @@ void print_loc(std::vector<http_server::location> &vec)
     }
 }
 
-void print_data(http_server::parsing &parss)
+void print_data(Parsing &parss)
 {
-    std::vector<http_server::server>::iterator it;
+    std::vector<Server>::iterator it;
     int i = 0;
     for ( it = parss.servers.begin(); it != parss.servers.end(); it++, i++)
     {
@@ -198,7 +198,7 @@ void print_data(http_server::parsing &parss)
         std::cout << i << ":  "<< "server.name "  <<  (*it).name << std::endl;
         std::cout << i << ":  "<< "server.root_location " <<  (*it).root_location << std::endl;
         std::cout << i << ":  "<< "server.listen_port " <<  (*it).listen_port << std::endl;
-        print_str((*it).indexs, "index ");
+        print_str((*it).index, "index ");
         print_err((*it).errors);
         print_loc((*it).locations);
         // std::cout << "server.name " << i << " " <<  (it).name << std::endl;
@@ -208,20 +208,20 @@ void print_data(http_server::parsing &parss)
 
 }
 
-int main(int ac, char *av[])
-{
-    std::string  str;
-    http_server::parsing parss;
+// int main(int ac, char *av[])
+// {
+//     std::string  str;
+//     Parsing parss;
 
-    if (ac == 2) 
-    {
-        parss.file = av[1];
-        std::ifstream file(parss.file);
-        while (std::getline(file, str))
-            split_conf(parss.data, str);
-        parss_info(parss);
-        print_data(parss);
-        file.close();
-    }
-    return 0;
-}
+//     if (ac == 2) 
+//     {
+//         parss.file = av[1];
+//         std::ifstream file(parss.file);
+//         while (std::getline(file, str))
+//             split_conf(parss.data, str);
+//         parss_info(parss);
+//         print_data(parss);
+//         file.close();
+//     }
+//     return 0;
+// }

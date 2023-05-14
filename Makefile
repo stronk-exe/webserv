@@ -12,7 +12,14 @@
 
 NAME = webserv
 
-SRCS =  main.cpp config_parser.cpp socket.cpp methods.cpp cgi.cpp request.cpp response.cpp
+SRCS =  main.cpp \
+		parsing.cpp\
+		config_parser.cpp\
+		socket.cpp\
+		methods.cpp\
+		cgi.cpp\
+		request.cpp\
+		response.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
