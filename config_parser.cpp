@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   config_parser.cpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/11 11:15:23 by ael-asri          #+#    #+#             */
+/*   Updated: 2023/05/11 11:54:02 by ael-asri         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "webserv.hpp"
 
@@ -127,7 +138,7 @@ void _get_location( t_server *_server, std::string* _servers, std::string s, int
 	}
 }
 
-void _get_client_max_body_size( t_server *_server, std::string* _servers, int c )
+void _get_max_body_size( t_server *_server, std::string* _servers, int c )
 {
 	for (int i=0; i< c; i++)
 	{
@@ -141,30 +152,55 @@ void _get_client_max_body_size( t_server *_server, std::string* _servers, int c 
 			while (_servers[i][x] != ';')
 				t+=_servers[i][x++];
 		}
-		_server[i].client_max_body_size = t;
+		if (t.size())
+			_server[i].max_body_size = std::stoi(t);
 	}
 }
 
-void _get_index( t_server *_server, std::string s, int c )
+void _get_index( t_server *_server, std::string* _servers, int c )
 {
+	// for (int i=0; i< c; i++)
+	// {
+	// 	std::string t="";
+	// 	int _index;
+	// 	if ((_index = s.find("index")) > 0)
+	// 	{
+	// 		int x=_index+5;
+	// 		while (s[x] == ' ')
+	// 			x++;
+	// 		while (s[x] != ';')
+	// 			t+=s[x++];
+	// 	}
+	// 	char *p;
+	// 	p = strtok(&t[0], " ");
+	// 	while (p != NULL) {
+	// 		_server->index.push_back(std::string(p));
+	// 		p = strtok(NULL, " ");
+    // 	}
+	// }
 	for (int i=0; i< c; i++)
 	{
 		std::string t="";
 		int _index;
-		if ((_index = s.find("index")) > 0)
+	// std::cerr << "whyyyy" << std::endl;
+		if ((_index = _servers[i].find("index")) > 0)
 		{
 			int x=_index+5;
-			while (s[x] == ' ')
+			while (_servers[i][x] == ' ')
 				x++;
-			while (s[x] != ';')
-				t+=s[x++];
+			while (_servers[i][x] != ';')
+				t+=_servers[i][x++];
 		}
-		char *p;
-		p = strtok(&t[0], " ");
-		while (p != NULL) {
-			_server->index.push_back(std::string(p));
-			p = strtok(NULL, " ");
-    	}
+		_server[i].index = t;
+
+		// if (t.length())
+		// {
+		// 	char *r = &t[0];
+		// 	char *s;
+		// 	s = strtok(r, " ");
+		// 	s = strtok(NULL, " ");
+		// 	_server[i].root = std::string(s);
+		// }
 	}
 }
 
@@ -259,7 +295,7 @@ void _get_cgi( t_server *_server, std::string* _servers, int c )
 	}
 }
 
-void _parser( t_server *_server, std::string s, int count )
+void _config_parser( t_server *_server, std::string s, int count )
 {
 	std::string _servers[count];
 	int i=0;
@@ -295,8 +331,8 @@ void _parser( t_server *_server, std::string s, int count )
 	_get_version(_server, _servers, c);
 	_get_server_name(_server, _servers, c);
 	_get_location(_server, _servers, s, c);
-	_get_client_max_body_size(_server, _servers, c);
-	_get_index(_server, s, c);
+	_get_max_body_size(_server, _servers, c);
+	_get_index(_server, _servers, c);
 	_get_root(_server, _servers, c);
 	_get_cgi(_server, _servers, c);
 	_get_error_page(_server, _servers, c);
