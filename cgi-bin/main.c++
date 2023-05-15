@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+# include <fstream>
 #include <cerrno>
 
 
@@ -19,8 +20,15 @@ int main( int ac, char *av[]) {
         strerror(errno);
         return 1;
     }
-
+    std::string str;
+    std::ifstream file(av[1]);
+    std::getline(file, str);
+    str.erase(str.begin(), str.begin() + 2);
+    std::cout << str << std::endl;
+    if (access(str.c_str(), X_OK))
+        return 1;
     // Fork a new process
+    av[0] = &str[0];
     pid = fork();
     if (pid == -1) {
         strerror(errno);
@@ -31,7 +39,7 @@ int main( int ac, char *av[]) {
         close(pipe_fd[0]);
         dup2(pipe_fd[1], STDOUT_FILENO);
         close(pipe_fd[1]);
-        execve(av[1], &av[1], NULL);
+        execve(av[0], av, NULL);
         strerror(errno);
         return 1;
     } else {
@@ -41,7 +49,7 @@ int main( int ac, char *av[]) {
         while ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
             result.append(buffer, nbytes);
         close(pipe_fd[0]);
-        
+
         int status;
         waitpid(pid, &status, 0);
 
