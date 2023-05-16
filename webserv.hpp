@@ -13,19 +13,23 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
-#include <iostream>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <fstream>
-#include <vector>
-#include <map>
+# include <iostream>
+# include <cstdio>
+# include <sys/socket.h>
+# include <unistd.h>
+# include <stdlib.h>
+# include <netinet/in.h>
+# include <string.h>
+# include <fstream>
+# include <vector>
+# include <map>
+# include <unistd.h>
+# include <sys/types.h>
+# include <sys/wait.h>
+# include <sys/stat.h>
+# include <cerrno>
 
 // #include <sys/types.h>
-#include <sys/stat.h>
 // struct stat info;
 
 // #include "Parsing/Parsing.hpp"
