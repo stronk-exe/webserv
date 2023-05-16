@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:14:49 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/05/16 15:31:27 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,11 +57,13 @@ int main(int ac, char **av)
         (void)_request;
         (void)_response;
         parss_info(_server);
+        std::cout << (_server.servers.begin())->name << std::endl;
+        std::cout << (_server.servers.begin())->listen_port << std::endl;
         // print_data(_server);
         // exit(1);
 
         // 2- Socket connection
-        _socket(_server, _request, _response);
+        // _socket(_server, _request, _response);
 
         
     }

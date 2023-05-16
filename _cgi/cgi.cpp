@@ -6,34 +6,42 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:05:56 by mait-jao          #+#    #+#             */
-/*   Updated: 2023/05/16 14:35:26 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/16 16:31:31 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../webserv.hpp" 
 
-bool get_first_arg(char str[], std::string &s)
+// bool get_first_arg(char str[], std::string &s)
+// {
+//     char *token = strtok(str, " ");
+//     if (token[0] == '#' && token[1] == '!') {
+//         s = token;
+//         return true;
+//     }
+//     return false;
+// }
+
+// void get_command(std::string &str, std::string _file)
+// {
+//     std::ifstream file(_file);
+//     while (std::getline(file, str))
+//     {
+//         if (get_first_arg(const_cast<char *>(str.c_str()), str))
+//             break;
+//     }
+//     str.erase(str.begin(), str.begin() + 2);
+// }
+
+void path_file(std::string root, std::string file, char **str)
 {
-    char *token = strtok(str, " ");
-    if (token[0] == '#' && token[1] == '!') {
-        s = token;
-        return true;
-    }
-    return false;
+    std::string tmp = root + file;/////dosnt work 
+    *str = const_cast<char *>(tmp.c_str());
 }
 
-void get_command(std::string &str, std::string _file)
-{
-    std::ifstream file(_file);
-    while (std::getline(file, str))
-    {
-        if (get_first_arg(const_cast<char *>(str.c_str()), str))
-            break;
-    }
-    str.erase(str.begin(), str.begin() + 2);
-}
 
-void cgi_pass(std::string s)
+
+void cgi_pass(Request *_request, Response *_response)
 {
     int pipe_fd[2];
     pid_t pid;
@@ -43,12 +51,10 @@ void cgi_pass(std::string s)
         std::cerr << strerror(errno) << std::endl;
         exit(12);
     }
-    std::string str;
-    get_command(str, s);
 	char *av[3];
-	av[1] = const_cast<char *>(s.c_str());
+	path_file(_request->root, *(_request->cgi.begin() + 1), &av[0]);
+	path_file(_request->root, _request->path, &av[1]);
 	av[2] = NULL;
-	av[0] = &str[0];
     pid = fork();
     if (pid == -1) {
         std::cerr << strerror(errno) << std::endl;
@@ -71,8 +77,8 @@ void cgi_pass(std::string s)
         int status;
         waitpid(pid, &status, 0);
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-            std::cout << result << std::endl;
+            _response->body = result;
         else
-            std::cout <<"Script execution failed."<< std::endl;
+            std::cout <<"Script execution failed."<< std::endl;///////////////////
     }
 }
