@@ -32,28 +32,74 @@
 
 
 struct error_page
-    {
-        std::vector<int>  error_status;
-        std::string       path;
-    };
+{
+    std::vector<int>  error_status;
+    std::string       path;
 
-    struct location
-    {
-        bool            autoindex;
-        std::string  root_location, name;
-        std::vector<std::string>  index;
-        std::vector<std::string>  allows_methods;
-        std::vector<std::string>  cgi_pass;
-    };
+	error_page &operator= (const error_page & err)
+	{
+		this->path = err.path;
+		this->error_status = err.error_status;
+		return *this;
+	}
+};
+
+struct Redirection
+{
+    size_t            return_status;
+    std::string       path;
+
+	Redirection& operator=(const Redirection& red)
+	{
+		this->return_status = red.return_status;
+		this->path = red.path;
+		return *this;
+	}
+};
+
+struct Location
+{
+    bool						autoindex;
+    std::string					root_location, name;
+    std::vector<std::string> 	index;
+    std::vector<std::string>	allows_methods;
+	Redirection					redirection;
+    std::vector<std::string>	cgi_pass;
+
+	Location& operator=(const Location& loc)
+	{
+		this->name = loc.name;
+		this->root_location = loc.root_location;
+		this->autoindex = loc.autoindex;
+		this->index = loc.index;
+		this->allows_methods = loc.allows_methods;
+		this->redirection = loc.redirection;
+		this->cgi_pass = loc.cgi_pass;
+		return *this;
+	}
+};
     
 
 struct Server
 {
-    std::string  name, root_location;
+    std::string  name, root_location, client_max_body_size;
     std::vector<std::string>  index;
-    std::vector<location>   locations;
+    std::vector<Location>   locations;
     std::vector<error_page>  errors;
+	Redirection      redirection;
     size_t  listen_port;
+
+	Server& operator=(const Server& serv) {
+		this->name = serv.name;
+		this->root_location = serv.root_location;
+		this->client_max_body_size = serv.client_max_body_size;
+		this->listen_port = serv.listen_port;
+		this->index = serv.index;
+		this->locations = serv.locations;
+		this->redirection = serv.redirection;
+		this->errors = serv.errors;
+    return *this;
+  }
 };
 
 struct Parsing
@@ -127,15 +173,16 @@ class Request
 		std::string uri;
 		std::string method;
 		// std::string http_version;
-		std::string type;
-		int			autoindex;
-		std::string path;
-		std::vector<std::string> index;
-		std::string redirection;
-		std::string cgi;
-		int			client_body_upload;
+		std::string 						type;
+		int									autoindex;
+		std::string							path;
+		std::vector<std::string>			index;
+		std::string							root;
+		std::vector<std::string>			redirection;
+		std::vector<std::string>			cgi;
+		int									client_body_upload;
 		std::map<std::string, std::string>	headers;
-		std::string	body;
+		std::string							body;
 };
 
 // typedef struct s_request
@@ -184,15 +231,15 @@ void	_config_parser( t_server *_server, std::string s, int count );
 void	_socket( Parsing &_server, Request *_request, Response *_response );
 
 // Methodes
-void	_get( Response *_response, Request *_request, t_server *_server );
+void	_get( Response *_response, Request *_request, Server &_server );
 void	_post( Response *_response, Request *_request, t_server *_server );
 void	_delete();
 
 // CGI
-void	_cgi( t_server *_server, Response *_response );
+void _cgi( Request *_request, Response *_response );
 
 // Request
-void	_request( Parsing &_server, Request *_request, Response *_response, char *s );
+void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, char *s );
 
 // Response
 void	_response( Response *_response, Request *_request );
@@ -209,11 +256,11 @@ void	print_error(std::string s);
 void error(std::string err);
 int str_to_num(std::string str);
 void parss_info(Parsing &parss);
-void info_autoindex(location &loc, std::string &str);
+void info_autoindex(Location &loc, std::string &str);
 void info_(std::vector<std::string>  &vec, std::vector<std::string>::iterator &it);
 void split_conf(std::vector<std::string> &data, std::string str);
 void info_err_status(std::vector<error_page> &errors, std::vector<std::string>::iterator &it);
-void info_location(std::vector<location> &locations, std::vector<std::string>::iterator &it);
+void info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void print_data(Parsing &parss);
 
 #endif

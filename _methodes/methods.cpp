@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "webserv.hpp"
+#include "../webserv.hpp"
 
 void print_error(std::string s)
 {
@@ -18,27 +18,27 @@ void print_error(std::string s)
     exit(1);
 }
 
-int has_index_files( t_server *_server, Request *_request )
-{
-	std::ifstream _file;
-	for (size_t i=0; i < _request->index.size(); i++)
-	{
-		std::cerr << _server->root+_request->uri+_request->index[i] << std::endl;
-		_file.open(_server->root+_request->uri+_request->index[i]);
-		if (_file)
-			return 1;
-	}
-	// _file.open(_server->root+_request->uri+"index.html");
-	// if (_file)
-	// 	return 1;
-	return 0;
-}
+// int has_index_files( Server &_server, Request *_request )
+// {
+// 	std::ifstream _file;
+// 	for (size_t i=0; i < _request->index.size(); i++)
+// 	{
+// 		std::cerr << _server->root+_request->uri+_request->index[i] << std::endl;
+// 		_file.open(_server->root+_request->uri+_request->index[i]);
+// 		if (_file)
+// 			return 1;
+// 	}
+// 	// _file.open(_server->root+_request->uri+"index.html");
+// 	// if (_file)
+// 	// 	return 1;
+// 	return 0;
+// }
 
 void	_file_or_dir( Request *_request )
 {
 	struct stat info;
 
-	if (stat(_request->path.c_str(), &info) != 0)
+	if (stat(_request->root.c_str(), &info) != 0)
 		print_error("path is neither a file nor a directory");
 
     if (S_ISDIR(info.st_mode))
@@ -49,8 +49,9 @@ void	_file_or_dir( Request *_request )
 		print_error("path is neither a file nor a directory");
 }
 
-void	_get( Response *_response, Request *_request, t_server *_server )
+void	_get( Response *_response, Request *_request, Server &_server )
 {
+	(void)_server;
 	// std::cerr << "request path: " << _request->path << std::endl;
 	std::ifstream _file;
 	_file.open(_request->path);
@@ -59,15 +60,16 @@ void	_get( Response *_response, Request *_request, t_server *_server )
     _file_or_dir(_request);
 	if (_request->type == "directory")
 	{
-		if (_request->uri[_request->uri.size()-1] != '/')
+		if (_request->path[_request->path.size()-1] != '/')
 		{
-			_request->uri+='/';
+			_request->path+='/';
 			_response->status = 301;
 		}
 		else
 		{
-			if (has_index_files(_server, _request))
-				_cgi(_server, _response);
+			std::cerr << "Yoo:" << _request->index.size() << " - " << _request->autoindex << std::endl;
+			if (_request->index.size())
+				_cgi(_request, _response);
 			else
 			{
 				// autoindex
@@ -84,7 +86,7 @@ void	_get( Response *_response, Request *_request, t_server *_server )
 	else if (_request->type == "file")
 	{
 		if (_request->cgi.size())
-			_cgi(_server, _response);
+			_cgi(_request, _response);
 		else
 		{
 			_response->status = 200;
@@ -92,7 +94,7 @@ void	_get( Response *_response, Request *_request, t_server *_server )
 		}
 	}
 }
-
+/*
 void _post( Response *_response, Request *_request, t_server *_server )
 {
 	std::cout << "POST" << std::endl;
@@ -140,7 +142,7 @@ void _post( Response *_response, Request *_request, t_server *_server )
 		}
 	}
 }
-
+*/
 void _delete()
 {
 	std::cout << "DELETE" << std::endl;

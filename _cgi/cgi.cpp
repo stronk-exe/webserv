@@ -10,20 +10,23 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "webserv.hpp"
+#include "../webserv.hpp"
 
-void _cgi( t_server *_server, Response *_response )
+void _cgi( Request *_request, Response *_response )
 {
+	// Temporary
+	std::cerr << "pathhh: " << _request->path << std::endl;
+	// _request->path += "index.html";
 	// (void)_request;
-	if (_server->cgi.size())
-	{
+	// if (_server.name.size())
+	// {
 		std::cout << "cgi UwU" << std::endl;
 		_response->status = 200;
-	}
-	else
-	{
-		// std::cout << "200 OK" << std::endl;
-		// _response(_request, 200);
-		exit(1);
-	}
+	// }
+	// else
+	// {
+	// 	// std::cout << "200 OK" << std::endl;
+	// 	// _response(_request, 200);
+	// 	exit(1);
+	// }
 }
