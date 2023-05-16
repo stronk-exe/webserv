@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "webserv.hpp"
+#include "../webserv.hpp"
 
 const char *generate_response_str(Response *_response)
 {
@@ -89,7 +89,26 @@ void _socket( Parsing &_server, Request *request, Response *response )
 					std::cout << "buffer: " << buffer  << "~" << std::endl;
 
 					// 3- Request:
-					_request(_server, request, response, buffer);
+
+                    Server _s;
+                    // _match_theServer(_server, request, _s);
+                    // std::cerr << "sssserver: " << _s.name << std::endl;
+
+					_request(_server, _s, request, response, buffer);
+
+                    // checking the method
+                    if (request->method == "GET")
+                        _get(response, request, _s);
+                    // else if (request->method == "POST")
+                    //     _post(response, request, _server);
+                    // else if (request->method == "DELETE")
+                    //     _delete();
+                    else
+                        response->status = 405;
+                    // {
+                    //     std::cerr << "405 Method Not Allowed" << std::endl;
+                    //     exit(1);
+                    // }
 
 					// Response
         			_response(response, request);
@@ -104,19 +123,6 @@ void _socket( Parsing &_server, Request *request, Response *response )
 
         // exit(1);
 
-        // // checking the method
-        // if (request->method == "GET")
-        //     _get(response, request, _server);
-        // else if (request->method == "POST")
-        //     _post(response, request, _server);
-        // else if (request->method == "DELETE")
-        //     _delete();
-        // else
-        //     response->status = 405;
-        // // {
-        // //     std::cerr << "405 Method Not Allowed" << std::endl;
-        // //     exit(1);
-        // // }
 
         
         // // std::cout << "wssa3 ya kho response jat:" << std::endl;

@@ -13,13 +13,12 @@
 NAME = webserv
 
 SRCS =  main.cpp \
-		parsing.cpp\
-		config_parser.cpp\
-		socket.cpp\
-		methods.cpp\
-		cgi.cpp\
-		request.cpp\
-		response.cpp
+		_config_parser/parsing.cpp\
+		_socket/socket.cpp\
+		_methodes/methods.cpp\
+		_cgi/cgi.cpp\
+		_request/request.cpp\
+		_response/response.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
@@ -30,8 +29,8 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	c++ $(FLAGS) $^ -o $@
 
-%.o : %.cpp
-	@	c++ $(FLAGS) -c $(SRCS)
+# %.o : %.cpp
+# 	@	c++ $(FLAGS) -c $(SRCS)
 
 clean:
 	rm -f $(OBJS)

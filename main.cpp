@@ -57,7 +57,7 @@ int main(int ac, char **av)
         (void)_request;
         (void)_response;
         parss_info(_server);
-        print_data(_server);
+        // print_data(_server);
         // exit(1);
 
         // 2- Socket connection
