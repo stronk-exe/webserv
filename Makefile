@@ -17,7 +17,8 @@ SRCS =  main.cpp \
 		_socket/socket.cpp\
 		_methodes/methods.cpp\
 		_request/request.cpp\
-		_response/response.cpp
+		_response/response.cpp\
+		_cgi/cgi.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
@@ -27,9 +28,6 @@ all: $(NAME)
 
 $(NAME): $(OBJS)
 	c++ $(FLAGS) $^ -o $@
-
-# %.o : %.cpp
-# 	@	c++ $(FLAGS) -c $(SRCS)
 
 clean:
 	rm -f $(OBJS)

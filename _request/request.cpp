@@ -12,12 +12,36 @@
 
 #include "../webserv.hpp"
 
-int _get_matched_location( Server &_server, Request *_request )
+int	_max_element( std::vector<int> v )
 {
-    for (size_t i=0; i < _server.locations.size(); i++)
-        if (_server.locations[i].name == _request->uri)
-            return 1;
-    return 0;
+	int	temp = -999;
+	int	index = 0;
+	for (size_t i=0; i <v.size(); i++)
+		if (temp < v[i])
+		{
+			temp = v[i];
+			index = i;
+		}
+	return index;
+}
+
+int _match_theLocation( Server &_server, Location &_location, Request *_request )
+{
+	std::vector<int> v;
+	int count;
+
+	for (size_t i=0; i < _server.locations.size(); i++)
+	{
+		count = 0;
+		for (size_t j=0; j<_server.locations[i].name.size() && j<_request->uri.size() && _server.locations[i].name[j] == _request->uri[j]; j++)
+			count++;
+		v.push_back(count);
+	}
+	if (!v.size())
+		return 0;
+    std::cerr << "wwww" << std::endl;
+	_location = _server.locations[_max_element(v)];
+	return 1;
 }
 
 int _valid_url_chars( std::string s )
@@ -29,7 +53,7 @@ int _valid_url_chars( std::string s )
     return 1;
 }
 
-void	_validate_request( Server &_server, Request *_request, Response *_response )
+void	_validate_request( Server &_server, Location &_location, Request *_request, Response *_response )
 {
     std::map<std::string, std::string>::iterator _transfer_encoding_iter = _request->headers.find("Transfer-Ecoding");
 	std::map<std::string, std::string>::iterator _content_length_iter = _request->headers.find("Content-Length");
@@ -45,7 +69,7 @@ void	_validate_request( Server &_server, Request *_request, Response *_response 
 		_response->status = 414;
 	if (static_cast<int>(_request->body.size()) > str_to_num(_server.client_max_body_size) )
 		_response->status = 413;
-	if (!_get_matched_location(_server, _request))
+	if (!_match_theLocation(_server, _location, _request))
 		_response->status = 404;
 	if (_request->redirection.size())
 	{
@@ -58,12 +82,12 @@ void _extract_first_line( Request *_request, std::string s )
 {
     std::vector<std::string> v;
     char *_line = strtok(&s[0], " ");
+
     while (_line != NULL)
     {
         v.push_back(_line);
         _line = strtok(NULL, " ");
     }
-
     if (v.size() == 3)
     {
         _request->method = v[0];
@@ -73,30 +97,31 @@ void _extract_first_line( Request *_request, std::string s )
 		print_error("missing method or uri or http-version here!");
 }
 
-void _match_theLocation( Server &_server, Request *_request, Location &_location )
-{
-    for (size_t i=0; i < _server.locations.size(); i++)
-        if (_server.locations[i].name == _request->uri)
-            _location =  _server.locations[i];
-}
+// void _match_theLocation( Server &_server, Request *_request, Location &_location )
+// {
+//     for (size_t i=0; i < _server.locations.size(); i++)
+//         if (_server.locations[i].name == _request->uri)
+//             _location =  _server.locations[i];
+// }
 
-void _fill_request(Server &_server, Request *_request )
+void _fill_request(Server &_server, Location &_location, Request *_request )
 {
-	Location _location;
+	// Location _location;
 
 	// match the location
-	std::cerr << "server: " << _server.name << std::endl;
-	_match_theLocation(_server, _request, _location);
+	// std::cerr << "server: " << _server.name << std::endl;
+	// _match_theLocation(_server, _location, _request);
 
     // - Fill the index
-	std::cerr << "sbah hada:" << _location.index.size() << " - " << _location.autoindex << std::endl;
+	// std::cerr << "sbah hada:" << _location.index.size() << " - " << _location.autoindex << std::endl;
+	// std::cerr << "req parsed uri:" << _request->uri <<  "| path: "<< _request->path<< " | root: " << _request->root << std::endl;
 	if (_location.index.size())
 	{
 		// _request->index = _location.index;
 		for (size_t i=0; i<_location.index.size(); i++)
 			_request->index.push_back(_location.index[i]);
 	}
-	else if (_server.index.size())
+	if (_server.index.size())
 	{
 		// _request->index = _server.index;
 		for (size_t i=0; i<_server.index.size(); i++)
@@ -108,10 +133,10 @@ void _fill_request(Server &_server, Request *_request )
 	// 	for (size_t i=0; i<_server.index.size(); i++)
 	// 		_request->index.push_back(_server.index[i]);
 	// }
-	std::cerr << "root: " << _location.root_location << " : " << _location.name << std::endl;
+	// std::cerr << "root: " << _location.root_location << " : " << _location.name << std::endl;
 	_request->root = _location.root_location;
 	_request->path = _request->root+_request->uri;
-    
+    // std::cerr << "chihaja hnaya :" << _request->path << "~" << _request->root << "~" << _request->uri << std::endl;
 	// std::cerr << "Ayoo: " << _server.redirection.path.size() << std::endl;
 	_server.redirection.path.size() ? _request->redirection.push_back(_server.redirection.path) :  _request->redirection.push_back("");
 
@@ -132,7 +157,19 @@ void _fill_request(Server &_server, Request *_request )
 	// else
 		// _request->path = _server.servers[0].locations[0].name+_request->uri;
 	if (_location.cgi_pass.size())
-		_request->cgi = _location.cgi_pass;
+		for (size_t i=0; i<_location.cgi_pass.size(); i++)
+			_request->cgi.push_back(_location.cgi_pass[i]);
+	
+	if (_server.errors.size())
+	{
+		for (size_t i=0; i<_server.errors.size(); i++)
+		{
+			// _request->error_pages.status = _server.errors[i].error_status;
+			// _request->error_pages.path = _server.errors[i].path;
+			_request->error_pages.push_back(_server.errors[i]);
+			std::cerr << "error_pages: " << _request->error_pages[i].path << std::endl;
+		}
+	}
 }
 
 
@@ -172,20 +209,21 @@ void _fill_request(Server &_server, Request *_request )
 //     }
 // }
 
-std::string _str_trim( std::string s )
-{
-    std::cerr << "s: {" << s << "}" << std::endl;
-    size_t i=0;
-    for (; s.size() && s[i] == ' '; i++)
-        s.erase(s.begin()+i);
-    for (; s.size() && s[i] != ' ' && s[i] != '\n' && s[i] != '\r'; i++)
-        ;
-    for (; i<s.size(); i++)
-        s.erase(s.begin()+i);
-    // s.erase(s.begin()+s.size());
-    std::cerr << "s: {" << s << "}" << std::endl;
-    return s;
-}
+// std::string _str_trim( std::string s )
+// {
+//     std::cerr << "s: {" << s << "}" << std::endl;
+//     size_t i=0;
+
+//     for (; s.size() && s[i] == ' '; i++)
+//         s.erase(s.begin()+i);
+//     for (; s.size() && s[i] != ' ' && s[i] != '\n' && s[i] != '\r'; i++)
+//         ;
+//     for (; i<s.size(); i++)
+//         s.erase(s.begin()+i);
+//     // s.erase(s.begin()+s.size());
+//     std::cerr << "s: {" << s << "}" << std::endl;
+//     return s;
+// }
 
 void _match_theServer( Parsing &_server, Request *_request, Server &_s)
 {
@@ -233,13 +271,16 @@ void	_request_parser( Request *_request, char *s )
 void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, char *s )
 {
 	// Server _s;
+	Location _location;
 
 	_request_parser(_request, s);
     _match_theServer(_server, _request, _s);
-	_fill_request(_s, _request);
-    _validate_request(_s, _request, _response);
+	_match_theLocation(_s, _location, _request);
+	_fill_request(_s, _location, _request);
+	std::cerr << "req parsed uri:" << _request->uri <<  "| path: "<< _request->path<< " | root: " << _request->root << std::endl;
+    _validate_request(_s, _location, _request, _response);
 
-	std::cerr << "path: " << _request->path << std::endl;
+	// std::cerr << "path: " << _request->path << std::endl;
 
 
  /* 	std::cerr << "request parsed headers: " << std::endl;

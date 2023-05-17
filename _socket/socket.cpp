@@ -82,27 +82,23 @@ void _socket( Parsing &_server, Request *request, Response *response )
 					char buffer[99999] = {0};
 					int data = read(coming_socket, buffer, 99999);
 					if (data < 0)
-					{
-						std::cerr << "empty data!" << std::endl;
-						exit(1);
-					}
-					std::cout << "buffer: " << buffer  << "~" << std::endl;
+                        print_error("empty data!");
 
-					// 3- Request:
-
+					std::cerr << "~ buffer:\n" << buffer << std::endl;
+                    // 3- Request:
                     Server _s;
+					_request(_server, _s, request, response, buffer);
                     // _match_theServer(_server, request, _s);
                     // std::cerr << "sssserver: " << _s.name << std::endl;
 
-					_request(_server, _s, request, response, buffer);
 
                     // checking the method
                     if (request->method == "GET")
                         _get(response, request, _s);
-                    // else if (request->method == "POST")
-                    //     _post(response, request, _server);
-                    // else if (request->method == "DELETE")
-                    //     _delete();
+                    else if (request->method == "POST")
+                        _post(response, request, _s);
+                    else if (request->method == "DELETE")
+                        _delete();
                     else
                         response->status = 405;
                     // {
@@ -112,6 +108,8 @@ void _socket( Parsing &_server, Request *request, Response *response )
 
 					// Response
         			_response(response, request);
+
+                    // std::cerr << "uri:" << request->uri <<  "| path: "<< request->path<< " | root: " << request->root << std::endl;
 
 					const char *s = generate_response_str(response);
 					write(coming_socket, s, strlen(s));

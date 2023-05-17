@@ -73,7 +73,7 @@ void info_autoindex(Location &loc, std::string &str)
     if (str == "on")
         loc.autoindex = true;
     else if (str == "off")
-        loc.autoindex = true;
+        loc.autoindex = false;
     else
         error("autoindex error");
 }
@@ -123,7 +123,8 @@ void info_listen(Server &serv, std::vector<std::string>::iterator &it)
     if (vec.size() > 2)
         error("listen_port error");
     if (vec.size() == 2) {
-        serv.name = *vec.begin();
+        if (serv.name.empty())
+            serv.name = *vec.begin();
         serv.listen_port = str_to_num(*(vec.begin() + 1));
     }
     else if (vec.size() == 1){
