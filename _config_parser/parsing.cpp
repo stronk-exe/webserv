@@ -1,3 +1,5 @@
+
+
 #include "../webserv.hpp"
 
 void split_conf(std::vector<std::string> &data, std::string str) 
@@ -109,6 +111,27 @@ void info_location(std::vector<Location> &locations, std::vector<std::string>::i
     it--;
 }
 
+void info_listen(Server &serv, std::vector<std::string>::iterator &it)
+{
+
+    std::string word;
+    std::vector<std::string> vec;
+    std::istringstream iss(*it);
+    
+    while (std::getline(iss, word, ':'))
+        vec.push_back(word);
+    if (vec.size() > 2)
+        error("listen_port error");
+    if (vec.size() == 2) {
+        if (serv.name.empty())
+            serv.name = *vec.begin();
+        serv.listen_port = str_to_num(*(vec.begin() + 1));
+    }
+    else if (vec.size() == 1){
+        serv.listen_port = str_to_num(*vec.begin());
+    }
+}
+
 void parss_info(Parsing &parss)
 {
     Server serv;
@@ -127,7 +150,7 @@ void parss_info(Parsing &parss)
                 else if (*it == "client_max_body_size" && *(it + 1) != ";" && *(it + 2) == ";")
                     serv.client_max_body_size = *(++it);   
                 else if (*it == "listen" && *(it + 1) != ";" && *(it + 2) == ";")
-                    serv.listen_port = str_to_num(*(++it));
+                    info_listen(serv, ++it);
                 else if (*it == "error_page")
                     info_err_status(serv.errors, ++it);
                 else if (*it == "index")

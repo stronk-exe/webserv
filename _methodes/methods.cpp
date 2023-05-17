@@ -136,7 +136,7 @@ void _post( Response *_response, Request *_request, Server &_server )
 	if (_request->client_body_upload)
 	{
 		// Upload the shit
-		// std::cerr << "body: " << body << std::endl;
+		std::cerr << "request body: " << _request->body << std::endl;
 	}
 	else
 	{

@@ -21,6 +21,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <map>
 #include <sys/stat.h>

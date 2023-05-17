@@ -109,7 +109,7 @@ void _socket( Parsing &_server, Request *request, Response *response )
 					// Response
         			_response(response, request);
 
-                    std::cerr << "uri:" << request->uri <<  "| path: "<< request->path<< " | root: " << request->root << std::endl;
+                    // std::cerr << "uri:" << request->uri <<  "| path: "<< request->path<< " | root: " << request->root << std::endl;
 
 					const char *s = generate_response_str(response);
 					write(coming_socket, s, strlen(s));

@@ -33,6 +33,7 @@ int	_get_res_body( Request *_request, Response *_response )
 
 void    get_file_data( Response *_response, std::string path )
 {
+    std::cerr << "l path: " << path << std::endl;
     std::ifstream myfile;
 	myfile.open(path);
 	std::string myline;
@@ -74,37 +75,37 @@ void	_response( Response *_response, Request *_request )
     {
         if (_response->status == 400)
         {
-            _response->body = "<html><body><h1>400 Bad Request</h1></body></html>";
+            _response->body = "<html><body><h1>400 Bad Request</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
             _response->status_message = "Bad Request";
         }
         else if (_response->status == 403)
         {
-            _response->body = "<html><body><h1>403 Forbidden</h1></body></html>";
+            _response->body = "<html><body><h1>403 Forbidden</h1><img src=\"https://i.kym-cdn.com/entries/icons/original/000/028/434/We_Believe__The_Best_Men_Can_Be___Gillette_(Short_Film)_1-4_screenshot.jpg\" alt=\"forbidden\"/></body></html>";
             _response->status_message = "Forbidden";
         }
         else if (_response->status == 404)
         {
-            _response->body = "<html><body><h1>404 Not Found</h1></body></html>";
+            _response->body = "<html><body><h1>404 Not Found</h1><img src=\"https://media.makeameme.org/created/file-not-found-c17b083c9c.jpg\" alt=\"404_not_found.gif\"/></body></html>";
             _response->status_message = "Not Found";
         }
         else if (_response->status == 405)
         {
-            _response->body = "<html><body><h1>405 Method Not Allowed</h1></body></html>";
+            _response->body = "<html><body><h1>405 Method Not Allowed</h1><img src=\"https://en.meming.world/images/en/a/a3/We_Don%27t_Do_That_Here.jpg\" alt=\"method_not_allowed\"/></body></html>";
             _response->status_message = "Method Not Allowed";
         }
         else if (_response->status == 413)
         {
-            _response->body = "<html><body><h1>413 Request Entity Too Large</h1></body></html>";
+            _response->body = "<html><body><h1>413 Request Entity Too Large</h1><img src=\"https://preview.redd.it/request-entity-too-large-all-of-a-sudden-pics-i-could-send-v0-dqgu5n5guhh91.jpg?auto=webp&s=a83ff042398f7dc5cbb36cf21ae8b1fc97bc7b68\" alt=\"request_entity_too_large\"/></body></html>";
             _response->status_message = "Request Entity Too Large";
         }
         else if (_response->status == 414)
         {
-            _response->body = "<html><body><h1>414 Request-URI Too Long</h1></body></html>";
+            _response->body = "<html><body><h1>414 Request-URI Too Long</h1><img src=\"https://www.catalystdigital.com/wp-content/uploads/url-too-long.jpg\" alt=\"request_uri_too_long\"/></body></html>";
             _response->status_message = "Request-URI Too Long";
         }
         else if (_response->status == 501)
         {
-            _response->body = "<html><body><h1>501 Not Implemented</h1></body></html>";
+            _response->body = "<html><body><h1>501 Not Implemented</h1><img src=\"https://3.bp.blogspot.com/-l_OPWrz4AZo/VtLroz9u1cI/AAAAAAAANPU/mGoZb0ZKwdk/s1600/zytel.jpg\" slt=\"not_implemented\"/></body></html>";
             _response->status_message = "Not Implemented";
         }
     }
@@ -119,6 +120,7 @@ void	_response( Response *_response, Request *_request )
 		if (!_response->body.size())
 			_get_res_body(_request, _response);
 	}
+    std::cerr << "_status: " << _status_found << std::endl;
 
 	std::cerr << "body: " << _response->body << std::endl;
 	
