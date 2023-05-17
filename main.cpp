@@ -1,48 +1,40 @@
-#include "webserv.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
+/*   Updated: 2023/05/16 15:31:27 by mait-jao         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int _servers_count( std::string s )
-{
-    std::string str= "server {";
-    size_t nPos = s.find(str, 0); 
-    int count = 0;
-    while (nPos != std::string::npos)
-    {
-        count++;
-        nPos = s.find(str, nPos + str.size());
-    }
-    return count;
-}
+#include "webserv.hpp"
 
 int main(int ac, char **av)
 {
-    // t_request *_request;
-    // t_response *_response;
-    t_req *_request = new t_req;
-    t_res *_response = new t_res;
+    Request *_request = new Request;
+    Response *_response = new Response;
+
+    std::string  str;
+    Parsing _server;
 
     if (ac == 2)
     {
-        std::fstream file(av[1]);
-        std::string _file, s;
+        _server.file = av[1];
+        std::ifstream file(_server.file);
+        while (std::getline(file, str))
+            split_conf(_server.data, str);
 
-        while (std::getline(file, s))
-            (_file+=s).push_back('\n');
-        
-        int count = _servers_count(_file);
-        t_server _server[count];
-
-        
         // 1- Config File:
-        _config_parser(_server, _file, count);
+        parss_info(_server);
+        std::cout << (_server.servers.begin())->name << std::endl;
+        std::cout << (_server.servers.begin())->listen_port << std::endl;
+        // print_data(_server);
 
         // 2- Socket connection
         _socket(_server, _request, _response);
-
-        // 3- Request:
-        // _request();
-
-        // 4- Response:
-        // _response();
     }
     else
         std::cerr << "invalid number of arguments!" << std::endl;
