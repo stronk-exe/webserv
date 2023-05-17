@@ -39,7 +39,7 @@ void _socket( Parsing &_server, Request *request, Response *response )
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
 	std::cerr << "ha7na hna " << _server.servers[0].listen_port << std::endl;
-    int  default_port = 80;
+    int  default_port = 8080;
     address.sin_port = htons(default_port);
 
     if ((bind(_socket_fd, (struct sockaddr *)&address, sizeof(address))) < 0)

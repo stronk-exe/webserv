@@ -130,6 +130,12 @@ class Request
 		std::map<std::string, std::string>	headers;
 		std::string							body;
 		std::vector<error_page>				error_pages;
+
+		// Uploads
+		std::string	upload_name;
+		std::string	upload_content_type;
+		std::string	upload_file_name;
+		std::string	upload_data;
 };
 
 class Response

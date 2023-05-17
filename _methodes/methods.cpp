@@ -130,16 +130,38 @@ void	_get( Response *_response, Request *_request, Server &_server )
 	}
 }
 
+// std::string subtractSubstring(const std::string& str, int start, int end) {
+//     if (start < 0 || end >= str.length() || start > end)
+//         return str;
+// 	// if (start+1 == end)
+//     //     return "";
+
+//     std::string result;
+//     result.reserve(str.length() - (end - start));
+
+//     // Add the characters before the starting index
+//     result.append(str, start,end );
+// 	std::cerr << "vvvv:" << result << std::endl;
+
+//     // Add the characters after the end index
+//     // result.append(str, end + 1, str.length() - (end + 1));
+
+//     return result;
+// }
+
 void _body_parser( Request *_request )
 {
 	std::cerr << _request->body << std::endl;
-	
+
+
+	std::map<std::string, std::string> m;
+
 	std::vector<std::string> _req;
 	std::string delimiter = "\r\n\r\n";
-    std::string r = s;
+    std::string r = _request->body;
     size_t pos = r.find(delimiter);
     std::string header = r.substr(0, pos);
-    _request->body = r.substr(pos + delimiter.length());
+    _request->upload_data = r.substr(pos + delimiter.length());
 
 	std::vector<std::string> v;
     std::string line;
@@ -154,7 +176,7 @@ void _body_parser( Request *_request )
     v.push_back(header);
 
 	// extract the method, the uri and the http-version
-	_extract_first_line(_request, v[0]);
+	// _extract_first_line(_request, v[0]);
 
 	std::string key, value;
 	for (size_t i=0; i < v.size(); i++)
@@ -163,9 +185,49 @@ void _body_parser( Request *_request )
 		if (pos != std::string::npos) {
 			key = v[i].substr(0, pos);
 			value = v[i].substr(pos + 2);
-			_request->headers[key] = value;
+			m[key] = value;
 		}
 	}
+	// std::map<std::string, std::string>::iterator iter;
+	// for (iter = m.begin(); iter != m.end(); iter++)
+    // {
+    //     std::cout << "{" << (*iter).first << "}---{" << (*iter).second << "}" << std::endl;
+    // }
+
+	pos = m["Content-Disposition"].find(";");
+	if (pos)
+	{
+		std::vector<std::string> v;
+		std::istringstream iss(m["Content-Disposition"]);
+		std::string token;
+
+		while (std::getline(iss, token, ';')) {
+			v.push_back(token);
+		}
+		if (v.size() == 3)
+		{
+			// get upload name
+			// for (size_t i=0; i<v[1].size() && v[1][i] != "\""; i++)
+			// 	;
+			size_t _p = v[1].find("\"");
+
+			_request->upload_name = v[1].substr(_p+1, v[1].size()-_p-2);// subtractSubstring(v[1], _p+1, v[1].size()-1);
+			_p = v[2].find("\"");
+			std::cerr << "howwwww:" << v[2].substr(_p+1, v[2].size()-_p-2)<<"-" << _p << "-"<< v[2].size()-_p-2 << std::endl;
+			// std::cerr << "{" << v[1]<<"}-{" << v[2] << "} haaaa\n";
+			_request->upload_file_name = v[2].substr(_p+1, v[2].size()-_p-2);
+		}
+		// _request->upload = m["Content-Type"].substr(0, pos);
+    	// std::string data = m["Content-Type"].substr(pos + delimiter.length());
+	}
+	std::cerr << "{" << m["Content-Type"] << "}\n";
+	_request->upload_content_type = m["Content-Type"];
+	
+	std::cerr << "upload shit:" << std::endl;
+	std::cerr << "upload_name: " << _request->upload_name << std::endl;
+	std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
+	std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
+	std::cerr << "data: " << _request->upload_data << std::endl;
 }
 
 void _post( Response *_response, Request *_request, Server &_server )
@@ -177,6 +239,12 @@ void _post( Response *_response, Request *_request, Server &_server )
 		// Upload the shit
 		std::cerr << "yes we do support that\nrequest body:\n" << _request->body << std::endl;
 		_body_parser(_request);
+
+		// creating the file
+		std::ofstream _upload_file("uploads/"+_request->upload_file_name);
+		
+		// fill it
+		_upload_file << _request->upload_data;
 	}
 	else
 	{
