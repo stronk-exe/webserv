@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/16 15:27:35 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/17 19:21:11 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,14 @@
 #define WEBSERV_HPP
 
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <fstream>
+#include <cstdlib>
 #include <sstream>
 #include <vector>
 #include <map>
