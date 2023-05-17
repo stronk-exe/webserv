@@ -71,7 +71,7 @@ void info_autoindex(Location &loc, std::string &str)
     if (str == "on")
         loc.autoindex = true;
     else if (str == "off")
-        loc.autoindex = true;
+        loc.autoindex = false;
     else
         error("autoindex error");
 }
