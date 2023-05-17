@@ -130,13 +130,53 @@ void	_get( Response *_response, Request *_request, Server &_server )
 	}
 }
 
+void _body_parser( Request *_request )
+{
+	std::cerr << _request->body << std::endl;
+	
+	std::vector<std::string> _req;
+	std::string delimiter = "\r\n\r\n";
+    std::string r = s;
+    size_t pos = r.find(delimiter);
+    std::string header = r.substr(0, pos);
+    _request->body = r.substr(pos + delimiter.length());
+
+	std::vector<std::string> v;
+    std::string line;
+    delimiter = "\r\n";
+    // pos = 0;
+    while ((pos = header.find(delimiter)) != std::string::npos)
+	{
+        line = header.substr(0, pos);
+        v.push_back(line);
+        header.erase(0, pos + delimiter.length());
+    }
+    v.push_back(header);
+
+	// extract the method, the uri and the http-version
+	_extract_first_line(_request, v[0]);
+
+	std::string key, value;
+	for (size_t i=0; i < v.size(); i++)
+	{
+		pos = v[i].find(":");
+		if (pos != std::string::npos) {
+			key = v[i].substr(0, pos);
+			value = v[i].substr(pos + 2);
+			_request->headers[key] = value;
+		}
+	}
+}
+
 void _post( Response *_response, Request *_request, Server &_server )
 {
 	std::cout << "POST" << std::endl;
-	if (_request->client_body_upload)
+	std::cerr << "zbla: " << _request->headers["Content-Type"] << std::endl;
+	if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
 	{
 		// Upload the shit
-		std::cerr << "request body: " << _request->body << std::endl;
+		std::cerr << "yes we do support that\nrequest body:\n" << _request->body << std::endl;
+		_body_parser(_request);
 	}
 	else
 	{
