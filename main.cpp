@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/16 15:31:27 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 13:22:37 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,10 @@ int main(int ac, char **av)
     {
         _server.file = av[1];
         std::ifstream file(_server.file);
+        if (!file) {
+            std::cerr << "Failed to open the file." << std::endl;
+            return 1;
+        }
         while (std::getline(file, str))
             split_conf(_server.data, str);
 

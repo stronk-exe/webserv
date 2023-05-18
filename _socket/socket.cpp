@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:33 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:24:04 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/05/18 12:30:04 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,4 +132,5 @@ void _socket( Parsing &_server, Request *request, Response *response )
 		
         close(coming_socket);
     }
+
 }

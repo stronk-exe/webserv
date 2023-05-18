@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:05:56 by mait-jao          #+#    #+#             */
-/*   Updated: 2023/05/16 16:31:31 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 13:25:04 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,20 +39,79 @@
 //     *str = const_cast<char *>(tmp.c_str());
 // }
 
+void update_env_for_cgi( Request *_request )
+{
+    if (setenv("REQUEST_METHOD", _request->method.c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+    if (setenv("CONTENT_TYPE", _request->headers["CONTENT_TYPE"].c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+    if (setenv("CONTENT_LENGTH", _request->headers["CONTENT_LENGTH"].c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+    if (setenv("HTTP_USER_AGENT", _request->headers["User-Agent"].c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+    if (setenv("DOCUMENT_ROOT", _request->root.c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+    if (setenv("SCRIPT_NAME", _request->path.c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+    if (setenv("REMOTE_ADDR", "127.0.0.1", 1) != 0) {/////hardcod
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }    
+    if (setenv("REMOTE_HOST", "localhost", 1) != 0) {/////hardcod
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+    if (setenv("SERVER_PORT", "80", 1) != 0) {/////hardcod
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }    
+    if (setenv("SERVER_NAME", "localhost", 1) != 0) {/////hardcod
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+}
+
+void     printHeaders(std::map<std::string, std::string> headers)
+{
+    std::map<std::string, std::string>::iterator i;
+        // std::cerr << i->first << " " << i->second << std::endl;
+        std::cerr << "*********************************************" << std::endl;
+    for ( i = headers.begin(); i != headers.end(); i++)
+    {
+        std::cerr << i->first << " -> " << i->second << std::endl;
+    }
+        std::cerr << "*********************************************" << std::endl;
+}
+
+
 void	_cgi( Request *_request, Response *_response )
 {
-    const std::string& scriptPath = "cgi-bin/php.cgi";//_request->path;
+    printHeaders(_request->headers);
 	std::string result;
+    std::string scriptPath = (*_request->cgi.begin()) + " " + _request->path;//_request->path;
+    std::cerr << "scriptPath : [" << scriptPath << "]" << std::endl;
+    // update_env_for_cgi(_request);
     FILE* pipe = popen(scriptPath.c_str(), "r");
-    if (pipe) {
-        char buffer[256];
-        while (!feof(pipe)) {
-            if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-                result += buffer;
-            }
-        }
-        pclose(pipe);
+    if (!pipe) {
+        std::cerr << strerror(errno) << std::endl;
+        return ;
     }
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), pipe))
+        result += buffer;
+    pclose(pipe);
     // return result;
 	_response->body = result;
 	std::cerr << "execution output: " << _response->body << std::endl;

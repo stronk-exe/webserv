@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:39 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:58:11 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/05/18 13:23:59 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,8 +135,13 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 	// }
 	// std::cerr << "root: " << _location.root_location << " : " << _location.name << std::endl;
 	_request->root = _location.root_location;
-	_request->path = _request->root+_request->uri;
-    // std::cerr << "chihaja hnaya :" << _request->path << "~" << _request->root << "~" << _request->uri << std::endl;
+	
+	/* mait-jao : There is an error here  */
+	_request->path = _request->root;
+	_request->path.erase();
+	_request->path = _request->uri;
+    
+	// std::cerr << "chihaja hnaya :" << _request->path << "~" << _request->root << "~" << _request->uri << std::endl;
 	// std::cerr << "Ayoo: " << _server.redirection.path.size() << std::endl;
 	_server.redirection.path.size() ? _request->redirection.push_back(_server.redirection.path) :  _request->redirection.push_back("");
 
