@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:33 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/18 15:45:08 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 17:54:27 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,10 @@ void _socket( Parsing &_server, Request *request, Response *response )
 	std::cerr << "ha7na hna " << _server.servers[0].listen_port << std::endl;
     int  default_port = 80;
     address.sin_port = htons(default_port);
-
+    /////
+    const int enable = 1;
+    setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+    /////
     if ((bind(_socket_fd, (struct sockaddr *)&address, sizeof(address))) < 0)
     {
         std::cerr << "binding failed!" << std::endl;

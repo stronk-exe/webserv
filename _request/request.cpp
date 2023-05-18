@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:39 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/18 15:55:24 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 16:49:17 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,11 +135,7 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 	// }
 	// std::cerr << "root: " << _location.root_location << " : " << _location.name << std::endl;
 	_request->root = _location.root_location;
-	
-	/* mait-jao NB: There is an error here  */
-	_request->path = _request->root;
-	_request->path.erase();
-	_request->path = _request->uri;
+	_request->path = _request->root+_request->uri;
     
 	// std::cerr << "chihaja hnaya :" << _request->path << "~" << _request->root << "~" << _request->uri << std::endl;
 	// std::cerr << "Ayoo: " << _server.redirection.path.size() << std::endl;

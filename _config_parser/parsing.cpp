@@ -61,11 +61,13 @@ void info_err_status(std::vector<error_page> &errors, std::vector<std::string>::
         error("location of the error page, not set");
 }
 
-void info_(std::vector<std::string>  &vec, std::vector<std::string>::iterator &it)
+std::vector<std::string> info_(std::vector<std::string>::iterator &it)
 {
+    std::vector<std::string>  vec;
     for (; * (it + 1) != ";" ; it++)
         vec.push_back(*it);
     vec.push_back(*it);
+    return vec;
 }
 
 void info_autoindex(Location &loc, std::string &str) 
@@ -76,6 +78,17 @@ void info_autoindex(Location &loc, std::string &str)
         loc.autoindex = false;
     else
         error("autoindex error");
+}
+
+CGI info_cgi( std::vector<std::string>::iterator &it )
+{
+    CGI _struct;
+    std::vector<std::string> vec = info_(it);
+    if (vec.size() != 2)
+        error("cgi_pass path error");
+    _struct.extension = *vec.begin();
+    _struct.path = *(vec.begin() + 1);
+    return _struct;    
 }
 
 void info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it)
@@ -90,11 +103,11 @@ void info_location(std::vector<Location> &locations, std::vector<std::string>::i
         if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
             loc.root_location = *(++it);
         else if (*it == "index")
-            info_(loc.index, ++it); 
+            loc.index = info_(++it); 
         else if (*it == "allow_methods")
-            info_(loc.allows_methods, ++it); 
+            loc.allows_methods = info_(++it);
         else if (*it == "cgi_pass")
-            info_(loc.cgi_pass, ++it); 
+            loc.cgi_pass.push_back(info_cgi(++it)); 
         else if (*it == "autoindex" && *(it + 1) != ";" && *(it + 2) == ";") 
             info_autoindex(loc, *(++it));
         else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
@@ -154,7 +167,7 @@ void parss_info(Parsing &parss)
                 else if (*it == "error_page")
                     info_err_status(serv.errors, ++it);
                 else if (*it == "index")
-                    info_(serv.index, ++it);   
+                    info_(++it);   
                 else if (*it == "location")
                     info_location(serv.locations, ++it);
                 else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
@@ -201,6 +214,16 @@ void print_err(std::vector<error_page> &vec)
     }
 }
 
+void print_cgi(std::vector<CGI> &vec)
+{
+    std::vector<CGI>::iterator it;
+    int i = 0;
+    for ( it = vec.begin(); it != vec.end(); it++, i++) {
+        std::cout <<"\n" <<  i << ":  " << "CGI.path" << (*it).path << std::endl;
+        std::cout <<"\n" <<  i << ":  " << "CGI.extension" << (*it).extension << std::endl;
+    }
+}
+
 void print_loc(std::vector<Location> &vec)
 {
     std::vector<Location>::iterator it;
@@ -213,7 +236,7 @@ void print_loc(std::vector<Location> &vec)
         std::cout << i << ":  "<< "location.root_location " <<  (*it).root_location << std::endl;
         print_str((*it).index, "index ");
         print_str((*it).allows_methods, "allows_methods ");
-        print_str((*it).cgi_pass, "cgi_pass ");
+        print_cgi((*it).cgi_pass);
 
         std::cout << "\n-------------------------------" << std::endl;
     }

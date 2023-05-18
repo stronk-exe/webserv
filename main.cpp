@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/18 12:59:05 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:42:20 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,10 @@ int main(int ac, char **av)
         parss_info(_server);
         std::cout << (_server.servers.begin())->name << std::endl;
         std::cout << (_server.servers.begin())->listen_port << std::endl;
-        // print_data(_server);
+        print_data(_server);
 
         // 2- Socket connection
-        _socket(_server, _request, _response);
+        // _socket(_server, _request, _response);
     }
     else
         std::cerr << "invalid number of arguments!" << std::endl;

@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:05:56 by mait-jao          #+#    #+#             */
-/*   Updated: 2023/05/18 15:12:26 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:02:12 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,16 @@
 //     *str = const_cast<char *>(tmp.c_str());
 // }
 
-void update_env_for_cgi( Request *_request , std::string path_info)
+std::string int_to_str(int num)
 {
-    if (setenv("PATH_INFO", path_info.c_str(), 1) != 0) {
+    std::ostringstream str1;
+    str1 << num;
+    return str1.str();
+}
+
+void update_env_for_cgi( Request *_request , std::string _path_info, Server _server )
+{
+    if (setenv("PATH_INFO", _path_info.c_str(), 1) != 0) {
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
     }
@@ -77,11 +84,11 @@ void update_env_for_cgi( Request *_request , std::string path_info)
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
     }
-    if (setenv("SERVER_PORT", "80", 1) != 0) {/////hardcod
+    if (setenv("SERVER_PORT", int_to_str(_server.listen_port).c_str(), 1) != 0) {/////hardcod
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
     }    
-    if (setenv("SERVER_NAME", "localhost", 1) != 0) {/////hardcod
+    if (setenv("SERVER_NAME", _server.name.c_str(), 1) != 0) {/////hardcod
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
     }
@@ -99,7 +106,7 @@ void     printHeaders(std::map<std::string, std::string> headers)
         std::cerr << "*********************************************" << std::endl;
 }
 
-bool check_path_extension(std::string extension, std::string path)
+bool check_extension(std::string extension, std::string path)
 {
     std::string::reverse_iterator it_ext, it_path;
     
@@ -112,15 +119,34 @@ bool check_path_extension(std::string extension, std::string path)
     return true;
 }
 
-void	_cgi( Request *_request, Response *_response )
+bool check_path_extension(std::vector<CGI>	cgi_pass, std::string path, std::string &scriptPath )
+{
+    std::vector<CGI>::iterator it;
+    
+    for (it = cgi_pass.begin(); it != cgi_pass.end() ; it++)
+    {
+        if (check_extension((*it).extension, path))
+        {
+            scriptPath = (*it).path + " " + path;
+            return true;
+        }
+    }
+    return false;
+}
+
+void	_cgi( Request *_request, Response *_response , Server _server )
 {
     printHeaders(_request->headers);
-	std::string result;
-    if (check_path_extension((*_request->cgi.begin()), _request->path))//// mait-jao NB: return file
+	std::string result, scriptPath;
+    // std::cerr << "(*_request->cgi.begin()) =" << (*_request->cgi.begin())  << "| _request->path="<< _request->path <<  std::endl;
+    if (!check_path_extension(_request->cgi , _request->path, scriptPath)) {
+        std::cerr << "extansion" << std::endl;
+        _response->body = "malk nta";
         return ;
-    std::string scriptPath = (*(_request->cgi.begin() + 1)) + " " + _request->path;//_request->path;
+    }
+    //  = (*(_request->cgi.begin() + 1)) +//_request->path;
     std::cerr << "scriptPath : [" << scriptPath << "]" << std::endl;
-    update_env_for_cgi(_request, scriptPath);
+    update_env_for_cgi(_request, scriptPath, _server);
     FILE* pipe = popen(scriptPath.c_str(), "r");
     if (!pipe) {
         std::cerr << strerror(errno) << std::endl;

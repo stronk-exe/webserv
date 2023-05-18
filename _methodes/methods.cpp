@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:32 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/18 12:32:48 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 16:51:40 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void	_get( Response *_response, Request *_request, Server &_server )
 		{
 			if (_request->index.size()) {
 				std::cerr << "cgi1" << std::endl;
-				_cgi(_request, _response);
+				_cgi(_request, _response, _server);
 			}
 			else
 			{
@@ -122,7 +122,7 @@ void	_get( Response *_response, Request *_request, Server &_server )
 		if (_request->cgi.size())
 		{
 			std::cerr << "cgi2" << std::endl;
-			_cgi(_request, _response);
+			_cgi(_request, _response, _server);
 		}
 		else
 		{
@@ -268,7 +268,7 @@ void _post( Response *_response, Request *_request, Server &_server )
 				{
 					if (_request->cgi.size()){
 						std::cerr << "cgi3" << std::endl;
-						_cgi(_request, _response);
+						_cgi(_request, _response, _server);
 					}
 					else
 						_response->status = 403;
@@ -281,7 +281,7 @@ void _post( Response *_response, Request *_request, Server &_server )
 		{
 			if (_request->cgi.size()) {
 				std::cerr << "cgi4" << std::endl;
-				_cgi(_request, _response);
+				_cgi(_request, _response, _server);
 			}
 			else
 			{

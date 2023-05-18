@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/18 12:24:28 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:06:49 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,19 @@ struct error_page
 	}
 };
 
+struct CGI
+{
+    std::string		extension;
+    std::string     path;
+
+	CGI &operator= (const CGI & _cgi)
+	{
+		this->path = _cgi.path;
+		this->extension = _cgi.extension;
+		return *this;
+	}
+};
+
 struct Redirection
 {
     size_t            return_status;
@@ -67,7 +80,7 @@ struct Location
     std::vector<std::string> 	index;
     std::vector<std::string>	allows_methods;
 	Redirection					redirection;
-    std::vector<std::string>	cgi_pass;
+    std::vector<CGI>			cgi_pass;
 
 	Location& operator=(const Location& loc)
 	{
@@ -118,19 +131,19 @@ class Request
 		Request() {};
 		~Request() {};
 
-		std::string							uri;
-		std::string							method;
-		std::string 						type;
-		int									autoindex;
-		std::string							path;
-		std::vector<std::string>			index;
-		std::string							root;
-		std::vector<std::string>			redirection;
-		std::vector<std::string>			cgi;
-		int									client_body_upload;
-		std::map<std::string, std::string>	headers;
-		std::string							body;
-		std::vector<error_page>				error_pages;
+		std::string									uri;
+		std::string									method;
+		std::string 								type;
+		int											autoindex;
+		std::string									path;
+		std::vector<std::string>					index;
+		std::string									root;
+		std::vector<std::string>					redirection;
+		std::vector<CGI>							cgi;
+		int											client_body_upload;
+		std::map<std::string, std::string>			headers;
+		std::string									body;
+		std::vector<error_page>						error_pages;
 
 		// Uploads
 		std::string	upload_name;
@@ -164,7 +177,7 @@ void	_post( Response *_response, Request *_request, Server &_server );
 void	_delete();
 
 // CGI
-void	_cgi( Request *_request, Response *_response );
+void	_cgi( Request *_request, Response *_response , Server _server );
 
 // Request
 void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, char *s );
@@ -181,10 +194,10 @@ void	error(std::string err);
 int		str_to_num(std::string str);
 void	parss_info(Parsing &parss);
 void	info_autoindex(Location &loc, std::string &str);
-void	info_(std::vector<std::string>  &vec, std::vector<std::string>::iterator &it);
 void	split_conf(std::vector<std::string> &data, std::string str);
 void	info_err_status(std::vector<error_page> &errors, std::vector<std::string>::iterator &it);
 void	info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void	print_data(Parsing &parss);
+std::vector<std::string>	info_(std::vector<std::string>::iterator &it);
 
 #endif
