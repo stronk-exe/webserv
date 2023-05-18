@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/17 19:21:11 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 12:24:28 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,12 @@ class Request
 		std::map<std::string, std::string>	headers;
 		std::string							body;
 		std::vector<error_page>				error_pages;
+
+		// Uploads
+		std::string	upload_name;
+		std::string	upload_content_type;
+		std::string	upload_file_name;
+		std::string	upload_data;
 };
 
 class Response
