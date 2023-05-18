@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:05:56 by mait-jao          #+#    #+#             */
-/*   Updated: 2023/05/18 11:29:42 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/18 15:12:26 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,12 @@
 //     *str = const_cast<char *>(tmp.c_str());
 // }
 
-void update_env_for_cgi( Request *_request )
+void update_env_for_cgi( Request *_request , std::string path_info)
 {
+    if (setenv("PATH_INFO", path_info.c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
     if (setenv("REQUEST_METHOD", _request->method.c_str(), 1) != 0) {
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
@@ -95,14 +99,28 @@ void     printHeaders(std::map<std::string, std::string> headers)
         std::cerr << "*********************************************" << std::endl;
 }
 
+bool check_path_extension(std::string extension, std::string path)
+{
+    std::string::reverse_iterator it_ext, it_path;
+    
+    extension.insert(0, ".");
+    for (it_ext = extension.rbegin(), it_path = path.rbegin(); it_ext != extension.rend() ; it_ext++, it_path++)
+    {
+        if (*it_ext != *it_path)
+            return false;
+    }
+    return true;
+}
 
 void	_cgi( Request *_request, Response *_response )
 {
     printHeaders(_request->headers);
 	std::string result;
-    std::string scriptPath = (*_request->cgi.begin()) + " " + _request->path;//_request->path;
+    if (check_path_extension((*_request->cgi.begin()), _request->path))//// mait-jao NB: return file
+        return ;
+    std::string scriptPath = (*(_request->cgi.begin() + 1)) + " " + _request->path;//_request->path;
     std::cerr << "scriptPath : [" << scriptPath << "]" << std::endl;
-    // update_env_for_cgi(_request);
+    update_env_for_cgi(_request, scriptPath);
     FILE* pipe = popen(scriptPath.c_str(), "r");
     if (!pipe) {
         std::cerr << strerror(errno) << std::endl;

@@ -6,7 +6,7 @@
 #    By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/11 11:16:24 by ael-asri          #+#    #+#              #
-#    Updated: 2023/05/16 15:28:50 by mait-jao         ###   ########.fr        #
+#    Updated: 2023/05/18 15:48:53 by mait-jao         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,7 @@ FLAGS = -Wall -Wextra -Werror -std=c++98
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	c++ $(FLAGS) $^ -o $@
+	c++  $(FLAGS) $^ -o $@
 
 clean:
 	rm -f $(OBJS)
