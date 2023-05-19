@@ -219,8 +219,8 @@ void print_cgi(std::vector<CGI> &vec)
     std::vector<CGI>::iterator it;
     int i = 0;
     for ( it = vec.begin(); it != vec.end(); it++, i++) {
-        std::cout <<"\n" <<  i << ":  " << "CGI.path" << (*it).path << std::endl;
-        std::cout <<"\n" <<  i << ":  " << "CGI.extension" << (*it).extension << std::endl;
+        std::cout <<"\n" <<  i << ":  " << "CGI.path=" << (*it).path << std::endl;
+        std::cout <<"\n" <<  i << ":  " << "CGI.extension=" << (*it).extension << std::endl;
     }
 }
 

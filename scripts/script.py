@@ -6,12 +6,12 @@ import cgi
 form = cgi.FieldStorage()
 
 # Set content type
-print("Content-type: text/html\r\n\r\n")
+# print("Content-type: text/html\r\n\r\n")
 
 # Start HTML response
 print("<html>")
 print("<head>")
-print("<title>CGI Scriptfgjdfhjghrthguhrtuohguhduhoutrhdghorthuhrhtghorthohgoth oghohohothohrtohgohrthohrtohohtoghtbh oeb ohoh gohtou ieh Example</title>")
+print("<title>CGI Script Example</title>")
 print("</head>")
 print("<body>")
 
