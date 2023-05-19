@@ -97,7 +97,31 @@ void	_get( Response *_response, Request *_request, Server &_server )
 		else
 		{
 			if (_request->index.size())
-				_cgi(_request, _response);
+			{
+				if (_request->cgi.size())
+				{
+					std::cerr << "wzzupppppppppppp" << std::endl;
+					_cgi(_request, _response, _server);
+					// if (!_response->body.size())
+						// run its source code
+				}
+				else
+				{
+					std::cerr << "yotip was here" << std::endl;
+					_response->status = 200;
+					get_indexed_file_data(_request, _response, _request->path);
+				}
+				// if (_request->cgi.size())
+				// 	_cgi(_request, _response, _server);
+				// else
+				// {
+				// 	_response->body = ;
+				// 	_response->status = 200;
+				// }
+				// // if (!_response->body.size())
+				// 	// run its source code
+					
+			}
 			else
 			{
 				// autoindex
@@ -119,8 +143,12 @@ void	_get( Response *_response, Request *_request, Server &_server )
 	{
 		if (_request->cgi.size())
 		{
-			// std::cerr << "wzzupp" << std::endl;
-			_cgi(_request, _response);
+			for (size_t i=0; i<_request->index.size(); i++)
+				std::cerr << "weew: " << _request->index[i] << std::endl;
+			std::cerr << "wzzupp" << _request->type << " " << _request->index.size() << std::endl;
+			_cgi(_request, _response, _server);
+			// if (!_response->body.size())
+				// run its source code
 		}
 		else
 		{
@@ -245,6 +273,7 @@ void _post( Response *_response, Request *_request, Server &_server )
 		
 		// fill it
 		_upload_file << _request->upload_data;
+		_response->content_type = _request->upload_content_type;
 	}
 	else
 	{
@@ -265,7 +294,9 @@ void _post( Response *_response, Request *_request, Server &_server )
 				if (_request->index.size())
 				{
 					if (_request->cgi.size())
-						_cgi(_request, _response);
+						_cgi(_request, _response, _server);
+						// if (!_response->body.size())
+							// run its source code
 					else
 						_response->status = 403;
 				}
@@ -276,7 +307,9 @@ void _post( Response *_response, Request *_request, Server &_server )
 		else if (_request->type == "file")
 		{
 			if (_request->cgi.size())
-				_cgi(_request, _response);
+				_cgi(_request, _response, _server);
+				// if (!_response->body.size())
+					// run its source code
 			else
 			{
 				_response->status = 200;
