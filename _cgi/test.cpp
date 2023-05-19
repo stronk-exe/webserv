@@ -26,3 +26,30 @@ int main(int ac, char *av[]) {
 
     return 0;
 }
+
+#include <cstdio>
+#include <cstring>
+
+int main() {
+    // Delete a file
+    const char* filename = "path/to/file.txt";
+    if (std::remove(filename) != 0) {
+        std::perror("Error deleting the file");
+        return 1;
+    }
+    else {
+        std::puts("File deleted successfully");
+    }
+
+    // Delete a directory
+    const char* dirname = "path/to/directory";
+    if (std::rmdir(dirname) != 0) {
+        std::perror("Error deleting the directory");
+        return 1;
+    }
+    else {
+        std::puts("Directory deleted successfully");
+    }
+
+    return 0;
+}

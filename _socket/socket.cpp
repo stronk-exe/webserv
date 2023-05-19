@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:33 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/18 17:54:27 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/19 11:54:49 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ void _socket( Parsing &_server, Request *request, Response *response )
                     else if (request->method == "POST")
                         _post(response, request, _s);
                     else if (request->method == "DELETE")
-                        _delete();
+                        _delete(response, request, _s);
                     else
                         response->status = 405;
                     // {

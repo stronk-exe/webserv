@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:32 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/18 16:51:40 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/19 11:49:47 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,22 +97,24 @@ void	_get( Response *_response, Request *_request, Server &_server )
 		else
 		{
 			if (_request->index.size()) {
-				std::cerr << "cgi1" << std::endl;
-				_cgi(_request, _response, _server);
+				if (_request->cgi.size()) {
+					std::cerr << "cgi1" << std::endl;
+					_cgi(_request, _response, _server);
+				}
+				else {
+					
+					_response->status = 200;
+					_get_res_body(_request, _response);
+				}
 			}
 			else
 			{
 				// autoindex
 				if (!_request->autoindex)
 					_response->status = 403;
-				else
-				{
-					// std::cerr << "Yoo:" << _request->index.size() << " - " << _request->autoindex << std::endl;
+				else {
 					_response->status = 200;
-					// _request->uri += "index.html";
-
-					// if is html file ()
-					_response->body = _get_listed_dir(_request);//"<html><body><h1>Directory file listing: </h1></body></html>";
+					_response->body = _get_listed_dir(_request);
 				}
 			}
 		}
@@ -292,7 +294,57 @@ void _post( Response *_response, Request *_request, Server &_server )
 	}
 }
 
-void _delete()
+void _delete(  Response *_response, Request *_request ,Server &_server )
 {
 	std::cout << "DELETE" << std::endl;
+	// (void)_server;
+	std::cerr << "request path: " << _request->path << std::endl;
+	std::ifstream _file;
+	_file.open(_request->path);
+	_file ? _get_res_body(_request, _response) : _response->status = 404;
+
+    _file_or_dir(_request, _response);
+	if (_request->type == "directory")
+	{
+		if (_request->path[_request->path.size()-1] != '/')
+			_response->status = 409;//Conflict
+		else
+		{
+			if (_request->cgi.size()) {
+				if (_request->index.size()) {
+					std::cerr << "cgi1" << std::endl;
+					_cgi(_request, _response, _server);
+				}
+				else
+					_response->status = 403;// Forbidden
+			}
+			else
+			{
+				if (rmdir(_request->path.c_str()) != 0) {
+					perror("Error deleting the directory");
+					if (!access(_request->path.c_str(), W_OK))
+						_response->status = 500;// Internal Server Error
+					else
+						_response->status = 403;// Forbidden
+				}
+				else
+					_response->status = 204;// No Content
+			}
+		}
+	}
+	else if (_request->type == "file")
+	{
+		if (_request->cgi.size())
+		{
+			std::cerr << "cgi2" << std::endl;
+			_cgi(_request, _response, _server);
+		}
+		else
+		{
+			_response->status = 204;// No Content
+			if (std::remove(_request->path.c_str()) != 0) {
+				perror("Error deleting the file");
+			}
+		}
+	}
 }

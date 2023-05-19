@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/18 19:06:49 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/19 11:50:22 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,12 @@
 
 #include <iostream>
 #include <cstdio>
+#include <unistd.h>
+#include <cstring>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <netinet/in.h>
-#include <string.h>
 #include <fstream>
 #include <cstdlib>
 #include <sstream>
@@ -174,7 +175,7 @@ void	_socket( Parsing &_server, Request *_request, Response *_response );
 // Methodes
 void	_get( Response *_response, Request *_request, Server &_server );
 void	_post( Response *_response, Request *_request, Server &_server );
-void	_delete();
+void	_delete( Response *_response, Request *_request ,Server &_server );
 
 // CGI
 void	_cgi( Request *_request, Response *_response , Server _server );
