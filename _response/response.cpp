@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:45 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:39:50 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/05/19 17:47:18 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,11 @@ void	_response( Response *_response, Request *_request )
 	std::cerr << "body: " << _response->body << std::endl;
 	
 	// Response heders
-	_response->content_length = (_response->body).size();
-	_response->content_type = "text/html";
+    // std::cerr << " ############## "<< std::endl;
+	_response->content_length = _response->body.size();
+	if (_response->content_type.empty()) {
+    std::cerr << " _response->content_type.empty() "<< std::endl;
+
+        _response->content_type = "text/html\n";
+    }
 }

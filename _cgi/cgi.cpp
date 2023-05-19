@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:05:56 by mait-jao          #+#    #+#             */
-/*   Updated: 2023/05/19 10:04:01 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/19 17:58:22 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,18 +138,28 @@ bool check_path_extension(std::vector<CGI>	cgi_pass, std::string path, std::stri
     return false;
 }
 
+std::string get_content_type(char *buffer)
+{
+    std::string str;
+    
+    char* token = std::strtok(buffer, " ");
+    token = std::strtok(NULL, " ");
+    
+    return (str = token);
+}
+
 void	_cgi( Request *_request, Response *_response , Server _server )
 {
-    printHeaders(_request->headers);
+    // printHeaders(_request->headers);
 	std::string result, scriptPath;
     // std::cerr << "(*_request->cgi.begin()) =" << (*_request->cgi.begin())  << "| _request->path="<< _request->path <<  std::endl;
     if (!check_path_extension(_request->cgi , _request->path, scriptPath)) {
         std::cerr << "extansion" << std::endl;
-        _response->body = "malk nta";
+        _response->body = "";
         return ;
     }
     //  = (*(_request->cgi.begin() + 1)) +//_request->path;
-    std::cerr << "scriptPath : [" << scriptPath << "]" << std::endl;
+    // std::cerr << "scriptPath : [" << scriptPath << "]" << std::endl;
     update_env_for_cgi(_request, scriptPath, _server);
     FILE* pipe = popen(scriptPath.c_str(), "r");
     if (!pipe) {
@@ -157,12 +167,17 @@ void	_cgi( Request *_request, Response *_response , Server _server )
         return ;
     }
     char buffer[256];
-    while (fgets(buffer, sizeof(buffer), pipe))
-        result += buffer;
+    while (fgets(buffer, sizeof(buffer), pipe)) {
+        // std::cerr << "------------" << buffer <<"--------------" << strncmp(buffer, "Content-type", 13) << std::endl;
+        if (!strncmp(buffer, "Content-type", 12))
+            _response->content_type = get_content_type(buffer);
+        else
+            result += buffer;
+    }
     pclose(pipe);
-    // return result;
-    // result.find("Content-type:");
 	_response->body = result;
+    
+	std::cerr << "Content-type: |" << _response->content_type << "|" << std::endl;
 	std::cerr << "execution output: " << _response->body << std::endl;
     _response->status = 200;
 }

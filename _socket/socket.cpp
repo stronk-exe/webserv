@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:33 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/19 11:54:49 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/19 17:14:10 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,11 @@
 
 const char *generate_response_str(Response *_response)
 {
-	std::string s = "HTTP/1.1 "+ std::to_string(_response->status)+" "+_response->status_message+\
+	std::string s = "HTTP/1.1 "+ std::to_string(_response->status)+" "+_response->status_message+ \
 					"\nContent-Type: "+_response->content_type+\
-					"\nContent-Length: "+std::to_string(_response->content_length)+\
+					"Content-Length: "+std::to_string(_response->content_length)+\
 					"\n\n"+_response->body;
+    std::cerr << "******body******\n" << s  << std::endl;
 	return s.c_str();
 }
 
