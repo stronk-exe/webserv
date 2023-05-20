@@ -150,6 +150,12 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 					// Response
         			_response(response, request);
 
+					std::cout << "wssa3 ya kho response jat:" << std::endl;
+					std::cout << "response content_length " << response->content_length << std::endl;
+					std::cout << "response content_type " << response->content_type << std::endl;
+					std::cout << "response status " << response->status << std::endl;
+					std::cout << "response content_type " << response->content_type << std::endl;
+					
                     // std::cerr << "uri:" << request->uri <<  "| path: "<< request->path<< " | root: " << request->root << std::endl;
 
 					const char *s = generate_response_str(response);
@@ -166,11 +172,6 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 
 
         
-        // // std::cout << "wssa3 ya kho response jat:" << std::endl;
-        // // std::cout << "response content_length " << response->content_length << std::endl;
-        // // std::cout << "response content_type " << response->content_type << std::endl;
-        // // std::cout << "response status " << response->status << std::endl;
-        // // std::cout << "response content_type " << response->content_type << std::endl;
         
 		
         

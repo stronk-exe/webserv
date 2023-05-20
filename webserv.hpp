@@ -136,6 +136,7 @@ class Request
 		std::string	upload_content_type;
 		std::string	upload_file_name;
 		std::string	upload_data;
+		std::string	boundary;
 };
 
 class Response

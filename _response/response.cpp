@@ -161,7 +161,8 @@ void	_response( Response *_response, Request *_request )
 	std::cerr << "body: " << _response->body << std::endl;
 	
 	// Response heders
-	_response->content_length = (_response->body).size();
+	if (!_response->content_length)
+        _response->content_length = (_response->body).size();
 	if (!_response->content_type.size())
         _response->content_type = "text/html";
 }
