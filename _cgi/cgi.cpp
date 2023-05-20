@@ -39,7 +39,7 @@
 //     *str = const_cast<char *>(tmp.c_str());
 // }
 
-void	_cgi( Request *_request, Response *_response )
+void	_cgi( Request *_request, Response *_response, Server &_server )
 {
     const std::string& scriptPath = "cgi-bin/php.cgi";//_request->path;
 	std::string result;

@@ -97,7 +97,31 @@ void	_get( Response *_response, Request *_request, Server &_server )
 		else
 		{
 			if (_request->index.size())
-				_cgi(_request, _response);
+			{
+				if (_request->cgi.size())
+				{
+					// std::cerr << "wzzupppppppppppp" << std::endl;
+					_cgi(_request, _response, _server);
+					// if (!_response->body.size())
+						// run its source code
+				}
+				else
+				{
+					// std::cerr << "yotip was here" << std::endl;
+					_response->status = 200;
+					get_indexed_file_data(_request, _response, _request->path);
+				}
+				// if (_request->cgi.size())
+				// 	_cgi(_request, _response, _server);
+				// else
+				// {
+				// 	_response->body = ;
+				// 	_response->status = 200;
+				// }
+				// // if (!_response->body.size())
+				// 	// run its source code
+					
+			}
 			else
 			{
 				// autoindex
@@ -119,8 +143,12 @@ void	_get( Response *_response, Request *_request, Server &_server )
 	{
 		if (_request->cgi.size())
 		{
-			// std::cerr << "wzzupp" << std::endl;
-			_cgi(_request, _response);
+			// for (size_t i=0; i<_request->index.size(); i++)
+			// 	std::cerr << "weew: " << _request->index[i] << std::endl;
+			// std::cerr << "wzzupp" << _request->type << " " << _request->index.size() << std::endl;
+			_cgi(_request, _response, _server);
+			// if (!_response->body.size())
+				// run its source code
 		}
 		else
 		{
@@ -151,7 +179,7 @@ void	_get( Response *_response, Request *_request, Server &_server )
 
 void _body_parser( Request *_request )
 {
-	std::cerr << _request->body << std::endl;
+	// std::cerr << "elBODY-"<< _request->body << std::endl;
 
 
 	std::map<std::string, std::string> m;
@@ -161,7 +189,31 @@ void _body_parser( Request *_request )
     std::string r = _request->body;
     size_t pos = r.find(delimiter);
     std::string header = r.substr(0, pos);
-    _request->upload_data = r.substr(pos + delimiter.length());
+    _request->upload_data = r.substr(pos + delimiter.length(), r.length()-150);
+
+	size_t boundary_pos = _request->headers["Content-Type"].find("boundary=")+9;
+	_request->boundary = _request->headers["Content-Type"].substr(boundary_pos);
+	std::cerr << "boundary value:" << _request->boundary << std::endl;
+	std::cerr << "!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+	std::cerr << "upload_data:" << _request->upload_data << std::endl;
+	std::cerr << "~~~~~~~~~~~~~~~~~~~~~\n" << _request->upload_data << "\n~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+	
+	size_t psps = _request->upload_data.find(_request->boundary);
+	std::cerr << "psps: " << psps << std::endl;
+	std::string _real_data = "";
+	std::cout << "##########################" << std::endl;
+	if (psps != std::string::npos)
+	{
+		for (size_t i=0; i < _request->upload_data.size() && i < psps; i++)
+		{
+			_real_data += _request->upload_data[i];
+			std::cout << _request->upload_data[i];
+		}
+	}
+	std::cout << "##########################" << std::endl;
+	// std::string fsfs = _request->upload_data.substr(psps + delimiter.length());
+	std::cerr << "real_data\n" << _real_data << std::endl;
+	_request->upload_data = _real_data;
 
 	std::vector<std::string> v;
     std::string line;
@@ -213,7 +265,7 @@ void _body_parser( Request *_request )
 
 			_request->upload_name = v[1].substr(_p+1, v[1].size()-_p-2);// subtractSubstring(v[1], _p+1, v[1].size()-1);
 			_p = v[2].find("\"");
-			std::cerr << "howwwww:" << v[2].substr(_p+1, v[2].size()-_p-2)<<"-" << _p << "-"<< v[2].size()-_p-2 << std::endl;
+			// std::cerr << "howwwww:" << v[2].substr(_p+1, v[2].size()-_p-2)<<"-" << _p << "-"<< v[2].size()-_p-2 << std::endl;
 			// std::cerr << "{" << v[1]<<"}-{" << v[2] << "} haaaa\n";
 			_request->upload_file_name = v[2].substr(_p+1, v[2].size()-_p-2);
 		}
@@ -228,23 +280,35 @@ void _body_parser( Request *_request )
 	std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
 	std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
 	std::cerr << "data: " << _request->upload_data << std::endl;
+	
+	
 }
 
 void _post( Response *_response, Request *_request, Server &_server )
 {
 	std::cout << "POST" << std::endl;
+
+	
+
 	std::cerr << "zbla: " << _request->headers["Content-Type"] << std::endl;
 	if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
 	{
 		// Upload the shit
 		std::cerr << "yes we do support that\nrequest body:\n" << _request->body << std::endl;
 		_body_parser(_request);
+		
+		_response->content_length = _request->upload_data.size();
+		_response->content_type = _request->upload_content_type;
 
+		std::cerr << "len: {" << _response->content_length << "} type: {"<< _response->content_type << "}" << std::endl;
+		
 		// creating the file
 		std::ofstream _upload_file("uploads/"+_request->upload_file_name);
 		
 		// fill it
 		_upload_file << _request->upload_data;
+		// _response->content_type = _request->upload_content_type;
+		_response->status = 200;
 	}
 	else
 	{
@@ -265,7 +329,9 @@ void _post( Response *_response, Request *_request, Server &_server )
 				if (_request->index.size())
 				{
 					if (_request->cgi.size())
-						_cgi(_request, _response);
+						_cgi(_request, _response, _server);
+						// if (!_response->body.size())
+							// run its source code
 					else
 						_response->status = 403;
 				}
@@ -276,7 +342,9 @@ void _post( Response *_response, Request *_request, Server &_server )
 		else if (_request->type == "file")
 		{
 			if (_request->cgi.size())
-				_cgi(_request, _response);
+				_cgi(_request, _response, _server);
+				// if (!_response->body.size())
+					// run its source code
 			else
 			{
 				_response->status = 200;

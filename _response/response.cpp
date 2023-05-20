@@ -31,9 +31,30 @@ int	_get_res_body( Request *_request, Response *_response )
 	return 1;
 }
 
+void    get_indexed_file_data( Request *_request, Response *_response, std::string path )
+{
+    for (size_t i=0; i<_request->index.size(); i++)
+    {
+        std::ifstream myfile;
+        myfile.open(path+_request->index[i]);
+        std::string myline;
+        _response->body = "";
+        if ( myfile.is_open() )
+        {
+            while ( myfile ) {
+                std::getline (myfile, myline);
+                _response->body += myline;
+            }
+        }
+    }
+    // std::cerr << "l path: " << path << std::endl;
+	// else
+	// 	std::cout << "Couldn't open file\n";
+}
+
 void    get_file_data( Response *_response, std::string path )
 {
-    std::cerr << "l path: " << path << std::endl;
+    // std::cerr << "l path: " << path << std::endl;
     std::ifstream myfile;
 	myfile.open(path);
 	std::string myline;
@@ -56,7 +77,7 @@ void	_response( Response *_response, Request *_request )
     {
         for (size_t i=0; i<_request->error_pages.size(); i++)
         {
-            std::cerr << "this path " << _request->error_pages[i].path << " is for:" << std::endl;
+            // std::cerr << "this path " << _request->error_pages[i].path << " is for:" << std::endl;
             
             for (size_t j=0; j<_request->error_pages[i].error_status[j]; j++)
             {
@@ -73,7 +94,12 @@ void	_response( Response *_response, Request *_request )
     }
     if (!_status_found)
     {
-        if (_response->status == 400)
+        if (_response->status == 204)
+        {
+            _response->body = "<html><body><h1>204 No Content</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
+            _response->status_message = "No Content";
+        }
+        else if (_response->status == 400)
         {
             _response->body = "<html><body><h1>400 Bad Request</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
             _response->status_message = "Bad Request";
@@ -93,6 +119,11 @@ void	_response( Response *_response, Request *_request )
             _response->body = "<html><body><h1>405 Method Not Allowed</h1><img src=\"https://en.meming.world/images/en/a/a3/We_Don%27t_Do_That_Here.jpg\" alt=\"method_not_allowed\"/></body></html>";
             _response->status_message = "Method Not Allowed";
         }
+        else if (_response->status == 409)
+        {
+            _response->body = "<html><body><h1>409 Conflict</h1><img src=\"https://en.meming.world/images/en/a/a3/We_Don%27t_Do_That_Here.jpg\" alt=\"method_not_allowed\"/></body></html>";
+            _response->status_message = "Conflict";
+        }
         else if (_response->status == 413)
         {
             _response->body = "<html><body><h1>413 Request Entity Too Large</h1><img src=\"https://preview.redd.it/request-entity-too-large-all-of-a-sudden-pics-i-could-send-v0-dqgu5n5guhh91.jpg?auto=webp&s=a83ff042398f7dc5cbb36cf21ae8b1fc97bc7b68\" alt=\"request_entity_too_large\"/></body></html>";
@@ -102,6 +133,11 @@ void	_response( Response *_response, Request *_request )
         {
             _response->body = "<html><body><h1>414 Request-URI Too Long</h1><img src=\"https://www.catalystdigital.com/wp-content/uploads/url-too-long.jpg\" alt=\"request_uri_too_long\"/></body></html>";
             _response->status_message = "Request-URI Too Long";
+        }
+        else if (_response->status == 500)
+        {
+            _response->body = "<html><body><h1>500 Internal Server Error</h1><img src=\"https://3.bp.blogspot.com/-l_OPWrz4AZo/VtLroz9u1cI/AAAAAAAANPU/mGoZb0ZKwdk/s1600/zytel.jpg\" slt=\"not_implemented\"/></body></html>";
+            _response->status_message = "Internal Server Error";
         }
         else if (_response->status == 501)
         {
@@ -125,6 +161,8 @@ void	_response( Response *_response, Request *_request )
 	std::cerr << "body: " << _response->body << std::endl;
 	
 	// Response heders
-	_response->content_length = (_response->body).size();
-	_response->content_type = "text/html";
+	if (!_response->content_length)
+        _response->content_length = (_response->body).size();
+	if (!_response->content_type.size())
+        _response->content_type = "text/html";
 }

@@ -39,7 +39,7 @@ int _match_theLocation( Server &_server, Location &_location, Request *_request 
 	}
 	if (!v.size())
 		return 0;
-    std::cerr << "wwww" << std::endl;
+    // std::cerr << "wwww" << std::endl;
 	_location = _server.locations[_max_element(v)];
 	return 1;
 }

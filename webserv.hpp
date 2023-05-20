@@ -136,6 +136,7 @@ class Request
 		std::string	upload_content_type;
 		std::string	upload_file_name;
 		std::string	upload_data;
+		std::string	boundary;
 };
 
 class Response
@@ -163,7 +164,7 @@ void	_post( Response *_response, Request *_request, Server &_server );
 void	_delete();
 
 // CGI
-void	_cgi( Request *_request, Response *_response );
+void	_cgi( Request *_request, Response *_response, Server &_server );
 
 // Request
 void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, char *s );
@@ -171,6 +172,7 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 // Response
 void	_response( Response *_response, Request *_request );
 int		_get_res_body( Request *_request, Response *_response );
+void    get_indexed_file_data( Request *_request, Response *_response, std::string path );
 
 // Utils
 void	print_error(std::string s);
