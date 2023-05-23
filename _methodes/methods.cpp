@@ -34,40 +34,18 @@ std::string	_get_listed_dir( Request *_request )
 		{
 			std::string data_name = entry->d_name;
 			s += "<h3><a href="+data_name+">"+data_name+"</a><br/></h3>";
-			// std::cerr << "s: " << s << std::endl;
-			// v.push_back(entry->d_name);
-			// printf("  %s\n", entry->d_name);
 		}
 		closedir(dir);
 	}
-	// exit(1);
 	return s;
-	// return v;
 }
-// int has_index_files( Server &_server, Request *_request )
-// {
-// 	std::ifstream _file;
-// 	for (size_t i=0; i < _request->index.size(); i++)
-// 	{
-// 		std::cerr << _server->root+_request->uri+_request->index[i] << std::endl;
-// 		_file.open(_server->root+_request->uri+_request->index[i]);
-// 		if (_file)
-// 			return 1;
-// 	}
-// 	// _file.open(_server->root+_request->uri+"index.html");
-// 	// if (_file)
-// 	// 	return 1;
-// 	return 0;
-// }
 
 void	_file_or_dir( Request *_request, Response *_response )
 {
 	struct stat info;
 
-	std::cerr << "stat: " << _request->path << std::endl;
 	if (stat(_request->path.c_str(), &info) != 0)
 		_response->status = 404;
-		// print_error("path is neither a file nor a directory");
 
     if (S_ISDIR(info.st_mode))
 		_request->type = "directory";
@@ -75,13 +53,11 @@ void	_file_or_dir( Request *_request, Response *_response )
 		_request->type = "file";
 	else
 		_response->status = 404;
-		// print_error("path is neither a file nor a directory");
 }
 
 void	_get( Response *_response, Request *_request, Server &_server )
 {
 	(void)_server;
-	// std::cerr << "request path: " << _request->path << std::endl;
 	std::ifstream _file;
 	_file.open(_request->path);
 	_file ? _get_res_body(_request, _response) : _response->status = 404;
@@ -100,26 +76,15 @@ void	_get( Response *_response, Request *_request, Server &_server )
 			{
 				if (_request->cgi.size())
 				{
-					// std::cerr << "wzzupppppppppppp" << std::endl;
 					_cgi(_request, _response, _server);
 					// if (!_response->body.size())
 						// run its source code
 				}
 				else
 				{
-					// std::cerr << "yotip was here" << std::endl;
 					_response->status = 200;
 					get_indexed_file_data(_request, _response, _request->path);
 				}
-				// if (_request->cgi.size())
-				// 	_cgi(_request, _response, _server);
-				// else
-				// {
-				// 	_response->body = ;
-				// 	_response->status = 200;
-				// }
-				// // if (!_response->body.size())
-				// 	// run its source code
 					
 			}
 			else
@@ -129,12 +94,10 @@ void	_get( Response *_response, Request *_request, Server &_server )
 					_response->status = 403;
 				else
 				{
-					// std::cerr << "Yoo:" << _request->index.size() << " - " << _request->autoindex << std::endl;
 					_response->status = 200;
-					// _request->uri += "index.html";
 
 					// if is html file ()
-					_response->body = _get_listed_dir(_request);//"<html><body><h1>Directory file listing: </h1></body></html>";
+					_response->body = _get_listed_dir(_request);
 				}
 			}
 		}
@@ -143,9 +106,6 @@ void	_get( Response *_response, Request *_request, Server &_server )
 	{
 		if (_request->cgi.size())
 		{
-			// for (size_t i=0; i<_request->index.size(); i++)
-			// 	std::cerr << "weew: " << _request->index[i] << std::endl;
-			// std::cerr << "wzzupp" << _request->type << " " << _request->index.size() << std::endl;
 			_cgi(_request, _response, _server);
 			// if (!_response->body.size())
 				// run its source code
@@ -158,100 +118,31 @@ void	_get( Response *_response, Request *_request, Server &_server )
 	}
 }
 
-// std::string subtractSubstring(const std::string& str, int start, int end) {
-//     if (start < 0 || end >= str.length() || start > end)
-//         return str;
-// 	// if (start+1 == end)
-//     //     return "";
-
-//     std::string result;
-//     result.reserve(str.length() - (end - start));
-
-//     // Add the characters before the starting index
-//     result.append(str, start,end );
-// 	std::cerr << "vvvv:" << result << std::endl;
-
-//     // Add the characters after the end index
-//     // result.append(str, end + 1, str.length() - (end + 1));
-
-//     return result;
-// }
-
 void _body_parser( Request *_request )
 {
-	// std::cerr << "DA BODY-"<< _request->body << std::endl;
-	// for (size_t i=0; i<_request->body.size(); i++)
-	// {
-	// 	if (_request->body[i] == '\r' && _request->body[i+1] == '\n' && _request->body[i+2] == '\r' && _request->body[i+3] == '\n')
-	// 		std::cerr << "holaaa\n";
-	// 	// else if (_request->body[i] == '\r')
-	// 	// 	std::cerr << "holaaalaaa\n";
-	// 	// std::cerr << "-" << _request->body[i] << "-\n";
-	// }
-
 	std::map<std::string, std::string> m;
 
 	std::vector<std::string> _req;
 	std::string delimiter = "\r\n\r\n";
-    // std::string r = _request->body;
     size_t pos = _request->body.find(delimiter);
-	std::cerr << "pos :" << pos << std::endl;
     std::string header = _request->body.substr(0, pos);
 	_request->upload_data = "";
 	for (size_t i=pos+4; i < _request->body.size(); i++)
-	{
 		_request->upload_data += _request->body[i];
-		// std::cerr << _request->body[i];
-	}
-    // _request->upload_data = strdup((r.substr(pos + delimiter.length(), r.length()-150).c_str()));
-	// std::cerr << "********************\n";
-	// std::cerr << "body header: " << header << std::endl;
-	// std::cerr << "body content: " << _request->upload_data << std::endl;
-	// std::cerr << "********************\n";
 
 	size_t boundary_pos = _request->headers["Content-Type"].find("boundary=")+9;
 	_request->boundary = _request->headers["Content-Type"].substr(boundary_pos);
-	// std::cerr << "boundary value:" << _request->boundary << std::endl;
-	// std::cerr << "!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	// std::cerr << "upload_data:" << _request->upload_data << std::endl;
-	// std::cerr << "~~~~~~~~~~~~~~~~~~~~~\n" << _request->upload_data << "\n~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-	
-	// char* end = _request->upload_data + strlen(_request->upload_data);
-	// char* found = strstr(const_cast<char*>(_request->upload_data), _request->boundary.c_str());
+
     int psps= _request->upload_data.find(_request->boundary);
-	std::cerr << "pdpd: " << psps << "|-|" << _request->boundary << std::endl;
 	std::string _real_data = "";
+
 	for (size_t i=0; i < _request->upload_data.size() && i < psps-4; i++)
-	{
 		_real_data += _request->upload_data[i];
-		// std::cerr << _request->body[i];
-	}
-	// if (found) {
-    //     psps = found - const_cast<char*>(_request->upload_data);  // Calculate the index of the found substring
-    // }
-	// char *psps = std::find(, end, );
-	// std::cerr << "psps: " << psps << std::endl;
-	// char _real_data[9999];
-	// std::cout << "##########################" << std::endl;
-	// psps = 140;
-	// if (psps)
-	// {
-	// 	for (size_t i=0; i < strlen(_request->upload_data) /*&& i < psps-4*/ /*had '-4' ghi hardcode*/; i++)
-	// 	{
-	// 		_real_data[i] = _request->upload_data[psps];
-	// 		std::cout << _request->upload_data[i];
-	// 		psps++;
-	// 	}
-	// }
-	// std::cout << "##########################" << std::endl;
-	// std::string fsfs = _request->upload_data.substr(psps + delimiter.length());
-	// std::cerr << "real_data\n" << _real_data << std::endl;
 	_request->upload_data = _real_data;
 
 	std::vector<std::string> v;
     std::string line;
     delimiter = "\r\n";
-    // pos = 0;
     while ((pos = header.find(delimiter)) != std::string::npos)
 	{
         line = header.substr(0, pos);
@@ -259,9 +150,6 @@ void _body_parser( Request *_request )
         header.erase(0, pos + delimiter.length());
     }
     v.push_back(header);
-
-	// extract the method, the uri and the http-version
-	// _extract_first_line(_request, v[0]);
 
 	std::string key, value;
 	for (size_t i=0; i < v.size(); i++)
@@ -273,11 +161,6 @@ void _body_parser( Request *_request )
 			m[key] = value;
 		}
 	}
-	// std::map<std::string, std::string>::iterator iter;
-	// for (iter = m.begin(); iter != m.end(); iter++)
-    // {
-    //     std::cout << "{" << (*iter).first << "}---{" << (*iter).second << "}" << std::endl;
-    // }
 
 	pos = m["Content-Disposition"].find(";");
 	if (pos)
@@ -291,55 +174,33 @@ void _body_parser( Request *_request )
 		}
 		if (v.size() == 3)
 		{
-			// get upload name
-			// for (size_t i=0; i<v[1].size() && v[1][i] != "\""; i++)
-			// 	;
 			size_t _p = v[1].find("\"");
 
-			_request->upload_name = v[1].substr(_p+1, v[1].size()-_p-2);// subtractSubstring(v[1], _p+1, v[1].size()-1);
+			_request->upload_name = v[1].substr(_p+1, v[1].size()-_p-2);
 			_p = v[2].find("\"");
-			// std::cerr << "howwwww:" << v[2].substr(_p+1, v[2].size()-_p-2)<<"-" << _p << "-"<< v[2].size()-_p-2 << std::endl;
-			// std::cerr << "{" << v[1]<<"}-{" << v[2] << "} haaaa\n";
 			_request->upload_file_name = v[2].substr(_p+1, v[2].size()-_p-2);
 		}
-		// _request->upload = m["Content-Type"].substr(0, pos);
-    	// std::string data = m["Content-Type"].substr(pos + delimiter.length());
 	}
-	// std::cerr << "{" << m["Content-Type"] << "}\n";
 	_request->upload_content_type = m["Content-Type"];
-	
-	// std::cerr << "upload shit:" << std::endl;
-	// std::cerr << "upload_name: " << _request->upload_name << std::endl;
-	// std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
-	// std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
-	// std::cerr << "data: " << _request->upload_data << std::endl;
-	
 }
 
 void _post( Response *_response, Request *_request, Server &_server )
 {
 	std::cout << "POST" << std::endl;
 
-	
-
-	// std::cerr << "zbla: " << _request->headers["Content-Type"] << std::endl;
 	if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
 	{
 		// Upload the shit
-		// std::cerr << "yes we do support that\nrequest body:\n" << _request->body << std::endl;
 		_body_parser(_request);
 		
 		_response->content_length = _request->upload_data.size();
 		_response->content_type = _request->upload_content_type;
-
-		std::cerr << "len: {" << _response->content_length << "} type: {"<< _response->content_type << "}" << std::endl;
 		
 		// creating the file
 		std::ofstream _upload_file("uploads/"+_request->upload_file_name);
 		
 		// fill it
 		_upload_file << _request->upload_data;
-		// _response->content_type = _request->upload_content_type;
 		_response->body = _request->upload_data;
 		_response->status = 200;
 	}

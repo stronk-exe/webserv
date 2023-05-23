@@ -47,14 +47,10 @@ void    get_indexed_file_data( Request *_request, Response *_response, std::stri
             }
         }
     }
-    // std::cerr << "l path: " << path << std::endl;
-	// else
-	// 	std::cout << "Couldn't open file\n";
 }
 
 void    get_file_data( Response *_response, std::string path )
 {
-    // std::cerr << "l path: " << path << std::endl;
     std::ifstream myfile;
 	myfile.open(path);
 	std::string myline;
@@ -77,8 +73,6 @@ void	_response( Response *_response, Request *_request )
     {
         for (size_t i=0; i<_request->error_pages.size(); i++)
         {
-            // std::cerr << "this path " << _request->error_pages[i].path << " is for:" << std::endl;
-            
             for (size_t j=0; j<_request->error_pages[i].error_status[j]; j++)
             {
 				if (_response->status == _request->error_pages[i].error_status[j])
@@ -87,9 +81,6 @@ void	_response( Response *_response, Request *_request )
                     _status_found=1;
                 }
             }
-
-            //     std::cout << _request->error_pages[i].error_status[j] << std::endl;
-            // std::cerr << "------------------" << std::endl;
         }
     }
     if (!_status_found)
@@ -147,23 +138,13 @@ void	_response( Response *_response, Request *_request )
     }
     else
     {
-	// 	_response->body = "<html><body><h1>server says: 9oraydiss</h1></body></html>";
-    //     _response->status_message = "OK";
-    // }
-	
-
-	// Response body
 		if (!_response->body.size())
 			_get_res_body(_request, _response);
 	}
-    std::cerr << "_status: " << _status_found << std::endl;
 
-	// std::cerr << "body: " << _response->body << std::endl;
-	
 	// Response heders
 	if (!_response->content_length)
         _response->content_length = (_response->body).size();
 	if (!_response->content_type.size())
         _response->content_type = "text/html";
-    std::cerr << "maaalna" << std::endl;
 }
