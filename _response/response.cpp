@@ -158,11 +158,12 @@ void	_response( Response *_response, Request *_request )
 	}
     std::cerr << "_status: " << _status_found << std::endl;
 
-	std::cerr << "body: " << _response->body << std::endl;
+	// std::cerr << "body: " << _response->body << std::endl;
 	
 	// Response heders
 	if (!_response->content_length)
         _response->content_length = (_response->body).size();
 	if (!_response->content_type.size())
         _response->content_type = "text/html";
+    std::cerr << "maaalna" << std::endl;
 }

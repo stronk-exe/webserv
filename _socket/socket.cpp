@@ -120,15 +120,22 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 					if ((coming_socket = accept(_socket_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
 
-					char buffer[99999] = {0};
-					int data = read(coming_socket, buffer, 99999);
+					request->fd = coming_socket;
+					char buffer[999999] = {0};
+					int data = read(coming_socket, buffer, 999999);
 					if (data < 0)
                         print_error("empty data!");
 
-					std::cerr << "~ buffer:\n" << buffer << std::endl;
+					// std::ofstream _hmida("uploads/hmida.txt");
+					std::string _test_buffer;
+					for (int i=0; i<data; i++)
+						_test_buffer += buffer[i];
+					// std::cerr << "_tesssst: " << _test_buffer << std::endl;
+					// exit(1);
+					// std::cerr << "~ buffer:\n" << buffer << std::endl;
                     // 3- Request:
                     Server _s;
-					_request(_server, _s, request, response, buffer);
+					_request(_server, _s, request, response, /*buffer*/ _test_buffer);
                     // _match_theServer(_server, request, _s);
                     // std::cerr << "sssserver: " << _s.name << std::endl;
 

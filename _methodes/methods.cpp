@@ -179,40 +179,73 @@ void	_get( Response *_response, Request *_request, Server &_server )
 
 void _body_parser( Request *_request )
 {
-	// std::cerr << "elBODY-"<< _request->body << std::endl;
-
+	// std::cerr << "DA BODY-"<< _request->body << std::endl;
+	// for (size_t i=0; i<_request->body.size(); i++)
+	// {
+	// 	if (_request->body[i] == '\r' && _request->body[i+1] == '\n' && _request->body[i+2] == '\r' && _request->body[i+3] == '\n')
+	// 		std::cerr << "holaaa\n";
+	// 	// else if (_request->body[i] == '\r')
+	// 	// 	std::cerr << "holaaalaaa\n";
+	// 	// std::cerr << "-" << _request->body[i] << "-\n";
+	// }
 
 	std::map<std::string, std::string> m;
 
 	std::vector<std::string> _req;
 	std::string delimiter = "\r\n\r\n";
-    std::string r = _request->body;
-    size_t pos = r.find(delimiter);
-    std::string header = r.substr(0, pos);
-    _request->upload_data = r.substr(pos + delimiter.length(), r.length()-150);
+    // std::string r = _request->body;
+    size_t pos = _request->body.find(delimiter);
+	std::cerr << "pos :" << pos << std::endl;
+    std::string header = _request->body.substr(0, pos);
+	_request->upload_data = "";
+	for (size_t i=pos+4; i < _request->body.size(); i++)
+	{
+		_request->upload_data += _request->body[i];
+		// std::cerr << _request->body[i];
+	}
+    // _request->upload_data = strdup((r.substr(pos + delimiter.length(), r.length()-150).c_str()));
+	// std::cerr << "********************\n";
+	// std::cerr << "body header: " << header << std::endl;
+	// std::cerr << "body content: " << _request->upload_data << std::endl;
+	// std::cerr << "********************\n";
 
 	size_t boundary_pos = _request->headers["Content-Type"].find("boundary=")+9;
 	_request->boundary = _request->headers["Content-Type"].substr(boundary_pos);
-	std::cerr << "boundary value:" << _request->boundary << std::endl;
-	std::cerr << "!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-	std::cerr << "upload_data:" << _request->upload_data << std::endl;
-	std::cerr << "~~~~~~~~~~~~~~~~~~~~~\n" << _request->upload_data << "\n~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+	// std::cerr << "boundary value:" << _request->boundary << std::endl;
+	// std::cerr << "!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+	// std::cerr << "upload_data:" << _request->upload_data << std::endl;
+	// std::cerr << "~~~~~~~~~~~~~~~~~~~~~\n" << _request->upload_data << "\n~~~~~~~~~~~~~~~~~~~~~" << std::endl;
 	
-	size_t psps = _request->upload_data.find(_request->boundary);
-	std::cerr << "psps: " << psps << std::endl;
+	// char* end = _request->upload_data + strlen(_request->upload_data);
+	// char* found = strstr(const_cast<char*>(_request->upload_data), _request->boundary.c_str());
+    int psps= _request->upload_data.find(_request->boundary);
+	std::cerr << "pdpd: " << psps << "|-|" << _request->boundary << std::endl;
 	std::string _real_data = "";
-	std::cout << "##########################" << std::endl;
-	if (psps != std::string::npos)
+	for (size_t i=0; i < _request->upload_data.size() && i < psps-4; i++)
 	{
-		for (size_t i=0; i < _request->upload_data.size() && i < psps; i++)
-		{
-			_real_data += _request->upload_data[i];
-			std::cout << _request->upload_data[i];
-		}
+		_real_data += _request->upload_data[i];
+		// std::cerr << _request->body[i];
 	}
-	std::cout << "##########################" << std::endl;
+	// if (found) {
+    //     psps = found - const_cast<char*>(_request->upload_data);  // Calculate the index of the found substring
+    // }
+	// char *psps = std::find(, end, );
+	// std::cerr << "psps: " << psps << std::endl;
+	// char _real_data[9999];
+	// std::cout << "##########################" << std::endl;
+	// psps = 140;
+	// if (psps)
+	// {
+	// 	for (size_t i=0; i < strlen(_request->upload_data) /*&& i < psps-4*/ /*had '-4' ghi hardcode*/; i++)
+	// 	{
+	// 		_real_data[i] = _request->upload_data[psps];
+	// 		std::cout << _request->upload_data[i];
+	// 		psps++;
+	// 	}
+	// }
+	// std::cout << "##########################" << std::endl;
 	// std::string fsfs = _request->upload_data.substr(psps + delimiter.length());
-	std::cerr << "real_data\n" << _real_data << std::endl;
+	// std::cerr << "real_data\n" << _real_data << std::endl;
 	_request->upload_data = _real_data;
 
 	std::vector<std::string> v;
@@ -272,15 +305,14 @@ void _body_parser( Request *_request )
 		// _request->upload = m["Content-Type"].substr(0, pos);
     	// std::string data = m["Content-Type"].substr(pos + delimiter.length());
 	}
-	std::cerr << "{" << m["Content-Type"] << "}\n";
+	// std::cerr << "{" << m["Content-Type"] << "}\n";
 	_request->upload_content_type = m["Content-Type"];
 	
-	std::cerr << "upload shit:" << std::endl;
-	std::cerr << "upload_name: " << _request->upload_name << std::endl;
-	std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
-	std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
-	std::cerr << "data: " << _request->upload_data << std::endl;
-	
+	// std::cerr << "upload shit:" << std::endl;
+	// std::cerr << "upload_name: " << _request->upload_name << std::endl;
+	// std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
+	// std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
+	// std::cerr << "data: " << _request->upload_data << std::endl;
 	
 }
 
@@ -290,11 +322,11 @@ void _post( Response *_response, Request *_request, Server &_server )
 
 	
 
-	std::cerr << "zbla: " << _request->headers["Content-Type"] << std::endl;
+	// std::cerr << "zbla: " << _request->headers["Content-Type"] << std::endl;
 	if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
 	{
 		// Upload the shit
-		std::cerr << "yes we do support that\nrequest body:\n" << _request->body << std::endl;
+		// std::cerr << "yes we do support that\nrequest body:\n" << _request->body << std::endl;
 		_body_parser(_request);
 		
 		_response->content_length = _request->upload_data.size();
@@ -308,6 +340,7 @@ void _post( Response *_response, Request *_request, Server &_server )
 		// fill it
 		_upload_file << _request->upload_data;
 		// _response->content_type = _request->upload_content_type;
+		_response->body = _request->upload_data;
 		_response->status = 200;
 	}
 	else

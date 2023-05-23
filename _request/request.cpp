@@ -232,14 +232,23 @@ void _match_theServer( Parsing &_server, Request *_request, Server &_s)
             _s =  _server.servers[i];
 }
 
-void	_request_parser( Request *_request, char *s )
+void	_request_parser( Request *_request, std::string r )
 {
 	std::vector<std::string> _req;
 	std::string delimiter = "\r\n\r\n";
-    std::string r = s;
+    // std::string r = s;
     size_t pos = r.find(delimiter);
     std::string header = r.substr(0, pos);
-    _request->body = r.substr(pos + delimiter.length());
+	// std::cerr << r.size() << " ======================\n";
+	_request->body = "";
+	for (size_t i=pos+4; i < r.size(); i++)
+	{
+		// std::cerr << r[i];
+		_request->body += r[i];
+	}
+	// std::cerr << "======================\n";
+    // _request->body = strdup((r.substr(pos + delimiter.length())).c_str());
+	// std::cerr << "boddddy:" << r << std::endl;
 
 	std::vector<std::string> v;
     std::string line;
@@ -268,12 +277,30 @@ void	_request_parser( Request *_request, char *s )
 	}
 }
 
-void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, char *s )
+void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, std::string s )
 {
 	// Server _s;
 	Location _location;
-
+	
 	_request_parser(_request, s);
+
+	
+	std::cerr << "content length: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << ">-<" << _request->body.size() << std::endl;
+	if (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
+	{
+		while (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
+		{
+			char buffer[999999] = {0};
+			int data = read(_request->fd, buffer, 999999);
+			if (data < 0)
+				print_error("empty data!");
+			// std::string _test_buffer;
+			for (int i=0; i<data; i++)
+				_request->body += buffer[i];
+			// _request->headers["Content-Length"] += data;
+			std::cerr << "content length: " << _request->headers["Content-Length"] << ">-<" << _request->body.size() << std::endl;
+		}
+	}
     _match_theServer(_server, _request, _s);
 	_match_theLocation(_s, _location, _request);
 	_fill_request(_s, _location, _request);

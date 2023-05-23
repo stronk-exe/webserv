@@ -29,8 +29,6 @@ int main(int ac, char **av)
 
         // 1- Config File:
         parss_info(_server);
-        std::cout << (_server.servers.begin())->name << std::endl;
-        std::cout << (_server.servers.begin())->listen_port << std::endl;
         // print_data(_server);
 
         // 2- Socket connection

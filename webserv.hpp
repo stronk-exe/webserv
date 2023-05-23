@@ -117,6 +117,7 @@ class Request
 		Request() {};
 		~Request() {};
 
+		int									fd;
 		std::string							uri;
 		std::string							method;
 		std::string 						type;
@@ -167,7 +168,7 @@ void	_delete();
 void	_cgi( Request *_request, Response *_response, Server &_server );
 
 // Request
-void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, char *s );
+void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, std::string s );
 
 // Response
 void	_response( Response *_response, Request *_request );
