@@ -46,6 +46,19 @@ struct error_page
 	}
 };
 
+struct CGI
+{
+    std::string		extension;
+    std::string     path;
+
+	CGI &operator= (const CGI & _cgi)
+	{
+		this->path = _cgi.path;
+		this->extension = _cgi.extension;
+		return *this;
+	}
+};
+
 struct Redirection
 {
     size_t            return_status;
@@ -66,7 +79,7 @@ struct Location
     std::vector<std::string> 	index;
     std::vector<std::string>	allows_methods;
 	Redirection					redirection;
-    std::vector<std::string>	cgi_pass;
+    std::vector<CGI>			cgi_pass;
 
 	Location& operator=(const Location& loc)
 	{
@@ -126,7 +139,7 @@ class Request
 		std::vector<std::string>			index;
 		std::string							root;
 		std::vector<std::string>			redirection;
-		std::vector<std::string>			cgi;
+		std::vector<CGI>					cgi;
 		int									client_body_upload;
 		std::map<std::string, std::string>	headers;
 		std::string							body;
@@ -162,7 +175,7 @@ void	_socket( Parsing &_server, Request *_request, Response *_response );
 // Methodes
 void	_get( Response *_response, Request *_request, Server &_server );
 void	_post( Response *_response, Request *_request, Server &_server );
-void	_delete();
+void	_delete( Response *_response, Request *_request ,Server &_server );
 
 // CGI
 void	_cgi( Request *_request, Response *_response, Server &_server );
@@ -183,10 +196,10 @@ void	error(std::string err);
 int		str_to_num(std::string str);
 void	parss_info(Parsing &parss);
 void	info_autoindex(Location &loc, std::string &str);
-void	info_(std::vector<std::string>  &vec, std::vector<std::string>::iterator &it);
 void	split_conf(std::vector<std::string> &data, std::string str);
 void	info_err_status(std::vector<error_page> &errors, std::vector<std::string>::iterator &it);
 void	info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void	print_data(Parsing &parss);
+std::vector<std::string>	info_(std::vector<std::string>::iterator &it);
 
 #endif

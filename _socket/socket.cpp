@@ -30,6 +30,16 @@ std::vector<int>	_get_ports( Parsing &_server )
 	return _ports;
 }
 
+void	_init_l3alam( Request *_request, Response *_response)
+{
+	// Request
+	_request->body = "";
+
+	// Response
+	_response->content_length = 0;
+	_response->body = "";
+}
+
 void	_socket( Parsing &_server, Request *request, Response *response )
 {
     int					_socket_fd;
@@ -80,6 +90,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 		if (select(FD_SETSIZE, &_sockets, NULL, NULL, NULL) < 0)
 			print_error("error in select");
 
+		_init_l3alam(request, response);
 		for (int i=0; i < FD_SETSIZE; i++)
 		{
 			if (FD_ISSET(i, &_sockets))
@@ -112,7 +123,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
                     else if (request->method == "POST")
                         _post(response, request, _s);
                     else if (request->method == "DELETE")
-                        _delete();
+                        _delete(response, request, _s);
                     else
                         response->status = 405;
 				

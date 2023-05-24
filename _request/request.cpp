@@ -191,4 +191,12 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	_match_theLocation(_s, _location, _request);
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
+
+
+	// std::cerr << "buffer: " << s << std::endl;
+	// std::map<std::string, std::string>::iterator iter;
+    // for (iter = _request->headers.begin(); iter != _request->headers.end(); iter++)
+    // {
+    //     std::cout << "{" << (*iter).first << "}---{" << (*iter).second << "}" << std::endl;
+    // }
 }

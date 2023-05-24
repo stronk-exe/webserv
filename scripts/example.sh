@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Set the content type to HTML
 echo "Content-type: text/html"

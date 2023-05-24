@@ -126,9 +126,12 @@ void _body_parser( Request *_request )
 	std::string delimiter = "\r\n\r\n";
     size_t pos = _request->body.find(delimiter);
     std::string header = _request->body.substr(0, pos);
+	// std::cerr << "kayyn: " << header << std::endl;
 	_request->upload_data = "";
+	std::cerr << "body:\n" << _request->body << std::endl;
 	for (size_t i=pos+4; i < _request->body.size(); i++)
-		_request->upload_data += _request->body[i];
+	{	_request->upload_data += _request->body[i];
+	}
 
 	size_t boundary_pos = _request->headers["Content-Type"].find("boundary=")+9;
 	_request->boundary = _request->headers["Content-Type"].substr(boundary_pos);
@@ -163,6 +166,7 @@ void _body_parser( Request *_request )
 	}
 
 	pos = m["Content-Disposition"].find(";");
+	// std::cerr << "Content-Disposition: " << m["Content-Disposition"] << std::endl;
 	if (pos)
 	{
 		std::vector<std::string> v;
@@ -182,6 +186,12 @@ void _body_parser( Request *_request )
 		}
 	}
 	_request->upload_content_type = m["Content-Type"];
+
+	std::cerr << "upload shit:" << std::endl;
+	std::cerr << "upload_name: " << _request->upload_name << std::endl;
+	std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
+	std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
+	// std::cerr << "data: " << _request->upload_data << std::endl;
 }
 
 void _post( Response *_response, Request *_request, Server &_server )
@@ -191,17 +201,20 @@ void _post( Response *_response, Request *_request, Server &_server )
 	if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
 	{
 		// Upload the shit
-		_body_parser(_request);
+		// _body_parser(_request);
 		
-		_response->content_length = _request->upload_data.size();
-		_response->content_type = _request->upload_content_type;
+		_response->content_length = _request->body.size();//_request->upload_data.size();
+		_response->content_type = "text/html";//_request->upload_content_type;
 		
+		// std::cerr << "multipart shit: " << _request->upload_file_name << std::endl;
 		// creating the file
+		_request->upload_file_name = "randomshit.php";
 		std::ofstream _upload_file("uploads/"+_request->upload_file_name);
 		
 		// fill it
-		_upload_file << _request->upload_data;
-		_response->body = _request->upload_data;
+		_upload_file << _request->body; //_request->upload_data;
+		// _response->body = _request->upload_data;
+		_cgi(_request, _response, _server);
 		_response->status = 200;
 	}
 	else
@@ -248,7 +261,58 @@ void _post( Response *_response, Request *_request, Server &_server )
 	}
 }
 
-void _delete()
+void _delete(  Response *_response, Request *_request ,Server &_server )
 {
 	std::cout << "DELETE" << std::endl;
+	// (void)_server;
+	std::cerr << "request path: " << _request->path << std::endl;
+	std::ifstream _file;
+	_file.open(_request->path);
+	_file ? _get_res_body(_request, _response) : _response->status = 404;
+
+    _file_or_dir(_request, _response);
+	if (_request->type == "directory")
+	{
+		if (_request->path[_request->path.size()-1] != '/')
+			_response->status = 409;//Conflict
+		else
+		{
+			if (_request->cgi.size()) {
+				if (_request->index.size()) {
+					std::cerr << "cgi1" << std::endl;
+					_cgi(_request, _response, _server);
+				}
+				else
+					_response->status = 403;// Forbidden
+			}
+			else
+			{
+				if (rmdir(_request->path.c_str()) != 0) {
+					perror("Error deleting the directory");
+					if (!access(_request->path.c_str(), W_OK))
+						_response->status = 500;// Internal Server Error
+					else
+						_response->status = 403;// Forbidden
+				}
+				else
+					_response->status = 204;// No Content
+			}
+		}
+	}
+	else if (_request->type == "file")
+	{
+		if (_request->cgi.size())
+		{
+			std::cerr << "cgi2" << std::endl;
+			_cgi(_request, _response, _server);
+		}
+		else
+		{
+			_response->status = 204;// No Content
+			if (std::remove(_request->path.c_str()) != 0) {
+				perror("Error deleting the file");
+			}
+		}
+	}
 }
+
