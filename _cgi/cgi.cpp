@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:05:56 by mait-jao          #+#    #+#             */
-/*   Updated: 2023/05/19 17:58:22 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/06 17:53:32 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,14 @@ void update_env_for_cgi( Request *_request , std::string _path_info, Server _ser
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
     }
+    if (setenv("HTTP_COOKIE", _request->headers["Cookie"].c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
+    if (setenv("REMOTE_HOST", _request->headers["Host"].c_str(), 1) != 0) {
+        std::cerr << "Failed to set environment variable." << std::endl;
+        return ;
+    }
     if (setenv("DOCUMENT_ROOT", _request->root.c_str(), 1) != 0) {
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
@@ -80,10 +88,6 @@ void update_env_for_cgi( Request *_request , std::string _path_info, Server _ser
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
     }    
-    if (setenv("REMOTE_HOST", _request->headers["Host"].c_str(), 1) != 0) {/////hardcod
-        std::cerr << "Failed to set environment variable." << std::endl;
-        return ;
-    }
     if (setenv("SERVER_PORT", int_to_str(_server.listen_port).c_str(), 1) != 0) {/////hardcod
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
@@ -92,10 +96,6 @@ void update_env_for_cgi( Request *_request , std::string _path_info, Server _ser
         std::cerr << "Failed to set environment variable." << std::endl;
         return ;
     }    
-    if (setenv("HTTP_COOKIE", _request->headers["Cookie"].c_str(), 1) != 0) {/////hardcod
-        std::cerr << "Failed to set environment variable." << std::endl;
-        return ;
-    }
 }
 
 void     printHeaders(std::map<std::string, std::string> headers)
@@ -148,78 +148,126 @@ std::string get_content_type(char *buffer)
     return (str = token);
 }
 
-void	_cgi( Request *_request, Response *_response , Server _server )
+bool exec_cgi(char **av, std::string &result)
 {
-    // printHeaders(_request->headers);
-	std::string result, scriptPath;
-    // std::cerr << "(*_request->cgi.begin()) =" << (*_request->cgi.begin())  << "| _request->path="<< _request->path <<  std::endl;
+    pid_t pid;
+    int pipe_fd[2];
+    char buffer[256];
+
+    if (pipe(pipe_fd) == -1) {
+        std::cerr << strerror(errno) << std::endl;
+        exit(12);
+    }
+
+    pid = fork();
+    if (pid == -1) {
+        std::cerr << strerror(errno) << std::endl;
+        exit(12);
+    }
+    if (pid == 0) {
+        close(pipe_fd[0]);
+        dup2(pipe_fd[1], STDOUT_FILENO);
+        close(pipe_fd[1]);
+        execve(av[0], av, NULL);
+        std::cerr << strerror(errno) << std::endl;
+        exit(12);
+    } else {
+        std::string result;
+        close(pipe_fd[1]);
+        int nbytes;
+        while ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
+            result.append(buffer, nbytes);
+        close(pipe_fd[0]);
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
+            return true;
+        else
+            return false;///////////////////
+    }
+    return false;
+}
+
+
+int createFile(const char* filename, std::string data) {
+    
+    int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd != -1) {
+        write(fd, data.c_str(), data.size());
+        close(fd); // Close the file when done
+        // printf("File '%s' created successfully.\n", filename);
+    } else {
+        std::cerr << strerror(errno) << std::endl;
+        exit(12);
+    }
+    return fd;
+}
+
+bool exec_file_cgi(char **av, std::string &result, std::string data)
+{
+    pid_t pid;
+    int fd_file, pipe_fd[2];
+    char buffer[256];
+
+    if (pipe(pipe_fd) == -1) {
+        std::cerr << strerror(errno) << std::endl;
+        exit(12);
+    }
+    fd_file = createFile(".hamid", data);
+    pid = fork();
+    if (pid == -1) {
+        std::cerr << strerror(errno) << std::endl;
+        exit(12);
+    }
+    if (pid == 0) {
+        close(pipe_fd[0]);
+        dup2(fd_file, STDIN_FILENO);
+        dup2(pipe_fd[1], STDOUT_FILENO);
+        close(pipe_fd[1]);
+        execve(av[0], av, NULL);
+        std::cerr << strerror(errno) << std::endl;
+        exit(12);
+    } else {
+        std::string result;
+        close(pipe_fd[1]);
+        int nbytes;
+        while ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
+            result.append(buffer, nbytes);
+        close(pipe_fd[0]);
+        int status;
+        waitpid(pid, &status, 0);
+        if (std::remove(".hamid") != 0) {
+            std::perror("Error deleting the file");
+        }
+        if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
+            return true;
+        else
+            return false;///////////////////
+    }
+    return false;
+}
+
+void _cgi(Request *_request, Response *_response, Server _server)
+{
+	char *av[3];
+	std::string result, scriptPath, arg;
+    
     if (!check_path_extension(_request->cgi , _request->path, scriptPath)) {
         std::cerr << "extansion" << std::endl;
         _response->body = "";
         return ;
     }
-    //  = (*(_request->cgi.begin() + 1)) +//_request->path;
-    // std::cerr << "scriptPath : [" << scriptPath << "]" << std::endl;
     update_env_for_cgi(_request, scriptPath, _server);
-    FILE* pipe = popen(scriptPath.c_str(), "r");
-    if (!pipe) {
-        std::cerr << strerror(errno) << std::endl;
-        return ;
+    std::istringstream ss(scriptPath);
+    for (int i = 0; i < 2; i++) {
+        std::getline(ss, arg, ' ');
+        av[i] = const_cast<char*>(arg.c_str());
     }
-    char buffer[256];
-    while (fgets(buffer, sizeof(buffer), pipe)) {
-        // std::cerr << "------------" << buffer <<"--------------" << strncmp(buffer, "Content-type", 13) << std::endl;
-        if (!strncmp(buffer, "Content-type", 12))
-            _response->content_type = get_content_type(buffer);
-        else
-            result += buffer;
-    }
-    pclose(pipe);
-	_response->body = result;
-    
-	std::cerr << "Content-type: |" << _response->content_type << "|" << std::endl;
-	std::cerr << "execution output: " << _response->body << std::endl;
-    _response->status = 200;
+    av[2] = NULL;
+    if (!_request->file_cgi.empty() && !exec_file_cgi(av, result, _request->file_cgi))
+        std::cout <<"Script execution failed."<< std::endl;
+    if (!exec_cgi(av, result))
+        std::cout <<"Script execution failed."<< std::endl;
+    else
+        _response->status = 200;
 }
-
-// void _cgi(Request *_request, Response *_response)
-// {
-//     int pipe_fd[2];
-//     pid_t pid;
-//     char buffer[100];
-
-//     if (pipe(pipe_fd) == -1) {
-//         std::cerr << strerror(errno) << std::endl;
-//         exit(12);
-//     }
-// 	char *av[3];
-// 	path_file(_request->root, *(_request->cgi.begin() + 1), &av[0]);
-// 	path_file(_request->root, _request->path, &av[1]);
-// 	av[2] = NULL;
-//     pid = fork();
-//     if (pid == -1) {
-//         std::cerr << strerror(errno) << std::endl;
-//         exit(12);
-//     }
-//     if (pid == 0) {
-//         close(pipe_fd[0]);
-//         dup2(pipe_fd[1], STDOUT_FILENO);
-//         close(pipe_fd[1]);
-//         execve(av[0], av, NULL);
-//         std::cerr << strerror(errno) << std::endl;
-//         exit(12);
-//     } else {
-//         std::string result;
-//         close(pipe_fd[1]);
-//         int nbytes;
-//         while ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
-//             result.append(buffer, nbytes);
-//         close(pipe_fd[0]);
-//         int status;
-//         waitpid(pid, &status, 0);
-//         if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-//             _response->body = result;
-//         else
-//             std::cout <<"Script execution failed."<< std::endl;///////////////////
-//     }
-// }

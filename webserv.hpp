@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/19 11:50:22 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/06 17:15:43 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <netinet/in.h>
 #include <fstream>
+#include <fcntl.h>
 #include <cstdlib>
 #include <sstream>
 #include <vector>
@@ -135,6 +136,7 @@ class Request
 		std::string									uri;
 		std::string									method;
 		std::string 								type;
+		std::string 								file_cgi;
 		int											autoindex;
 		std::string									path;
 		std::vector<std::string>					index;
