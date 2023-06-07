@@ -199,4 +199,5 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
     // {
     //     std::cout << "{" << (*iter).first << "}---{" << (*iter).second << "}" << std::endl;
     // }
+	std::cout << "request body: " << _request->body << std::endl;
 }
