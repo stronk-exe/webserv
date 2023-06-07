@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/06 17:15:43 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/07 20:14:48 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,17 @@
 #define WEBSERV_HPP
 
 #include <iostream>
-#include <cstdio>
-#include <unistd.h>
-#include <cstring>
+#include <stdio.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <cstdlib>
+#include <stdlib.h>
 #include <netinet/in.h>
+#include <string.h>
 #include <fstream>
-#include <fcntl.h>
-#include <cstdlib>
 #include <sstream>
 #include <vector>
+#include <algorithm>
+#include <fcntl.h>
 #include <map>
 #include <sys/stat.h>
 
@@ -133,26 +132,27 @@ class Request
 		Request() {};
 		~Request() {};
 
-		std::string									uri;
-		std::string									method;
-		std::string 								type;
-		std::string 								file_cgi;
-		int											autoindex;
-		std::string									path;
-		std::vector<std::string>					index;
-		std::string									root;
-		std::vector<std::string>					redirection;
-		std::vector<CGI>							cgi;
-		int											client_body_upload;
-		std::map<std::string, std::string>			headers;
-		std::string									body;
-		std::vector<error_page>						error_pages;
+		int									fd;
+		std::string							uri;
+		std::string							method;
+		std::string 						type;
+		int									autoindex;
+		std::string							path;
+		std::vector<std::string>			index;
+		std::string							root;
+		std::vector<std::string>			redirection;
+		std::vector<CGI>					cgi;
+		int									client_body_upload;
+		std::map<std::string, std::string>	headers;
+		std::string							body;
+		std::vector<error_page>				error_pages;
 
 		// Uploads
 		std::string	upload_name;
 		std::string	upload_content_type;
 		std::string	upload_file_name;
 		std::string	upload_data;
+		std::string	boundary;
 };
 
 class Response
@@ -180,14 +180,15 @@ void	_post( Response *_response, Request *_request, Server &_server );
 void	_delete( Response *_response, Request *_request ,Server &_server );
 
 // CGI
-void	_cgi( Request *_request, Response *_response , Server _server );
+void	_cgi( Request *_request, Response *_response, Server &_server );
 
 // Request
-void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, char *s );
+void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, std::string s );
 
 // Response
 void	_response( Response *_response, Request *_request );
 int		_get_res_body( Request *_request, Response *_response );
+void    get_indexed_file_data( Request *_request, Response *_response, std::string path );
 
 // Utils
 void	print_error(std::string s);

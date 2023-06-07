@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/19 08:55:27 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/05/16 15:31:27 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,17 +24,11 @@ int main(int ac, char **av)
     {
         _server.file = av[1];
         std::ifstream file(_server.file);
-        if (!file) {
-            std::cerr << "Failed to open the file." << std::endl;
-            return 1;
-        }
         while (std::getline(file, str))
             split_conf(_server.data, str);
 
         // 1- Config File:
         parss_info(_server);
-        std::cout << (_server.servers.begin())->name << std::endl;
-        std::cout << (_server.servers.begin())->listen_port << std::endl;
         // print_data(_server);
 
         // 2- Socket connection
