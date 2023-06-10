@@ -46,7 +46,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
     struct sockaddr_in	address;
     int					addrlen;
     int					default_port;
-	std::vector<int>	_socket_fds;
+	std::vector<int>	_socket_fds, accepted_fds;
 	fd_set				_sockets;
 
     
@@ -78,17 +78,19 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 			print_error("listining failed!");
 		
 		_socket_fds.push_back(_socket_fd);
-
+		FD_ZERO(&_sockets);
+		FD_SET(_socket_fd, &_sockets);
 	}
-	FD_ZERO(&_sockets);
-	FD_SET(_socket_fd, &_sockets);
-
+	
+	int x=0;
     while (1)
     {
         std::cout << "listening ..." << std::endl;
 		// ready_sockets = current_sockets;
 		if (select(FD_SETSIZE, &_sockets, NULL, NULL, NULL) < 0)
 			print_error("error in select");
+		// std::cerr << "vvvvvvv" << _socket_fds[0] << std::endl;
+		std::vector<int>	accepted_fds;
 
 		_init_l3alam(request, response);
 		for (int i=0; i < FD_SETSIZE; i++)
@@ -98,19 +100,28 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 				if (std::find( _socket_fds.begin(), _socket_fds.end(), i) != _socket_fds.end())
 				{
 					int coming_socket;
-					if ((coming_socket = accept(_socket_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
+					if ((coming_socket = accept(i, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
+					FD_SET(coming_socket, &_sockets);
+					accepted_fds.push_back(coming_socket);
+					std::cerr << "hillownnn-" << x << std::endl;
+				}
+				else if (std::find( accepted_fds.begin(), accepted_fds.end(), i) != accepted_fds.end())
+				{
 
-					request->fd = coming_socket;
-					char buffer[999999] = {0};
-					int data = read(coming_socket, buffer, 999999);
+					// request->fd = coming_socket;
+					char buffer[9999] = {0};
+					int data = read(i, buffer, 9999);
 					if (data < 0)
                         print_error("empty data!");
+					std::cerr << "read: " << data << std::endl;
 
 					// std::ofstream _hmida("uploads/hmida.txt");
 					std::string _test_buffer;
 					for (int i=0; i<data; i++)
 						_test_buffer += buffer[i];
+					
+					std::cerr << "buffer: " << _test_buffer << "\nvector: " << _socket_fds.size() << "\ni: " << i << std::endl;
 				
                     // 3- Request:
                     Server _s;
@@ -131,10 +142,18 @@ void	_socket( Parsing &_server, Request *request, Response *response )
         			_response(response, request);
 					
 					const char *s = generate_response_str(response);
-					write(coming_socket, s, strlen(s));
+					write(i, s, strlen(s));
 					
-					close(coming_socket);
+					close(i);
+
+					FD_CLR(i, &_sockets);
+					// _socket_fds.pop_back();
+					std::cerr << "hillow-" << x << std::endl;
 				}
+				// else {
+				// 	close(_socket_fds[i]);
+				// }
+				x+=1;
 			}
 		}
     }

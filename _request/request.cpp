@@ -71,6 +71,7 @@ void	_validate_request( Server &_server, Location &_location, Request *_request,
 		_response->status = 404;
 	if (_request->redirection.size())
 	{
+		std::cerr << "haaaa" << std::endl;
 		_response->path = _request->redirection[0];
 		_response->status = 301;
 	}
@@ -91,8 +92,8 @@ void _extract_first_line( Request *_request, std::string s )
         _request->method = v[0];
         _request->uri = v[1];
     }
-    else
-		print_error("missing method or uri or http-version here!");
+    // else
+	// 	print_error("missing method or uri or http-version here!");
 }
 
 void _fill_request(Server &_server, Location &_location, Request *_request )
@@ -106,7 +107,8 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 	_location.autoindex ? _request->autoindex = 1 : _request->autoindex = 0;
 	_request->root = _location.root_location;
 	_request->path = _request->root+_request->uri;
-	_server.redirection.path.size() ? _request->redirection.push_back(_server.redirection.path) :  _request->redirection.push_back("");
+	if (_server.redirection.path.size())
+		_request->redirection.push_back(_server.redirection.path);
 
 	if (_location.cgi_pass.size())
 		for (size_t i=0; i<_location.cgi_pass.size(); i++)
@@ -199,5 +201,5 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
     // {
     //     std::cout << "{" << (*iter).first << "}---{" << (*iter).second << "}" << std::endl;
     // }
-	std::cout << "request body: " << _request->body << std::endl;
+	// std::cout << "request body: " << _request->body << std::endl;
 }

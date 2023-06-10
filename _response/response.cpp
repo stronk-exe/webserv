@@ -136,11 +136,11 @@ void	_response( Response *_response, Request *_request )
             _response->status_message = "Not Implemented";
         }
     }
-    else
-    {
+    // else
+    // {
 		if (!_response->body.size())
 			_get_res_body(_request, _response);
-	}
+	// }
 
 	// Response heders
 	if (_response->content_length <= 0)
@@ -148,4 +148,5 @@ void	_response( Response *_response, Request *_request )
     // std::cerr << "Content Lenght: " << _response->content_length << " | body: " << _response->body << std::endl;
 	if (!_response->content_type.size())
         _response->content_type = "text/html";
+    // std::cerr << "gg: " << _response->content_type << std::endl;
 }
