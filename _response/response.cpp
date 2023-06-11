@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:45 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:39:50 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/06/11 20:39:38 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,8 @@ void	_response( Response *_response, Request *_request )
             }
         }
     }
+	// std::cerr << "-----------------------------" << std::endl;
+
     if (!_status_found)
     {
         if (_response->status == 204)
@@ -136,11 +138,11 @@ void	_response( Response *_response, Request *_request )
             _response->status_message = "Not Implemented";
         }
     }
-    else
-    {
+    // else
+    // {
 		if (!_response->body.size())
 			_get_res_body(_request, _response);
-	}
+	// }
 
 	// Response heders
 	if (_response->content_length <= 0)
@@ -148,4 +150,5 @@ void	_response( Response *_response, Request *_request )
     // std::cerr << "Content Lenght: " << _response->content_length << " | body: " << _response->body << std::endl;
 	if (!_response->content_type.size())
         _response->content_type = "text/html";
+    // std::cerr << "gg: " << _response->content_type << std::endl;
 }

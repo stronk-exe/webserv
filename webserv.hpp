@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/07 20:14:48 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/11 20:29:24 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,9 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <fstream>
+#include <fcntl.h>
 #include <sstream>
 #include <vector>
-#include <algorithm>
-#include <fcntl.h>
 #include <map>
 #include <sys/stat.h>
 
@@ -142,6 +141,7 @@ class Request
 		std::string							root;
 		std::vector<std::string>			redirection;
 		std::vector<CGI>					cgi;
+		char								**env;
 		int									client_body_upload;
 		std::map<std::string, std::string>	headers;
 		std::string							body;

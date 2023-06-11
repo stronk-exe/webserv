@@ -1,10 +1,7 @@
-#!/usr/bin/php-cgi
+#!/usr/bin/php
 <?php
+header("Content-Type: text/plain");  // Set the Content-Type header
 
-// Set the content type to HTML and output the header
-header("Content-Type: text/html");
-
-// Output PHP information
-echo "<h1>PHP Information</h1>";
-echo "<hr>";
-echo phpinfo();
+echo "Hello, CGI World!\n";
+echo "This is a PHP CGI script.";
+?>

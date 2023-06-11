@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Set the content type to HTML
-echo "Content-Type: text/html"
+echo "Content-type: text/html"
 echo ""
 
 # Output the HTML document

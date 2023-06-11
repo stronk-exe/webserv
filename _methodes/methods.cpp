@@ -65,6 +65,7 @@ void	_get( Response *_response, Request *_request, Server &_server )
     _file_or_dir(_request, _response);
 	if (_request->type == "directory")
 	{
+		// std::cerr << "Ayoo!!!!" << std::endl;
 		if (_request->path[_request->path.size()-1] != '/')
 		{
 			_request->path+='/';
@@ -107,6 +108,7 @@ void	_get( Response *_response, Request *_request, Server &_server )
 		if (_request->cgi.size())
 		{
 			_cgi(_request, _response, _server);
+			// std::cerr << "Ayoo" << std::endl;
 			// if (!_response->body.size())
 				// run its source code
 		}
@@ -187,10 +189,10 @@ void _body_parser( Request *_request )
 	}
 	_request->upload_content_type = m["Content-Type"];
 
-	std::cerr << "upload shit:" << std::endl;
-	std::cerr << "upload_name: " << _request->upload_name << std::endl;
-	std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
-	std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
+	// std::cerr << "upload shit:" << std::endl;
+	// std::cerr << "upload_name: " << _request->upload_name << std::endl;
+	// std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
+	// std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
 	// std::cerr << "data: " << _request->upload_data << std::endl;
 }
 
@@ -208,13 +210,21 @@ void _post( Response *_response, Request *_request, Server &_server )
 		
 		// std::cerr << "multipart shit: " << _request->upload_file_name << std::endl;
 		// creating the file
-		_request->upload_file_name = "randomshit.php";
-		std::ofstream _upload_file("uploads/"+_request->upload_file_name);
 		
 		// fill it
-		_upload_file << _request->body; //_request->upload_data;
-		// _response->body = _request->upload_data;
 		_cgi(_request, _response, _server);
+		if (!_response->body.size())
+		{
+			// gg
+			_body_parser(_request);
+			std::ofstream _upload_file("uploads/"+_request->upload_file_name);
+			
+			_upload_file << _request->upload_data;
+			_response->content_type = _request->upload_content_type;
+			_response->body = _request->body;
+			_response->content_length = _response->body.size();
+			// std::cerr << "gg: " << _response->content_type << std::endl;
+		}
 		_response->status = 200;
 	}
 	else
