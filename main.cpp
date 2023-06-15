@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/16 15:31:27 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/11 20:30:15 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@ int main(int ac, char **av)
 {
     Request *_request = new Request;
     Response *_response = new Response;
+    _request->env = new char*[11];
+    for (int i = 0; i < 10; i++)
+        _request->env[i] = NULL;
 
     std::string  str;
     Parsing _server;

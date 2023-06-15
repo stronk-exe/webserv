@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:45 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:39:50 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/06/11 20:39:38 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ int	_get_res_body( Request *_request, Response *_response )
 {
 	std::ifstream myfile;
 	myfile.open(_request->path);
+    std::cerr << "path: " << _request->path << std::endl;
 	std::string myline;
 	_response->body = "";
 	if ( myfile.is_open() )
@@ -83,6 +84,8 @@ void	_response( Response *_response, Request *_request )
             }
         }
     }
+	// std::cerr << "-----------------------------" << std::endl;
+
     if (!_status_found)
     {
         if (_response->status == 204)

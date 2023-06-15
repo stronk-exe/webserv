@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:39 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:58:11 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/06/11 20:37:33 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,6 +179,34 @@ void	_complete_body_filling( Request *_request )
 	}
 }
 
+void	get_mims( Response *_response )
+{
+	std::vector<std::string> v;
+	std::string key, value;
+
+    std::ifstream file("/Users/ael-asri/Desktop/khiibra/utils/mims");
+
+    if (file.is_open()) {
+			std::cerr << "vec: " << v.size() << std::endl;
+        std::string line;
+        while (std::getline(file, line)) {
+            v.push_back(line);
+        }
+        file.close();
+	}
+	
+	for (size_t i=0; i < v.size(); i++)
+	{
+		std::cerr << "vec: " << v[i] << std::endl;
+		int pos = v[i].find(" ");
+		if (pos != std::string::npos) {
+			key = v[i].substr(0, pos);
+			value = v[i].substr(pos + 1);
+			_response->mims[key] = value;
+		}
+	}
+}
+
 void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, std::string s )
 {
 	// Server _s;
@@ -193,11 +221,12 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	_match_theLocation(_s, _location, _request);
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
+	get_mims(_response);
 
 
 	// std::cerr << "buffer: " << s << std::endl;
 	// std::map<std::string, std::string>::iterator iter;
-    // for (iter = _request->headers.begin(); iter != _request->headers.end(); iter++)
+    // for (iter = _response->mims.begin(); iter != _response->mims.end(); iter++)
     // {
     //     std::cout << "{" << (*iter).first << "}---{" << (*iter).second << "}" << std::endl;
     // }

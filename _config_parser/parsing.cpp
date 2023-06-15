@@ -234,6 +234,7 @@ void print_loc(std::vector<Location> &vec)
         std::cout << i << ":  "<< "location.autoindex "  <<  (*it).autoindex << std::endl;
         std::cout << i << ":  "<< "location.name "  <<  (*it).name << std::endl;
         std::cout << i << ":  "<< "location.root_location " <<  (*it).root_location << std::endl;
+        std::cout << i << ":  "<< "location.autoindex " <<  (*it).autoindex << std::endl;
         print_str((*it).index, "index ");
         print_str((*it).allows_methods, "allows_methods ");
         print_cgi((*it).cgi_pass);

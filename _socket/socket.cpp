@@ -3,24 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:33 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:24:04 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/06/11 20:39:05 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../webserv.hpp"
 
-const char *generate_response_str(Response *_response)
+void generate_response_str(Response *_response, int coming_socket)
 {
 	std::string s = "HTTP/1.1 "+ std::to_string(_response->status)+" "+_response->status_message+\
 					"\nContent-Type: "+_response->content_type+\
 					"\nContent-Length: "+std::to_string(_response->content_length)+\
 					"\n\n"+_response->body;
-	return s.c_str();
+					
+	write(coming_socket, s.c_str(), s.size());
 }
-
 std::vector<int>	_get_ports( Parsing &_server )
 {
     std::vector<int>    _ports;
@@ -129,9 +129,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 				
 					// Response
         			_response(response, request);
-					
-					const char *s = generate_response_str(response);
-					write(coming_socket, s, strlen(s));
+					generate_response_str(response, coming_socket);
 					
 					close(coming_socket);
 				}
