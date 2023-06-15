@@ -1,0 +1,13 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/mait-jao/Project/webserv'
+c++    -c -o main.o main.cpp
+ 
+c++    -c -o _config_parser/parsing.o _config_parser/parsing.cpp
+c++    -c -o _socket/socket.o _socket/socket.cpp
+c++    -c -o _methodes/methods.o _methodes/methods.cpp
+c++    -c -o _request/request.o _request/request.cpp
+c++    -c -o _response/response.o _response/response.cpp
+c++    -c -o _cgi/cgi.o _cgi/cgi.cpp
+c++ -Wall -Wextra -Werror -std=c++98 main.o _config_parser/parsing.o _socket/socket.o _methodes/methods.o _request/request.o _response/response.o _cgi/cgi.o -o webserv
+make: Leaving directory `/Users/mait-jao/Project/webserv'
+ 
