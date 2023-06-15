@@ -8,7 +8,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This program built for i386-apple-darwin11.3.0
  
 
-# Make data base, printed on Thu Jun 15 11:49:14 2023
+# Make data base, printed on Thu Jun 15 16:51:50 2023
 
 # Variables
 
@@ -28,6 +28,7 @@ VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
 CURDIR := /Users/mait-jao/Project/webserv
 # makefile
 SHELL = /bin/sh
+ 
 # environment
 VSCODE_NLS_CONFIG = {"locale":"en-us","osLocale":"en","availableLanguages":{},"_languagePackSupport":true}
 # environment
@@ -39,19 +40,15 @@ OBJS = $(SRCS:.cpp=.o)
 # environment
 VSCODE_CWD = /
 # environment
-Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.i8YOh035DZ/Render
+Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.uhHAH517mK/Render
 # environment
-PATH = /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/goinfre/mait-jao/homebrew/bin/
-# environment
-LSCOLORS = Gxfxcxdxbxegedabagacad
+PATH = /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-LS_COLORS = di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43
-# environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.GesYYmnhOn/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.wWZbb7cohJ/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -70,8 +67,6 @@ VSCODE_CODE_CACHE_PATH = /Users/mait-jao/Library/Application Support/Code/Cached
 LOGNAME = mait-jao
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
-# environment
-ZSH = /Users/mait-jao/.oh-my-zsh
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # automatic
@@ -94,8 +89,6 @@ USER = mait-jao
 .DEFAULT_GOAL := all
 # makefile (from `Makefile', line 13)
 NAME = webserv
-# environment
-LESS = -R
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # default
@@ -117,21 +110,25 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-XPC_SERVICE_NAME = com.microsoft.VSCode.2484
+XPC_SERVICE_NAME = com.apple.xpc.launchd.oneshot.0x10000002.Electron
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
 # automatic
 +F = $(notdir $+)
 # environment
 __CF_USER_TEXT_ENCODING = 0x1069:0x0:0x0
+# environment
+COMMAND_MODE = unix2003
 # default
 MAKEFILES := 
 # automatic
 <F = $(notdir $<)
 # environment
-PAGER = less
-# environment
 LC_ALL = C
+# environment
+SECURITYSESSIONID = 186a7
 # automatic
 ^F = $(notdir $^)
 # default
@@ -145,9 +142,9 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 59447
+VSCODE_PID = 4541
 # variable set hash-table stats:
-# Load=67/1024=7%, Rehash=0, Collisions=3/95=3%
+# Load=65/1024=6%, Rehash=0, Collisions=3/93=3%
 
 # Pattern-specific Variable Values
 
@@ -155,33 +152,55 @@ VSCODE_PID = 59447
 
 # Directories
 
-# . (device 16777227, inode 1610911): 21 files, no impossibilities.
+# _request (device 16777227, inode 1701735): 3 files, no impossibilities so far.
+# . (device 16777227, inode 1610911): 23 files, no impossibilities.
+# _response (device 16777227, inode 1701738): 3 files, no impossibilities so far.
+# _socket (device 16777227, inode 1701741): 3 files, no impossibilities so far.
+# _config_parser (device 16777227, inode 1701729): 3 files, no impossibilities so far.
+# _cgi (device 16777227, inode 1701726): 3 files, no impossibilities so far.
+# _methodes (device 16777227, inode 1701732): 3 files, no impossibilities so far.
 
-# 21 files, no impossibilities in 1 directories.
+# 41 files, no impossibilities in 7 directories.
 
 # Implicit Rules
 
-# No implicit rules.
+%.o: %.cpp
+#  commands to execute (from `Makefile', line 34):
+	c++ -g3 ${CFLAGS} -c $< -o $@
+	
+
+# 1 implicit rules, 0 (0.0%) terminal.
 
 # Files
+
+# Not a target:
+_response/response.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2023-06-15 12:42:00
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 all: webserv
 #  Phony target (prerequisite of .PHONY).
 #  Command-line target.
 #  Implicit rule search has not been done.
 #  File does not exist.
-#  File has not been updated.
+#  File has been updated.
+#  Successfully updated.
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 webserv: main.o _config_parser/parsing.o _socket/socket.o _methodes/methods.o _request/request.o _response/response.o _cgi/cgi.o
 #  Implicit rule search has not been done.
-#  Last modified 2023-06-11 21:21:43
-#  File has not been updated.
+#  Last modified 2023-06-15 16:50:51
+#  File has been updated.
+#  Successfully updated.
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
-#  commands to execute (from `Makefile', line 30):
-	c++ $(FLAGS) $^ -o $@
+#  commands to execute (from `Makefile', line 31):
+	c++ -g3 $(FLAGS) $^ -o $@
 	
 
 .PHONY: all clean fclean re
@@ -189,17 +208,29 @@ webserv: main.o _config_parser/parsing.o _socket/socket.o _methodes/methods.o _r
 #  Modification time never checked.
 #  File has not been updated.
 
-# Not a target:
-_config_parser/parsing.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+_config_parser/parsing.o: _config_parser/parsing.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `_config_parser/parsing'
+#  Last modified 2023-06-15 16:50:48
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 34):
+	c++ -g3 ${CFLAGS} -c $< -o $@
+	
 
-# Not a target:
-_methodes/methods.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+_methodes/methods.o: _methodes/methods.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `_methodes/methods'
+#  Last modified 2023-06-15 16:50:49
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 34):
+	c++ -g3 ${CFLAGS} -c $< -o $@
+	
 
 # Not a target:
 .SUFFIXES:
@@ -210,7 +241,34 @@ _methodes/methods.o:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2023-06-11 21:21:37
+#  Last modified 2023-06-15 16:50:44
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+_request/request.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2023-06-15 12:42:00
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+_socket/socket.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2023-06-15 12:42:00
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+main.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2023-06-15 16:27:43
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -221,15 +279,30 @@ fclean: clean
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 36):
+#  commands to execute (from `Makefile', line 40):
 	rm -f $(NAME)
 	
 
+_response/response.o: _response/response.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `_response/response'
+#  Last modified 2023-06-15 16:50:50
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 34):
+	c++ -g3 ${CFLAGS} -c $< -o $@
+	
+
 # Not a target:
-_response/response.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+_cgi/cgi.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2023-06-15 12:41:59
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
 .DEFAULT:
@@ -248,38 +321,79 @@ clean:
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 33):
+#  commands to execute (from `Makefile', line 37):
+ 
 	rm -f $(OBJS)
 	
 
-# Not a target:
-_request/request.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-_socket/socket.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-main.o:
+_request/request.o: _request/request.cpp
 #  Implicit rule search has been done.
-#  File does not exist.
-#  File has not been updated.
+#  Implicit/static pattern stem: `_request/request'
+#  Last modified 2023-06-15 16:50:50
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 34):
+	c++ -g3 ${CFLAGS} -c $< -o $@
+	
+
+# Not a target:
+_config_parser/parsing.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2023-06-15 16:35:46
+#  File has been updated.
+#  Successfully updated.
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
+_socket/socket.o: _socket/socket.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `_socket/socket'
+#  Last modified 2023-06-15 16:50:48
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 34):
+	c++ -g3 ${CFLAGS} -c $< -o $@
+	
+
 # Not a target:
-_cgi/cgi.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+_methodes/methods.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2023-06-15 12:42:00
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+main.o: main.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `main'
+#  Last modified 2023-06-15 16:50:47
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 34):
+	c++ -g3 ${CFLAGS} -c $< -o $@
+	
+
+_cgi/cgi.o: _cgi/cgi.cpp
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `_cgi/cgi'
+#  Last modified 2023-06-15 16:50:51
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+#  commands to execute (from `Makefile', line 34):
+	c++ -g3 ${CFLAGS} -c $< -o $@
+	
 
 # files hash-table stats:
-# Load=16/1024=2%, Rehash=0, Collisions=0/44=0%
+# Load=23/1024=2%, Rehash=0, Collisions=0/72=0%
 # VPATH Search Paths
 
 # No `vpath' search paths.
@@ -291,8 +405,6 @@ _cgi/cgi.o:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Thu Jun 15 11:49:14 2023
+# Finished Make data base on Thu Jun 15 16:51:50 2023
 
  
-make: *** No rule to make target `main.o', needed by `webserv'.  Stop.
-

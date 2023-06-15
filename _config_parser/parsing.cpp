@@ -8,6 +8,7 @@ void split_conf(std::vector<std::string> &data, std::string str)
 
     for (size_t i = 0; i < str.size() ; i++)
     {
+
         if ((str[i] == ' ' || str[i] == '\t'))
         {
             if (!tmp.empty())
@@ -23,7 +24,12 @@ void split_conf(std::vector<std::string> &data, std::string str)
             tmp = "";
         }
         else
-            tmp += str[i];
+        {
+            if (str[i] == '#')
+                break ;
+            else
+                tmp += str[i];
+        }
     }
     if (!tmp.empty())
         data.push_back(tmp);
@@ -104,6 +110,8 @@ void info_location(std::vector<Location> &locations, std::vector<std::string>::i
             loc.root_location = *(++it);
         else if (*it == "index")
             loc.index = info_(++it); 
+        else if (*it == "uploadDir" && *(it + 1) != ";" && *(it + 2) == ";")
+            loc.uploadDir = *(++it);
         else if (*it == "allow_methods")
             loc.allows_methods = info_(++it);
         else if (*it == "cgi_pass")
@@ -145,6 +153,19 @@ void info_listen(Server &serv, std::vector<std::string>::iterator &it)
     }
 }
 
+
+void info_nameServ(Server &serv, std::string &data)
+{
+    int pos = data.find(":");
+    if (pos != -1)
+    {
+        serv.name = data.substr(0, pos);
+        serv.listen_port = str_to_num(data.substr(pos + 1, data.size()));
+    }
+    else
+        serv.name = data;
+}
+
 void parss_info(Parsing &parss)
 {
     Server serv;
@@ -152,12 +173,13 @@ void parss_info(Parsing &parss)
     
     for (it = parss.data.begin(); it != parss.data.end(); it++)
     {
+        
         if (*it == "server" && *(++it) == "{")
         {
             for (it++; *it != "}"; it += 2)
             {
                 if (*it == "server_name" && *(it + 1) != ";" && *(it + 2) == ";")
-                    serv.name = *(++it);
+                    info_nameServ(serv, *(++it));
                 else if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
                     serv.root_location = *(++it);
                 else if (*it == "client_max_body_size" && *(it + 1) != ";" && *(it + 2) == ";")
@@ -174,7 +196,7 @@ void parss_info(Parsing &parss)
                     serv.redirection.return_status = str_to_num(*(++it));
                     serv.redirection.path = *(++it);
                 }
-                else
+                else if (*it != ";")
                     error("not understood");
             }
             if (*it == "}")

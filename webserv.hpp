@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/11 20:29:24 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/15 16:17:17 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ struct Redirection
 struct Location
 {
     bool						autoindex;
-    std::string					root_location, name;
+    std::string					root_location, name, uploadDir;
     std::vector<std::string> 	index;
     std::vector<std::string>	allows_methods;
 	Redirection					redirection;
@@ -85,6 +85,7 @@ struct Location
 	Location& operator=(const Location& loc)
 	{
 		this->name = loc.name;
+		this->uploadDir = loc.uploadDir;
 		this->root_location = loc.root_location;
 		this->autoindex = loc.autoindex;
 		this->index = loc.index;

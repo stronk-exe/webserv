@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/11 20:30:15 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/15 16:27:43 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,8 @@ int main(int ac, char **av)
 
         // 1- Config File:
         parss_info(_server);
-        // print_data(_server);
-
+        print_data(_server);
+        exit(0);
         // 2- Socket connection
         _socket(_server, _request, _response);
     }
