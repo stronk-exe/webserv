@@ -45,11 +45,19 @@ int _match_theLocation( Server &_server, Location &_location, Request *_request 
 
 int _valid_url_chars( std::string s )
 {
-    std::string t = "ABCDEFGHIJKLMNOPQRSTUVWXYZazcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
-	for (int i=0; s[i]; i++)
-		if (!t.find(s[i]))
+    std::string t = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+	for (size_t i=0; i<s.size(); i++)
+		if (t.find(s[i])<0)
 			return 0;
     return 1;
+}
+
+int	_is_method_allowed( Location _location, Request *_request )
+{
+	for (size_t i=0 ; i<_location.allows_methods.size(); i++)
+		if (_location.allows_methods[i] == _request->method)
+			return 1;
+	return 0;
 }
 
 void	_validate_request( Server &_server, Location &_location, Request *_request, Response *_response )
@@ -65,13 +73,17 @@ void	_validate_request( Server &_server, Location &_location, Request *_request,
 		_response->status = 400;
 	if ((_request->uri).size() > 2048)
 		_response->status = 414;
-	if (static_cast<int>(_request->body.size()) > str_to_num(_server.client_max_body_size) )
+	if (static_cast<int>(_request->body.size()) > (str_to_num(_server.client_max_body_size)* 1e6) )
 		_response->status = 413;
+	if (_is_method_allowed(_location, _request))
+		_request->is_method_allowed = 1;
 	if (!_match_theLocation(_server, _location, _request))
+	{
+		std::cerr << "wwwww\n";
 		_response->status = 404;
+	}
 	if (_request->redirection.size())
 	{
-		std::cerr << "haaaa" << std::endl;
 		_response->path = _request->redirection[0];
 		_response->status = 301;
 	}
@@ -179,27 +191,26 @@ void	_complete_body_filling( Request *_request )
 	}
 }
 
-void	get_mims( Response *_response )
+void	_get_mims( Response *_response )
 {
 	std::vector<std::string> v;
 	std::string key, value;
 
     std::ifstream file("/Users/ael-asri/Desktop/khiibra/utils/mims");
 
-    if (file.is_open()) {
-			std::cerr << "vec: " << v.size() << std::endl;
+    if (file.is_open())
+	{
         std::string line;
-        while (std::getline(file, line)) {
+        while (std::getline(file, line))
             v.push_back(line);
-        }
         file.close();
 	}
 	
 	for (size_t i=0; i < v.size(); i++)
 	{
-		std::cerr << "vec: " << v[i] << std::endl;
 		int pos = v[i].find(" ");
-		if (pos != std::string::npos) {
+		if (pos != std::string::npos)
+		{
 			key = v[i].substr(0, pos);
 			value = v[i].substr(pos + 1);
 			_response->mims[key] = value;
@@ -221,7 +232,7 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	_match_theLocation(_s, _location, _request);
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
-	get_mims(_response);
+	_get_mims(_response);
 
 
 	// std::cerr << "buffer: " << s << std::endl;

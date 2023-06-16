@@ -34,10 +34,13 @@ void	_init_l3alam( Request *_request, Response *_response)
 {
 	// Request
 	_request->body = "";
+	_request->is_method_allowed = 0;
 
 	// Response
+	_response->status = 0;
 	_response->content_length = 0;
 	_response->body = "";
+
 }
 
 void	_socket( Parsing &_server, Request *request, Response *response )
@@ -118,12 +121,15 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 
 
                     // checking the method
-                    if (request->method == "GET")
-                        _get(response, request, _s);
-                    else if (request->method == "POST")
-                        _post(response, request, _s);
-                    else if (request->method == "DELETE")
-                        _delete(response, request, _s);
+					if (request->is_method_allowed)
+					{
+						if (request->method == "GET")
+							_get(response, request, _s);
+						else if (request->method == "POST")
+							_post(response, request, _s);
+						else if (request->method == "DELETE")
+							_delete(response, request, _s);
+					}
                     else
                         response->status = 405;
 				

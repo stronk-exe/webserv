@@ -146,6 +146,7 @@ class Request
 		std::map<std::string, std::string>	headers;
 		std::string							body;
 		std::vector<error_page>				error_pages;
+		int									is_method_allowed;
 
 		// Uploads
 		std::string	upload_name;
@@ -187,9 +188,10 @@ void	_cgi( Request *_request, Response *_response, Server &_server );
 void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, std::string s );
 
 // Response
-void	_response( Response *_response, Request *_request );
-int		_get_res_body( Request *_request, Response *_response );
-void    get_indexed_file_data( Request *_request, Response *_response, std::string path );
+void		_response( Response *_response, Request *_request );
+int			_get_res_body( Request *_request, Response *_response );
+void    	get_indexed_file_data( Request *_request, Response *_response, std::string path );
+std::string	_get_ex( std::string _file_name );
 
 // Utils
 void	print_error(std::string s);

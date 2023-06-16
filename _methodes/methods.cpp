@@ -68,7 +68,7 @@ void _body_parser( Request *_request )
     std::string header = _request->body.substr(0, pos);
 	// std::cerr << "kayyn: " << header << std::endl;
 	_request->upload_data = "";
-	std::cerr << "body:\n" << _request->body << std::endl;
+	// std::cerr << "body:\n" << _request->body << std::endl;
 	for (size_t i=pos+4; i < _request->body.size(); i++)
 	{	_request->upload_data += _request->body[i];
 	}
@@ -134,15 +134,6 @@ void _body_parser( Request *_request )
 	// std::cerr << "data: " << _request->upload_data << std::endl;
 }
 
-std::string	_get_ex( std::string _file_name )
-{
-	size_t dotPos = _file_name.find_last_of('.');
-    if (dotPos != std::string::npos && dotPos < _file_name.length() - 1) {
-        return _file_name.substr(dotPos + 1);
-    }
-	return "";
-}
-
 void	_get( Response *_response, Request *_request, Server &_server )
 {
 	(void)_server;
@@ -151,154 +142,11 @@ void	_get( Response *_response, Request *_request, Server &_server )
 	_file ? _get_res_body(_request, _response) : _response->status = 404;
 
     _file_or_dir(_request, _response);
-	if (_request->type == "directory")
+
+	std::cout << "GET" << _response->status << std::endl;
+
+	if (!_response->status)
 	{
-		// std::cerr << "Ayoo!!!!" << std::endl;
-		if (_request->path[_request->path.size()-1] != '/')
-		{
-			_request->path+='/';
-			_response->status = 301;
-		}
-		else
-		{
-			if (_request->index.size())
-			{
-				if (_request->cgi.size())
-				{
-					_cgi(_request, _response, _server);
-					if (!_response->body.size())
-					{
-						// gg
-						
-						_body_parser(_request);
-						std::ofstream _upload_file(_request->path+_request->upload_file_name);
-						
-						_upload_file << _request->upload_data;
-						_response->content_type = _request->upload_content_type;
-						_response->body = _request->body;
-						_response->content_length = _response->body.size();
-						// std::cerr << "gg: " << _response->content_type << std::endl;
-					}
-					_response->status = 200;
-					// if (!_response->body.size())
-						// run its source code
-				}
-				else
-				{
-					_response->status = 200;
-					get_indexed_file_data(_request, _response, _request->path);
-				}
-			}
-			else
-			{
-				// autoindex
-				if (!_request->autoindex)
-					_response->status = 403;
-				else
-				{
-					_response->status = 200;
-
-					// if is html file ()
-					_response->body = _get_listed_dir(_request);
-				}
-			}
-		}
-		std::cerr << "mallawa mok" << std::endl;
-	}
-	else if (_request->type == "file")
-	{
-		if (_request->cgi.size())
-		{
-			_cgi(_request, _response, _server);
-			if (!_response->body.size())
-			{
-				// gg
-				// _body_parser(_request);
-				// std::ofstream myfile;
-  				// myfile.open ("Uploads/pewds.png");
-				// std::cerr << "path: " << _request->path << std::endl;
-				int fd = open( _request->path.c_str(), O_RDONLY );
-				// std::ofstream ofs("Uploads/pewds.png");
-
-				// int fd = fileno(ofs.rdbuf());
-				// std::ofstream _upload_file();
-				// char s[99999];
-				// s << _upload_file;
-				char buffer[999999] = {0};
-				// size_t x = _upload_file;
-				// std::ifstream myfile;
-				// myfile.open("Uploads/pewds.png");
-				int data = read(fd, buffer, 999999);
-				// // std::string _test_buffer;
-				std::cerr << "data: " << data << std::endl;
-				for (int i=0; i<data; i++)
-					_response->body += buffer[i];
-				// std::string s;// = _upload_file;
-				// std::getline(_upload_file, s);
-				// _response->body.assign(_upload_file);
-				// std::cerr << "yooo: " << s << std::endl;
-				
-				// _upload_file << _request->upload_data;
-				// std::map<std::string, std::string>::iterator iter = _response->mims[_get_ex(_request->path))];
-				std::cerr << "ex: " << _response->mims[_get_ex(_request->path)] << std::endl;
-				
-				_response->content_type = _response->mims[_get_ex(_request->path)];
-				// _response->body = _request->body;
-				_response->content_length = _response->body.size();
-				// std::cerr << "gg: " << _response->content_type << std::endl;
-			}
-			_response->status = 200;
-			// std::cerr << "Ayoo" << std::endl;
-			// if (!_response->body.size())
-				// run its source code
-		}
-		else
-		{
-			_response->status = 200;
-			_get_res_body(_request, _response);
-		}
-	}
-}
-
-
-void _post( Response *_response, Request *_request, Server &_server )
-{
-	std::cout << "POST" << std::endl;
-
-	if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
-	{
-		// Upload the shit
-		// _body_parser(_request);
-		
-		_response->content_length = _request->body.size();//_request->upload_data.size();
-		_response->content_type = "text/html";//_request->upload_content_type;
-		
-		// std::cerr << "multipart shit: " << _request->upload_file_name << std::endl;
-		// creating the file
-		
-		// fill it
-		_cgi(_request, _response, _server);
-		if (!_response->body.size())
-		{
-			// gg
-			_body_parser(_request);
-			std::ofstream _upload_file("uploads/"+_request->upload_file_name);
-			
-			_upload_file << _request->upload_data;
-			_response->content_type = _request->upload_content_type;
-			_response->body = _request->body;
-			_response->content_length = _response->body.size();
-			// std::cerr << "gg: " << _response->content_type << std::endl;
-		}
-		_response->status = 200;
-	}
-	else
-	{
-		std::ifstream _file;
-		_file.open(_request->path);
-		_file ? _get_res_body(_request, _response) : _response->status = 404;
-
-		_file_or_dir(_request, _response);
 		if (_request->type == "directory")
 		{
 			if (_request->path[_request->path.size()-1] != '/')
@@ -312,25 +160,109 @@ void _post( Response *_response, Request *_request, Server &_server )
 				{
 					if (_request->cgi.size())
 						_cgi(_request, _response, _server);
-						// if (!_response->body.size())
-							// run its source code
 					else
-						_response->status = 403;
+						get_indexed_file_data(_request, _response, _request->path);
+					_response->status = 200;
 				}
 				else
-					_response->status = 403;
+				{
+					// autoindex
+					if (!_request->autoindex)
+						_response->status = 403;
+					else
+					{
+						_response->body = _get_listed_dir(_request);
+						_response->content_type = "text/html";
+						_response->status = 200;
+					}
+				}
 			}
 		}
 		else if (_request->type == "file")
 		{
 			if (_request->cgi.size())
 				_cgi(_request, _response, _server);
-				// if (!_response->body.size())
-					// run its source code
 			else
-			{
-				_response->status = 200;
 				_get_res_body(_request, _response);
+			_response->status = 200;
+		}
+	}
+}
+
+
+void _post( Response *_response, Request *_request, Server &_server )
+{
+	std::cout << "POST" << std::endl;
+
+	if (!_response->status)
+	{
+		if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
+		{
+			// Upload the shit
+			// _body_parser(_request);
+			
+			_response->content_length = _request->body.size();//_request->upload_data.size();
+			_response->content_type = "text/html";//_request->upload_content_type;
+			
+			// std::cerr << "multipart shit: " << _request->upload_file_name << std::endl;
+			// creating the file
+			
+			// fill it
+			_cgi(_request, _response, _server);
+			if (!_response->body.size())
+			{
+				// gg
+				_body_parser(_request);
+				std::ofstream _upload_file("uploads/"+_request->upload_file_name);
+				
+				_upload_file << _request->upload_data;
+				_response->content_type = _request->upload_content_type;
+				_response->body = _request->body;
+				_response->content_length = _response->body.size();
+				// std::cerr << "gg: " << _response->content_type << std::endl;
+			}
+			_response->status = 200;
+		}
+		else
+		{
+			std::ifstream _file;
+			_file.open(_request->path);
+			_file ? _get_res_body(_request, _response) : _response->status = 404;
+
+			_file_or_dir(_request, _response);
+			if (_request->type == "directory")
+			{
+				if (_request->path[_request->path.size()-1] != '/')
+				{
+					_request->path+='/';
+					_response->status = 301;
+				}
+				else
+				{
+					if (_request->index.size())
+					{
+						if (_request->cgi.size())
+							_cgi(_request, _response, _server);
+							// if (!_response->body.size())
+								// run its source code
+						else
+							_response->status = 403;
+					}
+					else
+						_response->status = 403;
+				}
+			}
+			else if (_request->type == "file")
+			{
+				if (_request->cgi.size())
+					_cgi(_request, _response, _server);
+					// if (!_response->body.size())
+						// run its source code
+				else
+				{
+					_response->status = 200;
+					_get_res_body(_request, _response);
+				}
 			}
 		}
 	}

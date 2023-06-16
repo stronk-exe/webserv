@@ -12,23 +12,38 @@
 
 #include "../webserv.hpp"
 
+std::string	_get_ex( std::string _file_name )
+{
+	size_t dotPos = _file_name.find_last_of('.');
+    if (dotPos != std::string::npos && dotPos < _file_name.length() - 1) {
+        return _file_name.substr(dotPos + 1);
+    }
+	return "";
+}
+
 int	_get_res_body( Request *_request, Response *_response )
 {
-	std::ifstream myfile;
-	myfile.open(_request->path);
-    std::cerr << "path: " << _request->path << std::endl;
-	std::string myline;
-	_response->body = "";
-	if ( myfile.is_open() )
-	{
-		while ( myfile ) {
-			std::getline (myfile, myline);
-			_response->body += myline;
-		}
-	}
-	else
-		std::cout << "Couldn't open file\n";
-	_response->body.erase(_response->body.size()-myline.size(), myline.size());
+    int fd = open( _request->path.c_str(), O_RDONLY );
+    char buffer[999999] = {0};
+    int data = read(fd, buffer, 999999);
+    for (int i=0; i<data; i++)
+		_response->body += buffer[i];
+    _response->content_type = _response->mims[_get_ex(_request->path)];
+	// std::ifstream myfile;
+	// myfile.open(_request->path);
+    // std::cerr << "path: " << _request->path << std::endl;
+	// std::string myline;
+	// _response->body = "";
+	// if ( myfile.is_open() )
+	// {
+	// 	while ( myfile ) {
+	// 		std::getline (myfile, myline);
+	// 		_response->body += myline;
+	// 	}
+	// }
+	// else
+	// 	std::cout << "Couldn't open file\n";
+	// _response->body.erase(_response->body.size()-myline.size(), myline.size());
 	return 1;
 }
 
@@ -138,18 +153,23 @@ void	_response( Response *_response, Request *_request )
             _response->body = "<html><body><h1>501 Not Implemented</h1><img src=\"https://3.bp.blogspot.com/-l_OPWrz4AZo/VtLroz9u1cI/AAAAAAAANPU/mGoZb0ZKwdk/s1600/zytel.jpg\" slt=\"not_implemented\"/></body></html>";
             _response->status_message = "Not Implemented";
         }
+        _response->content_type = "text/html";
     }
     // else
     // {
-		if (!_response->body.size())
-			_get_res_body(_request, _response);
 	// }
 
 	// Response heders
-	if (_response->content_length <= 0)
-        _response->content_length = (_response->body).size();
-    // std::cerr << "Content Lenght: " << _response->content_length << " | body: " << _response->body << std::endl;
-	if (!_response->content_type.size())
-        _response->content_type = "text/html";
-    // std::cerr << "gg: " << _response->content_type << std::endl;
+	// if (_response->content_length <= 0)
+    //     _response->content_length = (_response->body).size();
+    // // std::cerr << "Content Lenght: " << _response->content_length << " | body: " << _response->body << std::endl;
+	// if (!_response->content_type.size())
+    //     _response->content_type = "text/html";
+	if (!_response->body.size())
+	{
+    	_get_res_body(_request, _response);
+        _response->content_type = _response->mims[_get_ex(_request->path)];
+    }
+    _response->content_length = _response->body.size();
+    std::cerr << "gg: " << _request->path << std::endl;
 }
