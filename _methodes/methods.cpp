@@ -69,6 +69,7 @@ void _body_parser( Request *_request )
 	for (size_t i=pos+4; i < _request->body.size(); i++)
 	{	_request->upload_data += _request->body[i];
 	}
+	// std::cerr << "yo upload: " << _request->body.size() << std::endl;
 
 	size_t boundary_pos = _request->headers["Content-Type"].find("boundary=")+9;
 	_request->boundary = _request->headers["Content-Type"].substr(boundary_pos);
@@ -194,7 +195,8 @@ void _post( Response *_response, Request *_request, Server &_server )
 
 	if (!_response->status)
 	{
-		if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
+		// if (_request->headers["Content-Type"].substr(0, 19) == "multipart/form-data")
+		if (_request->upload_path.size())
 		{
 			// Upload the shit
 			// _body_parser(_request);
@@ -211,12 +213,15 @@ void _post( Response *_response, Request *_request, Server &_server )
 			{
 				// gg
 				_body_parser(_request);
-				std::ofstream _upload_file("scripts/uploads/"+_request->upload_file_name);
+				
+				std::ofstream _upload_file(_request->root+_request->upload_path+'/'+_request->upload_file_name);
 				
 				_upload_file << _request->upload_data;
-				_response->content_type = _request->upload_content_type;
+				// _response->content_type = _request->upload_content_type;
+				_response->content_type = _response->mims[_get_ex(_request->upload_file_name)];
 				_response->body = _request->body;
 				_response->content_length = _response->body.size();
+				// std::cerr << "wa lwzz: " << _response->content_type << std::endl;
 				// std::cerr << "gg: " << _response->content_type << std::endl;
 			}
 			_response->status = 200;

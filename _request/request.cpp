@@ -126,6 +126,7 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 	if (_server.errors.size())
 		for (size_t i=0; i<_server.errors.size(); i++)
 			_request->error_pages.push_back(_server.errors[i]);
+	_location.uploadDir.size() ? _request->upload_path = _location.uploadDir : _request->upload_path = "";
 }
 
 void _match_theServer( Parsing &_server, Request *_request, Server &_s)
@@ -174,13 +175,19 @@ void	_request_parser( Request *_request, std::string r )
 
 void	_complete_body_filling( Request *_request )
 {
-	std::cerr << "wew wew: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << std::endl;
+	std::cerr << "wew wew: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << " ~ " << _request->body.size() << std::endl;
 	if (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
 	{
 		while (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
 		{
 			char buffer[999999] = {0};
+			std::cerr << "sizooon: " << _request->fd << std::endl;
+			// int newFd = dup(_request->fd);
+			// // _request->fd = newFd;
 			int data = read(_request->fd, buffer, 999999);
+			// close(newFd);
+			// int data = recv(_request->fd, buffer, 999999, 0);
+			std::cerr << "sizzzzzzz" << std::endl;
 			if (data < 0)
 				print_error("empty data!");
 			for (int i=0; i<data; i++)
@@ -224,7 +231,7 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	_request_parser(_request, s);
 
 	// if the body is not complete yet
-	// _complete_body_filling(_request);
+	_complete_body_filling(_request);
 	
 	
     _match_theServer(_server, _request, _s);

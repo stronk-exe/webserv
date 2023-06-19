@@ -76,7 +76,7 @@ struct Redirection
 struct Location
 {
     bool						autoindex;
-    std::string					root_location, name;
+    std::string					root_location, name, uploadDir;
     std::vector<std::string> 	index;
     std::vector<std::string>	allows_methods;
 	Redirection					redirection;
@@ -91,6 +91,7 @@ struct Location
 		this->allows_methods = loc.allows_methods;
 		this->redirection = loc.redirection;
 		this->cgi_pass = loc.cgi_pass;
+		this->uploadDir = loc.uploadDir;
 		return *this;
 	}
 };
@@ -147,6 +148,7 @@ class Request
 		std::string							body;
 		std::vector<error_page>				error_pages;
 		int									is_method_allowed;
+		std::string							upload_path;
 
 		// Uploads
 		std::string	upload_name;

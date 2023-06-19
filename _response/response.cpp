@@ -32,7 +32,8 @@ int	_get_res_body( Request *_request, Response *_response )
         _response->content_type = "text/html";
     else
         _response->content_type = _response->mims[_get_ex(_request->path)];
-    std::cerr << "yyooo: " << _request->path << " ~ " << _get_ex(_request->path) << " ~ " << _response->content_type << std::endl;
+    
+    // std::cerr << "yyooo: " << _request->path << " ~ " << _get_ex(_request->path) << " ~ " << _response->content_type << std::endl;
 	// std::ifstream myfile;
 	// myfile.open(_request->path);
     // std::cerr << "path: " << _request->path << std::endl;
@@ -103,9 +104,10 @@ void	_response( Response *_response, Request *_request )
             }
         }
     }
+    
 	// std::cerr << "-----------------------------" << std::endl;
 
-    if (!_status_found)
+    if (!_status_found && _response->status != 200)
     {
         if (_response->status == 204)
         {
@@ -169,11 +171,13 @@ void	_response( Response *_response, Request *_request )
     // // std::cerr << "Content Lenght: " << _response->content_length << " | body: " << _response->body << std::endl;
 	// if (!_response->content_type.size())
     //     _response->content_type = "text/html";
+    // std::cerr << "wa lwzz: " << _response->content_type << "~" << _response->status << std::endl;
 	if (!_response->body.size())
 	{
     	_get_res_body(_request, _response);
         _response->content_type = _response->mims[_get_ex(_request->path)];
     }
     _response->content_length = _response->body.size();
+    
     // std::cerr << "gg: " << _request->path << std::endl;
 }

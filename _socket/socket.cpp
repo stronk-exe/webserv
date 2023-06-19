@@ -99,9 +99,9 @@ void	_socket( Parsing &_server, Request *request, Response *response )
     while (1)
     {
         std::cout << "listening ..." << std::endl;
-        std::cout << "fd_size: " << fd_size << std::endl;
+        // std::cout << "fd_size: " << fd_size << std::endl;
 		_sockets = current_sockets;
-		if (select(fd_size + 1, &_sockets, NULL, NULL, NULL) < 0)
+		if (select(fd_size + 1, &_sockets, &_write_sockets, NULL, NULL) < 0)
 			print_error("error in select");
 
 		_init_l3alam(request, response);
@@ -113,7 +113,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 		std::string _test_buffer;
 		while (x<=fd_size)
 		{
-			std::cerr << "check return value of FD_ISSET: " << FD_ISSET(x, &_sockets) << ", at: " << x << std::endl;
+			// std::cerr << "check return value of FD_ISSET: " << FD_ISSET(x, &_sockets) << ", at: " << x << std::endl;
 			if (FD_ISSET(x, &_sockets))
 			{
 				// std::cerr << "hola mista: " << x << std::endl;
@@ -124,14 +124,14 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 					if ((coming_socket = accept(x, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
 
-					// request->fd = coming_socket;
+					request->fd = coming_socket;
 					// _socket_fds.push_back(x);
 					// FD_ZERO(&_sockets);
 					FD_SET(coming_socket, &current_sockets);
 					if (coming_socket > fd_size)
 						fd_size = coming_socket;
 					read_again = 1;
-					std::cerr << "accepted socket: " << coming_socket << std::endl;
+					// std::cerr << "accepted socket: " << coming_socket << std::endl;
 					break ;
 					// std::cerr << "holaa: " << x << std::endl;
 				}
@@ -143,11 +143,14 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 					// std::cerr << "hhhh" << std::endl;
 					if ((data = read(x, buffer, 999999)) < 0)
                         print_error("empty data!");
+					
+					std::cerr << "reddddddddddddddddddddddddddd: " << data << " ~ " << x << " ~ " << std::string(buffer).size() << std::endl;
 					// std::cerr << "jjjjj" << std::endl;
 					// if (data < 0)
-					std::cerr << "empty data: " << data << std::endl;
+					// std::cerr << "empty data: " << data << std::endl;
 					if (!data || data < 999999)
 					{
+						FD_SET(coming_socket, &_write_sockets);
 						// we parse req
 						for (int i=0; i<data; i++)
 							_test_buffer += buffer[i];
@@ -176,9 +179,10 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 						_response(response, request);
 						std::string s = generate_response_str(response);
 						_wr = write(x, s.c_str(), s.size());
-						std::cerr << "length of image: " << strlen(s.c_str()) << std::endl;
+						// std::cerr << "Response: " << response->content_length << "-" << response->content_type << std::endl;
 						close(x);
 						FD_CLR(x, &current_sockets);
+						FD_CLR(x, &_write_sockets);
 						read_again = 0;
 						// _socket_fds.erase(std::remove(_socket_fds.begin(), _socket_fds.end(), x), _socket_fds.end());
 						// _socket_fds.erase(std::remove(_socket_fds.begin(), _socket_fds.end(), coming_socket), _socket_fds.end());
