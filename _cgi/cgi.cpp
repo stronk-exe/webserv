@@ -22,7 +22,7 @@ std::string int_to_str(int num)
 
 void update_env_for_cgi( Request *_request , std::string _path_info, Server _server )
 {///////////
-    std::cerr << "{" << _request->uri << "}"<< std::endl;
+    // std::cerr << "{" << _request->uri << "}"<< std::endl;
     for (int i = 0; i < 10; i++)
     {
         if (_request->env[i])
@@ -103,7 +103,7 @@ void parent_process(std::string &result, int *pipe_fd, int pid)
     close(pipe_fd[1]);
     while ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
     {
-        std::cerr << "..................................." << std::endl;
+        // std::cerr << "..................................." << std::endl;
         result.append(buffer, nbytes);
     }
     close(pipe_fd[0]);
@@ -138,7 +138,7 @@ std::string exec_file_cgi(std::string &scriptPath, std::string &_pwd, Request *_
         std::getline(ss, arg, ' ');
         args[i] = _pwd + "/" + arg;
         av[i] = const_cast<char*>(args[i].c_str());
-        std::cerr << av[i] << std::endl;
+        // std::cerr << av[i] << std::endl;
     }
     av[2] = NULL;
     
@@ -167,7 +167,7 @@ std::string exec_file_cgi(std::string &scriptPath, std::string &_pwd, Request *_
     }
     // if (remove(".hamid"))
     //     perror("remove file");
-    write (2, "*********", 10);
+    // write (2, "*********", 10);
     return result;
 }
 
@@ -199,21 +199,22 @@ void	_cgi( Request *_request, Response *_response , Server &_server )
 {
     // printHeaders(_request->headers); 
 	std::string result, scriptPath, arg, _pwd;
-    std::cerr << "-------------------------------" << std::endl;
-    std::cerr << "CGI" << std::endl;
+    // std::cerr << "-------------------------------" << std::endl;
+    // std::cerr << "CGI" << std::endl;
     _pwd = getcwd(NULL, 0);
     if (!check_path_extension(_request->cgi , _request->path, scriptPath)) {
-        std::cerr << "extansion" << std::endl;
+        // std::cerr << "extansion" << std::endl;
         _response->body = "";
         return ;
     }
     update_env_for_cgi(_request, (_pwd + "/" + _request->path), _server);
-    for (int i = 0; i < 10; i++)
-        std::cerr << "|" << _request->env[i] << "|" << std::endl;
+    // for (int i = 0; i < 10; i++)
+        // std::cerr << "|" << _request->env[i] << "|" << std::endl;
 
     result = exec_file_cgi(scriptPath, _pwd, _request);
+    // std::cerr << "jjjjjj" << std::endl;
 	get_body(_response, result);
     
-	std::cerr << "execution output: |" << _response->body <<"|" << std::endl;
-	std::cerr << "*************************************************" << std::endl;  
+	// std::cerr << "execution output: |" << _response->body <<"|" << std::endl;
+	// std::cerr << "*************************************************" << std::endl;  
 }

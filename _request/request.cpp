@@ -78,10 +78,7 @@ void	_validate_request( Server &_server, Location &_location, Request *_request,
 	if (_is_method_allowed(_location, _request))
 		_request->is_method_allowed = 1;
 	if (!_match_theLocation(_server, _location, _request))
-	{
-		std::cerr << "wwwww\n";
 		_response->status = 404;
-	}
 	if (_request->redirection.size())
 	{
 		_response->path = _request->redirection[0];
@@ -177,6 +174,7 @@ void	_request_parser( Request *_request, std::string r )
 
 void	_complete_body_filling( Request *_request )
 {
+	std::cerr << "wew wew: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << std::endl;
 	if (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
 	{
 		while (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
@@ -196,7 +194,7 @@ void	_get_mims( Response *_response )
 	std::vector<std::string> v;
 	std::string key, value;
 
-    std::ifstream file("/Users/ael-asri/Desktop/khiibra/utils/mims");
+    std::ifstream file("/Users/ael-asri/Desktop/wipsirv/_request/mims");
 
     if (file.is_open())
 	{
@@ -226,7 +224,8 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	_request_parser(_request, s);
 
 	// if the body is not complete yet
-	_complete_body_filling(_request);
+	// _complete_body_filling(_request);
+	
 	
     _match_theServer(_server, _request, _s);
 	_match_theLocation(_s, _location, _request);

@@ -52,10 +52,7 @@ void	_file_or_dir( Request *_request, Response *_response )
 	else if (S_ISREG(info.st_mode))
 		_request->type = "file";
 	else
-	{
-		std::cerr << "gwgwgw " << _request->path << std::endl;
 		_response->status = 404;
-	}
 }
 
 void _body_parser( Request *_request )
@@ -180,6 +177,7 @@ void	_get( Response *_response, Request *_request, Server &_server )
 		}
 		else if (_request->type == "file")
 		{
+			std::cerr << "path: " << _request->uri << std::endl;
 			if (_request->cgi.size())
 				_cgi(_request, _response, _server);
 			else
@@ -213,7 +211,7 @@ void _post( Response *_response, Request *_request, Server &_server )
 			{
 				// gg
 				_body_parser(_request);
-				std::ofstream _upload_file("uploads/"+_request->upload_file_name);
+				std::ofstream _upload_file("scripts/uploads/"+_request->upload_file_name);
 				
 				_upload_file << _request->upload_data;
 				_response->content_type = _request->upload_content_type;
@@ -272,7 +270,7 @@ void _delete(  Response *_response, Request *_request ,Server &_server )
 {
 	std::cout << "DELETE" << std::endl;
 	// (void)_server;
-	std::cerr << "request path: " << _request->path << std::endl;
+	// std::cerr << "request path: " << _request->path << std::endl;
 	std::ifstream _file;
 	_file.open(_request->path);
 	_file ? _get_res_body(_request, _response) : _response->status = 404;

@@ -28,7 +28,11 @@ int	_get_res_body( Request *_request, Response *_response )
     int data = read(fd, buffer, 999999);
     for (int i=0; i<data; i++)
 		_response->body += buffer[i];
-    _response->content_type = _response->mims[_get_ex(_request->path)];
+    if (_get_ex(_request->path) == "php")
+        _response->content_type = "text/html";
+    else
+        _response->content_type = _response->mims[_get_ex(_request->path)];
+    std::cerr << "yyooo: " << _request->path << " ~ " << _get_ex(_request->path) << " ~ " << _response->content_type << std::endl;
 	// std::ifstream myfile;
 	// myfile.open(_request->path);
     // std::cerr << "path: " << _request->path << std::endl;
@@ -171,5 +175,5 @@ void	_response( Response *_response, Request *_request )
         _response->content_type = _response->mims[_get_ex(_request->path)];
     }
     _response->content_length = _response->body.size();
-    std::cerr << "gg: " << _request->path << std::endl;
+    // std::cerr << "gg: " << _request->path << std::endl;
 }
