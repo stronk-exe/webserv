@@ -17,6 +17,7 @@ std::string	generate_response_str(Response *_response)
 	return "HTTP/1.1 "+ std::to_string(_response->status)+" "+_response->status_message+\
 					"\nContent-Type: "+_response->content_type+\
 					"\nContent-Length: "+std::to_string(_response->content_length)+\
+					"\nLocation: "+_response->location+\
 					"\n\n"+_response->body;
 }
 
@@ -32,14 +33,24 @@ std::vector<int>	_get_ports( Parsing &_server )
 void	_init_l3alam( Request *_request, Response *_response)
 {
 	// Request
-	_request->path = "";
+	// if (!_request->path.size())
+	// {
+		// char buffer[9999];
+		// if (getcwd(buffer, sizeof(buffer)) != nullptr)
+		// 	_request->path = std::string(buffer)+"/public";
+		// else
+		// 	_request->path = "";
+	// }// char c[9999];
+	// _request->path = std::string(getcwd(c, 9999));
 	_request->body = "";
+	// _request->root = "";
 	_request->is_method_allowed = 0;
 
 	// Response
 	_response->status = 0;
 	_response->content_length = 0;
 	_response->body = "";
+	_response->location = "";
 
 }
 
@@ -49,11 +60,12 @@ void	_socket( Parsing &_server, Request *request, Response *response )
     struct sockaddr_in	address;
     int					addrlen;
     int					default_port;
-	int					_wr = 0;
+	
 	std::vector<int>	_socket_fds;
+	
 	// std::string			s;
 	
-	fd_set				_sockets, _write_sockets, current_sockets;
+	fd_set				_sockets, _current_sockets, _readfds, _writefds;
 	
 
     
@@ -62,7 +74,8 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 
 	// Initializing the sockets
 	FD_ZERO(&_sockets);
-	FD_ZERO(&current_sockets);
+	FD_ZERO(&_readfds);
+	FD_ZERO(&_writefds);
 	for (size_t i=0; i < _server.servers.size(); i++)
 	{
 		// Creating a socket for each server
@@ -78,6 +91,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 		int on = 1;
 		if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
 			print_error("port in use!");
+		int v = fcntl(_socket_fd, F_SETFL, O_NONBLOCK);
 
 		if ((bind(_socket_fd, (struct sockaddr *)&address, sizeof(address))) < 0)
 			print_error("binding failed!");
@@ -87,7 +101,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 			print_error("listining failed!");
 		
 		
-		FD_SET(_socket_fd, &current_sockets);
+		FD_SET(_socket_fd, &_readfds);
 		_socket_fds.push_back(_socket_fd);
 		std::cerr << "fds: " << _socket_fd << std::endl;
 		// _socket_fds.push_back(_socket_fd);
@@ -96,71 +110,72 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 	}
 	int fd_size = _socket_fds[_socket_fds.size() - 1];
 	int read_again = 0;
+	int					_reading_lock=0, _writing_lock=0;
+	std::string _test_buffer;
+	std::string s;
+	int					_wr = 0;
     while (1)
     {
         std::cout << "listening ..." << std::endl;
         // std::cout << "fd_size: " << fd_size << std::endl;
-		_sockets = current_sockets;
-		if (select(fd_size + 1, &_sockets, &_write_sockets, NULL, NULL) < 0)
+		_sockets = _readfds;
+		_current_sockets = _writefds;
+		if (select(fd_size + 1, &_sockets, &_current_sockets, NULL, NULL) < 0)
 			print_error("error in select");
 
-		_init_l3alam(request, response);
 		// for (int i=0; i < FD_SETSIZE; i++)
 		
 		int x=0;
 		int coming_socket;
 		
-		std::string _test_buffer;
-		while (x<=fd_size)
+		
+		
+		_init_l3alam(request, response);
+		while (x <= fd_size)
 		{
 			// std::cerr << "check return value of FD_ISSET: " << FD_ISSET(x, &_sockets) << ", at: " << x << std::endl;
-			if (FD_ISSET(x, &_sockets))
+			if (FD_ISSET(x, &_sockets) || FD_ISSET(x, &_current_sockets))
 			{
-				// std::cerr << "hola mista: " << x << std::endl;
-				if (std::find( _socket_fds.begin(), _socket_fds.end(), x) != _socket_fds.end() && !read_again)
+				std::cerr << "hola mista: " << x << "-" << _reading_lock << "-" << _writing_lock << std::endl;
+				if (std::find( _socket_fds.begin(), _socket_fds.end(), x) != _socket_fds.end() && !_reading_lock && !_writing_lock)
 				{
 					// for (int j=0; j<_socket_fds.size(); j++)
 					// 	std::cerr << "-: " << _socket_fds[j] << std::endl;
 					if ((coming_socket = accept(x, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
-
+					int d = fcntl(coming_socket, F_SETFL, O_NONBLOCK);
+					// std::cerr << "return value of fcntl: " << d << std::endl;
 					request->fd = coming_socket;
 					// _socket_fds.push_back(x);
 					// FD_ZERO(&_sockets);
-					FD_SET(coming_socket, &current_sockets);
+					FD_SET(coming_socket, &_readfds);
 					if (coming_socket > fd_size)
 						fd_size = coming_socket;
-					read_again = 1;
+					_reading_lock = 1;
+					_test_buffer = "";
 					// std::cerr << "accepted socket: " << coming_socket << std::endl;
 					break ;
 					// std::cerr << "holaa: " << x << std::endl;
 				}
-				else if (std::find( _socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end())
+				// else if (std::find( _socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end())
+				else if (_reading_lock)
 				{
 					// std::cerr << "empty holaa: " << coming_socket << std::endl;
 					char				buffer[999999] = {0};
 					int data;
+					// memset(buffer, 0, 999999);
 					// std::cerr << "hhhh" << std::endl;
-					if ((data = read(x, buffer, 999999)) < 0)
-                        print_error("empty data!");
-					
-					std::cerr << "reddddddddddddddddddddddddddd: " << data << " ~ " << x << " ~ " << std::string(buffer).size() << std::endl;
-					// std::cerr << "jjjjj" << std::endl;
-					// if (data < 0)
-					// std::cerr << "empty data: " << data << std::endl;
-					if (!data || data < 999999)
+					// std::cerr << "rddddddddddddddddddddddddddddd" << std::endl;
+					if ((data = read(x, buffer, 999999)) <= 0)
 					{
-						FD_SET(coming_socket, &_write_sockets);
-						// we parse req
 						for (int i=0; i<data; i++)
 							_test_buffer += buffer[i];
-						// std::cerr << "req req: " << std::endl;
-						
-						// 3- Request:
+						FD_SET(x, &_writefds);
+						// x++;
 						Server _s;
 						_request(_server, _s, request, response, _test_buffer);
 
-						// std::cerr << "uri: " << request->uri << std::endl;
+						// std::cerr << "PATH: " << request->path << std::endl;
 
 						// checking the method
 						if (request->is_method_allowed)
@@ -175,54 +190,64 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 						else
 							response->status = 405;
 						
-						// Response
 						_response(response, request);
-						std::string s = generate_response_str(response);
-						_wr = write(x, s.c_str(), s.size());
-						// std::cerr << "Response: " << response->content_length << "-" << response->content_type << std::endl;
-						close(x);
-						FD_CLR(x, &current_sockets);
-						FD_CLR(x, &_write_sockets);
-						read_again = 0;
-						// _socket_fds.erase(std::remove(_socket_fds.begin(), _socket_fds.end(), x), _socket_fds.end());
-						// _socket_fds.erase(std::remove(_socket_fds.begin(), _socket_fds.end(), coming_socket), _socket_fds.end());
-						// for (int j=0; j<_socket_fds.size(); j++)
-						// 	std::cerr << "-: " << _socket_fds[j] << std::endl;
-						x++;
-						// coming_socket=0;
-						// std::cerr << "yooo: " << x << std::endl;
+						s = generate_response_str(response);
+						_reading_lock = 0;
+						_writing_lock = 1;
+						break;
 					}
-					// else if (data)
-					// 	break;
-						
-					// std::cerr << "we here??" << data << "~" << _wr << std::endl;
-					// if (!data && !_wr)
-					// {
-					// 	// we go for parsing
+                        // print_error("empty data!");
 					
-					// }
-					// else
+					// std::cerr << "reddddddddddddddddddddddddddd: " << data << " ~ " << x << " ~ " << std::string(buffer).size() << std::endl;
+					// std::cerr << "jjjjj" << std::endl;
+					// if (data < 0)
+					// std::cerr << "empty data: " << data << std::endl;
+					// if (!data || data < 999999)
 					// {
-					// 	std::cerr << "writing size: " << _wr << " ~ " << s.size() << std::endl << s << std::endl;
-					// 	FD_SET(x, &_write_sockets);
+						FD_SET(x, &_readfds);
+						// we parse req
+						for (int i=0; i<data; i++)
+							_test_buffer += buffer[i];
+						// std::cerr << "req req: " << std::endl;
+						
+						// 3- Request:
+						
+						
+						// Response
+						
+						
+						
+						// if (!data)
+						// {
+						// 	_reading_lock = 0;
+						// 	_writing_lock = 1;
+						// }
 					// }
+					// _writing_lock = 1;
+				}
+				else if (_writing_lock)
+				{
+					
+					// std::cerr << "rttttttttttttttttttttt: " << _wr << std::endl;
+					int return_write = write(x, &s.c_str()[_wr], s.size()-_wr);
+					_wr += return_write;
+					std::cerr << request->uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;
+					if (return_write <= 0 || _wr == s.size())
+					{
+						close(x);
+						FD_CLR(x, &_readfds);
+						FD_CLR(x, &_writefds);
+						// FD_CLR(x, &_current_sockets);
+						_writing_lock = 0;
+						_wr=0;
+						x++;
+						std::cerr << "l3zz: " << std::endl;
+					}
+					x++;
+
 				}
 				else
 					x++;
-					// if (_wr == s.size())
-					// {
-					// 	
-					// 	FD_CLR(x, &_write_sockets);
-					// 	_wr = 0;
-					// 	x++;
-					// }
-
-
-						
-						// std::cerr << "response body: " << s << std::endl;
-					
-
-					// std::ofstream _hmida("uploads/hmida.txt");
 			}
 			else
 				x++;

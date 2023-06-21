@@ -105,6 +105,27 @@ void _extract_first_line( Request *_request, std::string s )
 	// 	print_error("missing method or uri or http-version here!");
 }
 
+// std::string	_get_Path( std::string path )
+// {
+// 	DIR *dir;
+// 	struct dirent *entry;
+
+// 	std::string s;
+
+// 	if ((dir = opendir(path.c_str())) == NULL)
+// 		perror("opendir() error");
+// 	else
+// 	{
+// 		// puts("contents of root:");
+// 		// while ((entry = readdir(dir)) != NULL)
+// 		// {
+// 		// 	std::string data_name = entry->d_name;
+// 		// 	s += "<h3><a href="+data_name+">"+data_name+"</a><br/></h3>";
+// 		// }
+// 		closedir(dir);
+// 	}
+// }
+
 void _fill_request(Server &_server, Location &_location, Request *_request )
 {
 	if (_location.index.size())
@@ -115,7 +136,13 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 			_request->index.push_back(_server.index[i]);
 	_location.autoindex ? _request->autoindex = 1 : _request->autoindex = 0;
 	_request->root = _location.root_location;
-	_request->path = _request->root+_request->uri;
+	// if (_request->path == "/Users/ael-asri/Desktop/wipsirv/public")
+	// 	_request->path += '/' + _request->root ;
+	// if (_request->uri != "/favicon.ico")
+	// _new_location = _get_Path( _request->uri );
+
+	_request->path = "/Users/ael-asri/Desktop/wipsirv/public/" + _request->root + _request->uri;
+	// std::cerr << "PATH: " << _request->path << std::endl;
 	if (_server.redirection.path.size())
 		_request->redirection.push_back(_server.redirection.path);
 
@@ -175,19 +202,19 @@ void	_request_parser( Request *_request, std::string r )
 
 void	_complete_body_filling( Request *_request )
 {
-	std::cerr << "wew wew: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << " ~ " << _request->body.size() << std::endl;
+	// std::cerr << "wew wew: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << " ~ " << _request->body.size() << std::endl;
 	if (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
 	{
 		while (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
 		{
 			char buffer[999999] = {0};
-			std::cerr << "sizooon: " << _request->fd << std::endl;
+			// std::cerr << "sizooon: " << _request->fd << std::endl;
 			// int newFd = dup(_request->fd);
 			// // _request->fd = newFd;
 			int data = read(_request->fd, buffer, 999999);
 			// close(newFd);
 			// int data = recv(_request->fd, buffer, 999999, 0);
-			std::cerr << "sizzzzzzz" << std::endl;
+			// std::cerr << "sizzzzzzz" << std::endl;
 			if (data < 0)
 				print_error("empty data!");
 			for (int i=0; i<data; i++)
@@ -231,7 +258,7 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	_request_parser(_request, s);
 
 	// if the body is not complete yet
-	_complete_body_filling(_request);
+	// _complete_body_filling(_request);
 	
 	
     _match_theServer(_server, _request, _s);

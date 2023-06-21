@@ -131,12 +131,13 @@ std::string exec_file_cgi(std::string &scriptPath, std::string &_pwd, Request *_
     pid_t pid;
     char *av[3];
     int fd, pipe_fd[2];
+    (void)_pwd;
     std::string result, arg, args[2];
     
     std::istringstream ss(scriptPath);
     for (int i = 0; i < 2; i++) {
         std::getline(ss, arg, ' ');
-        args[i] = _pwd + "/" + arg;
+        args[i] = arg;
         av[i] = const_cast<char*>(args[i].c_str());
         // std::cerr << av[i] << std::endl;
     }
@@ -201,18 +202,19 @@ void	_cgi( Request *_request, Response *_response , Server &_server )
 	std::string result, scriptPath, arg, _pwd;
     // std::cerr << "-------------------------------" << std::endl;
     // std::cerr << "CGI" << std::endl;
+    // std::cerr << "path in cgi: " << _request->path << std::endl;
     _pwd = getcwd(NULL, 0);
     if (!check_path_extension(_request->cgi , _request->path, scriptPath)) {
         // std::cerr << "extansion" << std::endl;
         _response->body = "";
         return ;
     }
-    update_env_for_cgi(_request, (_pwd + "/" + _request->path), _server);
+    update_env_for_cgi(_request, (_request->path), _server);
     // for (int i = 0; i < 10; i++)
         // std::cerr << "|" << _request->env[i] << "|" << std::endl;
 
+    // std::cerr << "jjjjjj: " << scriptPath << std::endl;
     result = exec_file_cgi(scriptPath, _pwd, _request);
-    // std::cerr << "jjjjjj" << std::endl;
 	get_body(_response, result);
     
 	// std::cerr << "execution output: |" << _response->body <<"|" << std::endl;

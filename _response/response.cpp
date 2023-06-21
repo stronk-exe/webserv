@@ -98,6 +98,7 @@ void	_response( Response *_response, Request *_request )
             {
 				if (_response->status == _request->error_pages[i].error_status[j])
                 {
+                    // std::cerr << "ayooo: " << _request->error_pages[i].path << std::endl;
 					get_file_data(_response, _request->error_pages[i].path);
                     _status_found=1;
                 }

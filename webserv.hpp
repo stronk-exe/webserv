@@ -138,6 +138,7 @@ class Request
 		std::string 						type;
 		int									autoindex;
 		std::string							path;
+		std::map<std::string, std::string>	paths;
 		std::vector<std::string>			index;
 		std::string							root;
 		std::vector<std::string>			redirection;
@@ -171,6 +172,7 @@ class Response
 		std::string path;
 		std::string data;
 		std::string body;
+		std::string	location;
 		std::map<std::string, std::string>	mims;
 };
 
