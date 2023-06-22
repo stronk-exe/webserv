@@ -15,22 +15,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (in_array($avatar_actual_ext, $allowed)) {
         if ($avatar_error === 0) {
-            if ($avatar_size < 1000000000) {
+            if ($avatar_size < 1000000) {
                 $avatar_name_new = uniqid('', true) . '.' . $avatar_actual_ext;
-                $avatar_destination = '../Uploads/' . $avatar_name_new;
+                $avatar_destination = 'uploads/' . $avatar_name_new;
                 move_uploaded_file($avatar_tmp_name, $avatar_destination);
                 $_COOKIE['name'] = $_POST['name'];
                 $_COOKIE['email'] = $_POST['email'];
                 $_COOKIE['avatar'] = $avatar_destination;
-                setcookie('name', $_POST['name'], time() + 3600 * 24 * 7);
-                setcookie('email', $_POST['email'], time() + 3600 * 24 * 7);
-                setcookie('avatar', $avatar_destination, time() + 3600 * 24 * 7);
+                // setcookie('name', $_POST['name'], time() + 3600 * 24 * 7);
+                // setcookie('email', $_POST['email'], time() + 3600 * 24 * 7);
+                // setcookie('avatar', $avatar_destination, time() + 3600 * 24 * 7);
             } else {
                 echo 'File too big';
                 exit(1);
             }
         } else {
-            echo 'Error';
+            echo 'Error a hamid';
             exit(1);
         }
     } else {

@@ -110,7 +110,7 @@ void info_location(std::vector<Location> &locations, std::vector<std::string>::i
             loc.root_location = *(++it);
         else if (*it == "index")
             loc.index = info_(++it); 
-        else if (*it == "uploadDir" && *(it + 1) != ";" && *(it + 2) == ";")
+        else if (*it == "upload" && *(it + 1) != ";" && *(it + 2) == ";")
             loc.uploadDir = *(++it);
         else if (*it == "allow_methods")
             loc.allows_methods = info_(++it);
@@ -256,6 +256,7 @@ void print_loc(std::vector<Location> &vec)
         std::cout << i << ":  "<< "location.autoindex "  <<  (*it).autoindex << std::endl;
         std::cout << i << ":  "<< "location.name "  <<  (*it).name << std::endl;
         std::cout << i << ":  "<< "location.root_location " <<  (*it).root_location << std::endl;
+        std::cout << i << ":  "<< "location.upload " <<  (*it).uploadDir << std::endl;
         print_str((*it).index, "index ");
         print_str((*it).allows_methods, "allows_methods ");
         print_cgi((*it).cgi_pass);

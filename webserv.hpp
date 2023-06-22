@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/15 16:17:17 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/22 14:21:18 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,13 +85,13 @@ struct Location
 	Location& operator=(const Location& loc)
 	{
 		this->name = loc.name;
-		this->uploadDir = loc.uploadDir;
 		this->root_location = loc.root_location;
 		this->autoindex = loc.autoindex;
 		this->index = loc.index;
 		this->allows_methods = loc.allows_methods;
 		this->redirection = loc.redirection;
 		this->cgi_pass = loc.cgi_pass;
+		this->uploadDir = loc.uploadDir;
 		return *this;
 	}
 };
@@ -138,15 +138,19 @@ class Request
 		std::string 						type;
 		int									autoindex;
 		std::string							path;
+		std::map<std::string, std::string>	paths;
 		std::vector<std::string>			index;
 		std::string							root;
 		std::vector<std::string>			redirection;
 		std::vector<CGI>					cgi;
+		std::string							queryString;
 		char								**env;
 		int									client_body_upload;
 		std::map<std::string, std::string>	headers;
 		std::string							body;
 		std::vector<error_page>				error_pages;
+		int									is_method_allowed;
+		std::string							upload_path;
 
 		// Uploads
 		std::string	upload_name;
@@ -169,6 +173,8 @@ class Response
 		std::string path;
 		std::string data;
 		std::string body;
+		std::string	location;
+		std::map<std::string, std::string>	mims;
 };
 
 
@@ -187,9 +193,10 @@ void	_cgi( Request *_request, Response *_response, Server &_server );
 void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, std::string s );
 
 // Response
-void	_response( Response *_response, Request *_request );
-int		_get_res_body( Request *_request, Response *_response );
-void    get_indexed_file_data( Request *_request, Response *_response, std::string path );
+void		_response( Response *_response, Request *_request );
+int			_get_res_body( Request *_request, Response *_response );
+void    	get_indexed_file_data( Request *_request, Response *_response, std::string path );
+std::string	_get_ex( std::string _file_name );
 
 // Utils
 void	print_error(std::string s);
@@ -204,5 +211,7 @@ void	info_err_status(std::vector<error_page> &errors, std::vector<std::string>::
 void	info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void	print_data(Parsing &parss);
 std::vector<std::string>	info_(std::vector<std::string>::iterator &it);
+
+extern std::string webserv_loc;
 
 #endif

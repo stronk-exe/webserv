@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:39 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/11 20:37:33 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/22 11:09:08 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,11 +45,19 @@ int _match_theLocation( Server &_server, Location &_location, Request *_request 
 
 int _valid_url_chars( std::string s )
 {
-    std::string t = "ABCDEFGHIJKLMNOPQRSTUVWXYZazcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
-	for (int i=0; s[i]; i++)
-		if (!t.find(s[i]))
+    std::string t = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+	for (size_t i=0; i<s.size(); i++)
+		if (t.find(s[i])<0)
 			return 0;
     return 1;
+}
+
+int	_is_method_allowed( Location _location, Request *_request )
+{
+	for (size_t i=0 ; i<_location.allows_methods.size(); i++)
+		if (_location.allows_methods[i] == _request->method)
+			return 1;
+	return 0;
 }
 
 void	_validate_request( Server &_server, Location &_location, Request *_request, Response *_response )
@@ -65,13 +73,14 @@ void	_validate_request( Server &_server, Location &_location, Request *_request,
 		_response->status = 400;
 	if ((_request->uri).size() > 2048)
 		_response->status = 414;
-	if (static_cast<int>(_request->body.size()) > str_to_num(_server.client_max_body_size) )
+	if (static_cast<int>(_request->body.size()) > (str_to_num(_server.client_max_body_size)* 1e6) )
 		_response->status = 413;
+	if (_is_method_allowed(_location, _request))
+		_request->is_method_allowed = 1;
 	if (!_match_theLocation(_server, _location, _request))
 		_response->status = 404;
 	if (_request->redirection.size())
 	{
-		std::cerr << "haaaa" << std::endl;
 		_response->path = _request->redirection[0];
 		_response->status = 301;
 	}
@@ -96,6 +105,27 @@ void _extract_first_line( Request *_request, std::string s )
 	// 	print_error("missing method or uri or http-version here!");
 }
 
+// std::string	_get_Path( std::string path )
+// {
+// 	DIR *dir;
+// 	struct dirent *entry;
+
+// 	std::string s;
+
+// 	if ((dir = opendir(path.c_str())) == NULL)
+// 		perror("opendir() error");
+// 	else
+// 	{
+// 		// puts("contents of root:");
+// 		// while ((entry = readdir(dir)) != NULL)
+// 		// {
+// 		// 	std::string data_name = entry->d_name;
+// 		// 	s += "<h3><a href="+data_name+">"+data_name+"</a><br/></h3>";
+// 		// }
+// 		closedir(dir);
+// 	}
+// }
+
 void _fill_request(Server &_server, Location &_location, Request *_request )
 {
 	if (_location.index.size())
@@ -106,7 +136,13 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 			_request->index.push_back(_server.index[i]);
 	_location.autoindex ? _request->autoindex = 1 : _request->autoindex = 0;
 	_request->root = _location.root_location;
-	_request->path = _request->root+_request->uri;
+	// if (_request->path == "/Users/mait-jao/Project/hlwa/public")
+	// 	_request->path += '/' + _request->root ;
+	// if (_request->uri != "/favicon.ico")
+	// _new_location = _get_Path( _request->uri );
+
+	_request->path = webserv_loc + "/public/" + _request->root + _request->uri;
+	std::cerr << "PATH: " << _request->path << std::endl;
 	if (_server.redirection.path.size())
 		_request->redirection.push_back(_server.redirection.path);
 
@@ -117,6 +153,7 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 	if (_server.errors.size())
 		for (size_t i=0; i<_server.errors.size(); i++)
 			_request->error_pages.push_back(_server.errors[i]);
+	_location.uploadDir.size() ? _request->upload_path = _location.uploadDir : _request->upload_path = "";
 }
 
 void _match_theServer( Parsing &_server, Request *_request, Server &_s)
@@ -165,16 +202,50 @@ void	_request_parser( Request *_request, std::string r )
 
 void	_complete_body_filling( Request *_request )
 {
+	// std::cerr << "wew wew: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << " ~ " << _request->body.size() << std::endl;
 	if (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
 	{
 		while (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
 		{
 			char buffer[999999] = {0};
+			// std::cerr << "sizooon: " << _request->fd << std::endl;
+			// int newFd = dup(_request->fd);
+			// // _request->fd = newFd;
 			int data = read(_request->fd, buffer, 999999);
+			// close(newFd);
+			// int data = recv(_request->fd, buffer, 999999, 0);
+			// std::cerr << "sizzzzzzz" << std::endl;
 			if (data < 0)
 				print_error("empty data!");
 			for (int i=0; i<data; i++)
 				_request->body += buffer[i];
+		}
+	}
+}
+
+void	_get_mims( Response *_response )
+{
+	std::vector<std::string> v;
+	std::string key, value;
+
+    std::ifstream file((webserv_loc + "/_request/mims"));
+
+    if (file.is_open())
+	{
+        std::string line;
+        while (std::getline(file, line))
+            v.push_back(line);
+        file.close();
+	}
+	
+	for (size_t i=0; i < v.size(); i++)
+	{
+		int pos = v[i].find(" ");
+		if (pos != std::string::npos)
+		{
+			key = v[i].substr(0, pos);
+			value = v[i].substr(pos + 1);
+			_response->mims[key] = value;
 		}
 	}
 }
@@ -187,17 +258,19 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	_request_parser(_request, s);
 
 	// if the body is not complete yet
-	_complete_body_filling(_request);
+	// _complete_body_filling(_request);
+	
 	
     _match_theServer(_server, _request, _s);
 	_match_theLocation(_s, _location, _request);
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
+	_get_mims(_response);
 
 
 	// std::cerr << "buffer: " << s << std::endl;
 	// std::map<std::string, std::string>::iterator iter;
-    // for (iter = _request->headers.begin(); iter != _request->headers.end(); iter++)
+    // for (iter = _response->mims.begin(); iter != _response->mims.end(); iter++)
     // {
     //     std::cout << "{" << (*iter).first << "}---{" << (*iter).second << "}" << std::endl;
     // }
