@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:05:56 by mait-jao          #+#    #+#             */
-/*   Updated: 2023/06/22 14:30:54 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/22 14:34:44 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ std::string exec_file_cgi(std::string &scriptPath, std::string &_pwd, Request *_
         // std::cerr << "=======================================" << std::endl;
         // std::cerr << "body : \n" << _request->body << std::endl;
         // std::cerr << "=======================================" << std::endl;
-    fd = createFile("hamid", _request->body);
+    fd = createFile(".hamid", _request->body);
     if (!(pipe(pipe_fd) > -1 && (pid = fork()) > -1)) {
         std::cerr << strerror(errno) << std::endl;
         exit(12);
@@ -164,8 +164,8 @@ std::string exec_file_cgi(std::string &scriptPath, std::string &_pwd, Request *_
         //     perror("remove file");
         parent_process(result, pipe_fd, pid);///////////////////
     }
-    // if (remove(".hamid"))
-    //     perror("remove file");
+    if (remove(".hamid"))
+        perror("remove file");
     // write (2, "*********", 10);
     return result;
 }
