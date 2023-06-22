@@ -91,8 +91,8 @@ std::string get_content_type(char *buffer)
     
     char* token = std::strtok(buffer, " ");
     token = std::strtok(NULL, " ");
-    
-    return (str = token);
+    str = token;
+    return (str);
 }
 
 

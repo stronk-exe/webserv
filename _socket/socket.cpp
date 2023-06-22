@@ -117,7 +117,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 	int					_wr = 0;
     while (1)
     {
-        std::cout << "listening ..." << std::endl;
+        // std::cout << "listening ..." << std::endl;
 		_sockets = _readfds;
 		_current_sockets = _writefds;
 		if (select(fd_size + 1, &_sockets, &_current_sockets, NULL, NULL) < 0)
@@ -132,12 +132,13 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 		while (x <= fd_size)
 		{
 			// std::cerr << "check return value of FD_ISSET: " << FD_ISSET(x, &_sockets) << ", at: " << x << std::endl;
+			// std::cerr << "check return value of FD_ISSET current: " << FD_ISSET(x, &_current_sockets) << ", at: " << x << std::endl;
 			if (FD_ISSET(x, &_sockets) || FD_ISSET(x, &_current_sockets))
 			{
-				std::cerr << "hola mista: " << x << "-" << _reading_lock << "-" << _writing_lock << std::endl;
-				for (size_t f=0; f<_socket_fds.size(); f++)
-					std::cerr << "_socket_fds[" << f << "]: " << _socket_fds[f] << std::endl;
-				if (std::find( _socket_fds.begin(), _socket_fds.end(), x) != _socket_fds.end() && !_reading_lock && !_writing_lock)
+				// std::cerr << "hola mista: " << x << "-" << _reading_lock << "-" << _writing_lock << std::endl;
+				// for (size_t f=0; f<_socket_fds.size(); f++)
+				// 	std::cerr << "_socket_fds[" << f << "]: " << _socket_fds[f] << std::endl;
+				if (std::find(_socket_fds.begin(), _socket_fds.end(), x) != _socket_fds.end() && !_reading_lock && !_writing_lock)
 				{
 					if ((coming_socket = accept(x, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
@@ -149,7 +150,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 					_test_buffer = "";
 					break ;
 				}
-				else if (_reading_lock)
+				else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _reading_lock)
 				{
 					char				buffer[999999] = {0};
 					int data;
@@ -180,16 +181,18 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 						s = generate_response_str(response);
 						_reading_lock = 0;
 						_writing_lock = 1;
-						// x++;
-						// std::cerr << "wwwwww: " << data << std::endl;
+						std::cerr << "wwwwww: " << x << std::endl;
+						x++;
+						// FD_CLR(x, &_readfds);
 						break;
 					}
 					// std::cerr << "mmmmm: " << data << std::endl;
 					for (int i=0; i<data; i++)
 						_test_buffer += buffer[i];
 					FD_SET(x, &_readfds);
+					// x++;
 				}
-				else if (_writing_lock)
+				else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _writing_lock)
 				{
 					int return_write = write(x, &s.c_str()[_wr], s.size()-_wr);
 					_wr += return_write;
@@ -201,9 +204,8 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 						FD_CLR(x, &_writefds);
 						_writing_lock = 0;
 						_wr=0;
+						std::cerr << "l3zz: " << x << std::endl;
 						x++;
-						std::cerr << "l3zz: " << std::endl;
-						
 					}
 					x++;
 
