@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 13:05:56 by mait-jao          #+#    #+#             */
-/*   Updated: 2023/06/22 14:34:44 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/22 20:12:19 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,8 @@ std::string get_content_type(char *buffer)
     
     char* token = std::strtok(buffer, " ");
     token = std::strtok(NULL, " ");
-    
-    return (str = token);
+    str = token;
+    return (str);
 }
 
 
@@ -155,6 +155,7 @@ std::string exec_file_cgi(std::string &scriptPath, std::string &_pwd, Request *_
         close(pipe_fd[0]);
         dup2(pipe_fd[1], STDOUT_FILENO);
         close(pipe_fd[1]);
+        alarm(30);
         execve(av[0], av, _request->env);
         std::cerr << strerror(errno) << std::endl;
         exit(12);
@@ -212,7 +213,13 @@ void	_cgi( Request *_request, Response *_response , Server &_server )
         // std::cerr << "|" << _request->env[i] << "|" << std::endl;
 
     // std::cerr << "jjjjjj: " << scriptPath << std::endl;
+    clock_t startTime = clock();
     result = exec_file_cgi(scriptPath, _pwd, _request);
+    clock_t endTime = clock();
+
+    // Print the elapsed time
+    std::cout << "CLOCKS_PER_SEC : " << CLOCKS_PER_SEC << std::endl;
+    std::cout << "\033[38;5;70mElapsed time: \033[0m" << (static_cast<double>(endTime - startTime) / CLOCKS_PER_SEC ) << "seconds" << std::endl;
 	get_body(_response, result);
     
 	// std::cerr << "execution output: |" << _response->body <<"|" << std::endl;

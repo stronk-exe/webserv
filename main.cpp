@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:48 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/22 14:23:57 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/22 16:32:47 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ int main(int ac, char **av)
     std::string  str;
     Parsing _server;
 
-    
     if (ac == 3)
     {
         webserv_loc = av[2];
@@ -45,14 +44,3 @@ int main(int ac, char **av)
         std::cerr << "invalid number of arguments!" << std::endl;
     return 0;
 }
-
-// void check_QueryString(std::string & path, std::string & queryString)
-// {    
-//     int pos = path.find('?');
-//     if (pos != -1)
-//         queryString = path.substr(pos, path.size() - pos); 
-
-// 	std::cerr << "path.substr(0, pos) > " << path.substr(0, pos) << std::endl;
-// 	path = path.substr(0, pos);
-// }
-

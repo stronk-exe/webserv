@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:39 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/22 11:09:08 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/22 16:44:03 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,13 +136,14 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 			_request->index.push_back(_server.index[i]);
 	_location.autoindex ? _request->autoindex = 1 : _request->autoindex = 0;
 	_request->root = _location.root_location;
-	// if (_request->path == "/Users/mait-jao/Project/hlwa/public")
+	// if (_request->path == "/Users/ael-asri/Desktop/wipsirv/public")
 	// 	_request->path += '/' + _request->root ;
 	// if (_request->uri != "/favicon.ico")
 	// _new_location = _get_Path( _request->uri );
+	std::cerr <<  "_request->root" <<  _request->root << std::endl;
 
 	_request->path = webserv_loc + "/public/" + _request->root + _request->uri;
-	std::cerr << "PATH: " << _request->path << std::endl;
+	// std::cerr << "PATH: " << _request->path << std::endl;
 	if (_server.redirection.path.size())
 		_request->redirection.push_back(_server.redirection.path);
 
@@ -228,7 +229,7 @@ void	_get_mims( Response *_response )
 	std::vector<std::string> v;
 	std::string key, value;
 
-    std::ifstream file((webserv_loc + "/_request/mims"));
+    std::ifstream file((webserv_loc + "/mims"));
 
     if (file.is_open())
 	{

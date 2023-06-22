@@ -6,8 +6,9 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
+ 
 
-# Make data base, printed on Thu Jun 22 10:55:11 2023
+# Make data base, printed on Thu Jun 22 16:17:27 2023
 
 # Variables
 
@@ -38,21 +39,21 @@ OBJS = $(SRCS:.cpp=.o)
 # environment
 VSCODE_CWD = /
 # environment
-Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.Xh5iqRuXZQ/Render
+Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.i8JUCzK798/Render
 # environment
-PATH = /usr/bin:/bin:/usr/sbin:/sbin
+PATH = /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.FxOYjNobFi/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.RIyYdbi1Vr/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
 PWD = /Users/mait-jao/Project/hlwa
 # environment
-ORIGINAL_XDG_CURRENT_Project = undefined
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
@@ -108,9 +109,11 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-XPC_SERVICE_NAME = com.apple.xpc.launchd.oneshot.0x10000001.Electron
+XPC_SERVICE_NAME = com.apple.xpc.launchd.oneshot.0x10000004.Electron
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = 
 # automatic
 +F = $(notdir $+)
 # environment
@@ -138,9 +141,9 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 29242
+VSCODE_PID = 1794
 # variable set hash-table stats:
-# Load=64/1024=6%, Rehash=0, Collisions=3/92=3%
+# Load=65/1024=6%, Rehash=0, Collisions=3/93=3%
 
 # Pattern-specific Variable Values
 
@@ -163,14 +166,16 @@ all: webserv
 #  Command-line target.
 #  Implicit rule search has not been done.
 #  File does not exist.
-#  File has not been updated.
+#  File has been updated.
+#  Successfully updated.
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 webserv: main.o _config_parser/parsing.o _socket/socket.o _methodes/methods.o _request/request.o _response/response.o _cgi/cgi.o
 #  Implicit rule search has not been done.
-#  Last modified 2023-06-22 10:54:46
-#  File has not been updated.
+#  Last modified 2023-06-22 16:09:52
+#  File has been updated.
+#  Successfully updated.
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 #  commands to execute (from `Makefile', line 30):
@@ -184,15 +189,21 @@ webserv: main.o _config_parser/parsing.o _socket/socket.o _methodes/methods.o _r
 
 # Not a target:
 _config_parser/parsing.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  Last modified 2023-06-22 15:49:03
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
 _methodes/methods.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  Last modified 2023-06-22 15:49:04
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
 .SUFFIXES:
@@ -220,9 +231,12 @@ fclean: clean
 
 # Not a target:
 _response/response.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  Last modified 2023-06-22 15:49:05
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
 .DEFAULT:
@@ -247,29 +261,39 @@ clean:
 
 # Not a target:
 _request/request.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  Last modified 2023-06-22 15:49:05
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
 _socket/socket.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  Last modified 2023-06-22 15:49:03
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
 main.o:
 #  Implicit rule search has been done.
-#  File does not exist.
-#  File has not been updated.
+#  Last modified 2023-06-22 15:49:02
+#  File has been updated.
+#  Successfully updated.
 # variable set hash-table stats:
 # Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
 _cgi/cgi.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  Last modified 2023-06-22 16:09:51
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # files hash-table stats:
 # Load=16/1024=2%, Rehash=0, Collisions=0/44=0%
@@ -284,8 +308,6 @@ _cgi/cgi.o:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Thu Jun 22 10:55:11 2023
+# Finished Make data base on Thu Jun 22 16:17:27 2023
 
  
-make: *** No rule to make target `main.o', needed by `webserv'.  Stop.
-

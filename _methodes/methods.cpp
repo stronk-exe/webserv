@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:32 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/22 14:23:36 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/22 18:46:40 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,8 @@ void	_file_or_dir( Request *_request, Response *_response )
 	// std::cerr << "lpath lmrid: " << _request->path << std::endl;
 	if (stat(_request->path.c_str(), &info) != 0)
 		_response->status = 404;
-
+	
+	std::cerr  << "_response->status : "  << _response->status << std::endl;
     if (S_ISDIR(info.st_mode))
 		_request->type = "directory";
 	else if (S_ISREG(info.st_mode))
@@ -182,13 +183,12 @@ void	_get( Response *_response, Request *_request, Server &_server )
 {
 	(void)_server;
 	std::ifstream _file;
-	_file.open(_request->path);
+	std::cerr << "_request->path : " << _request->path << std::endl;
 	_file ? _get_res_body(_request, _response) : _response->status = 404;
 
-	std::cout << "--GET" << _response->status << std::endl;
     _file_or_dir(_request, _response);
 
-	std::cout << "++GET" << _response->status << std::endl;
+	std::cout << "GET" << _response->status << std::endl;
 
 	if (!_response->status)
 	{
@@ -327,57 +327,36 @@ void _post( Response *_response, Request *_request, Server &_server )
 void _delete(  Response *_response, Request *_request ,Server &_server )
 {
 	std::cout << "DELETE" << std::endl;
-	// (void)_server;
-	// std::cerr << "request path: " << _request->path << std::endl;
+
 	std::ifstream _file;
-	_file.open(_request->path);
 	_file ? _get_res_body(_request, _response) : _response->status = 404;
 
     _file_or_dir(_request, _response);
+	std::cerr << "--------_request->type : " << _request->type << std::endl;
 	if (_request->type == "directory")
 	{
 		if (_request->path[_request->path.size()-1] != '/')
 			_response->status = 409;//Conflict
 		else
 		{
-			if (_request->cgi.size()) {
-				if (_request->index.size()) {
-					std::cerr << "cgi1" << std::endl;
-					_cgi(_request, _response, _server);
-				}
+			if (rmdir(_request->path.c_str()) != 0) {
+				perror("Error deleting the directory");
+				if (!access(_request->path.c_str(), W_OK))
+					_response->status = 500;// Internal Server Error
 				else
 					_response->status = 403;// Forbidden
 			}
 			else
-			{
-				if (rmdir(_request->path.c_str()) != 0) {
-					perror("Error deleting the directory");
-					if (!access(_request->path.c_str(), W_OK))
-						_response->status = 500;// Internal Server Error
-					else
-						_response->status = 403;// Forbidden
-				}
-				else
-					_response->status = 204;// No Content
-			}
+				_response->status = 204;// No Content
 		}
 	}
 	else if (_request->type == "file")
 	{
-		if (_request->cgi.size())
-		{
-			std::cerr << "cgi2" << std::endl;
-			_cgi(_request, _response, _server);
-			if (_response->body.empty() && (std::remove(_request->path.c_str()) != 0))
-				perror("Error deleting the file");
-			
-		}
-		else
-		{
-			_response->status = 204;// No Content
-			if (std::remove(_request->path.c_str()) != 0) {
-				perror("Error deleting the file");
-			}
+
+		_response->status = 204;// No Content
+		std::cerr << "delete path : " << _request->path << std::endl;
+		if (std::remove(_request->path.c_str()) != 0) {
+			perror("Error deleting the file");
 		}
 	}
 }

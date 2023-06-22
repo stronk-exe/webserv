@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/22 14:21:18 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/22 16:50:09 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #undef _POSIX_SOURCE
 #include <stdio.h>
+
+extern std::string webserv_loc;
 
 struct error_page
 {
@@ -211,7 +213,5 @@ void	info_err_status(std::vector<error_page> &errors, std::vector<std::string>::
 void	info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void	print_data(Parsing &parss);
 std::vector<std::string>	info_(std::vector<std::string>::iterator &it);
-
-extern std::string webserv_loc;
 
 #endif
