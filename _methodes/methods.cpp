@@ -229,7 +229,7 @@ void	_get( Response *_response, Request *_request, Server &_server )
 		}
 		else if (_request->type == "file")
 		{
-			std::cerr << "path: " << _request->uri << std::endl;
+			// std::cerr << "path: " << _request->uri << std::endl;
 			if (_request->cgi.size())
 				_cgi(_request, _response, _server);
 			else
@@ -272,7 +272,7 @@ void _post( Response *_response, Request *_request, Server &_server )
 				_response->content_type = _response->mims[_get_ex(_request->upload_file_name)];
 				_response->body = _request->body;
 				_response->content_length = _response->body.size();
-				std::cerr << "file size: " << _response->body.size() << std::endl;
+				// std::cerr << "file size: " << _response->body.size() << std::endl;
 				// std::cerr << "wa lwzz: " << _response->content_type << std::endl;
 				// std::cerr << "gg: " << _response->content_type << std::endl;
 			}

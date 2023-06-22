@@ -86,7 +86,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 		// Binding the sockets of each server
 		memset((char *)&address, 0, sizeof(address));
 		address.sin_family = AF_INET;
-		address.sin_addr.s_addr = INADDR_ANY;
+		address.sin_addr.s_addr = htonl(INADDR_ANY);
 		address.sin_port = htons(_server.servers[i].listen_port);
 
 		int on = 1;
@@ -117,7 +117,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 	int					_wr = 0;
     while (1)
     {
-        // std::cout << "listening ..." << std::endl;
+        std::cout << "listening ..." << std::endl;
 		_sockets = _readfds;
 		_current_sockets = _writefds;
 		if (select(fd_size + 1, &_sockets, &_current_sockets, NULL, NULL) < 0)
@@ -181,7 +181,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 						s = generate_response_str(response);
 						_reading_lock = 0;
 						_writing_lock = 1;
-						std::cerr << "wwwwww: " << x << std::endl;
+						std::cerr << "PATH: " << request->path << std::endl;
 						x++;
 						// FD_CLR(x, &_readfds);
 						break;
@@ -196,7 +196,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 				{
 					int return_write = write(x, &s.c_str()[_wr], s.size()-_wr);
 					_wr += return_write;
-					std::cerr << request->uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;
+					// std::cerr << request->uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;
 					if (return_write <= 0 || _wr == s.size())
 					{
 						close(x);
@@ -204,7 +204,7 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 						FD_CLR(x, &_writefds);
 						_writing_lock = 0;
 						_wr=0;
-						std::cerr << "l3zz: " << x << std::endl;
+						// std::cerr << "l3zz: " << x << std::endl;
 						x++;
 					}
 					x++;

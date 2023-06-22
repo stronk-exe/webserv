@@ -55,8 +55,11 @@ int _valid_url_chars( std::string s )
 int	_is_method_allowed( Location _location, Request *_request )
 {
 	for (size_t i=0 ; i<_location.allows_methods.size(); i++)
+	{
+		std::cerr << "Ayoooo: " << _location.allows_methods[i] << std::endl;
 		if (_location.allows_methods[i] == _request->method)
 			return 1;
+	}
 	return 0;
 }
 
@@ -156,11 +159,40 @@ void _fill_request(Server &_server, Location &_location, Request *_request )
 	_location.uploadDir.size() ? _request->upload_path = _location.uploadDir : _request->upload_path = "";
 }
 
-void _match_theServer( Parsing &_server, Request *_request, Server &_s)
+int	_match_theServer( Parsing &_server, Request *_request, Server &_s)
 {
     for (size_t i=0; i<_server.servers.size(); i++)
-        if (_server.servers[i].name == _request->headers["Host"])
-            _s =  _server.servers[i];
+    {
+		std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request->headers["Host"] << std::endl;
+		if (_server.servers[i].name == _request->headers["Host"])
+        {
+			_s =  _server.servers[i];
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int	_match_thePort( Parsing &_server, Request *_request, Server &_s)
+{
+	int	_pos = _request->uri.find(':');
+	std::cerr << "Pos: " << _pos << std::endl;
+	if (_pos >= 0)
+	{
+		std::string _port = _request->uri.substr(_pos+1, _request->uri.size());
+		std::cerr << "Port: " << _port << std::endl;
+		for (size_t i=0; i<_server.servers.size(); i++)
+		{
+			// std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request->headers["Host"] << std::endl;
+			if (_server.servers[i].listen_port == str_to_num(_port))
+			{
+				_s =  _server.servers[i];
+				return 1;
+			}
+		}
+
+	}
+	return 0;
 }
 
 void	_request_parser( Request *_request, std::string r )
@@ -256,13 +288,21 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	Location _location;
 	
 	_request_parser(_request, s);
+	std::cerr << "req uri: " << _request->uri << " req Method: " << _request->method << std::endl;
 
 	// if the body is not complete yet
 	// _complete_body_filling(_request);
 	
 	
-    _match_theServer(_server, _request, _s);
+    if (!_match_theServer(_server, _request, _s))
+	{
+		//go for ports;
+		if (!_match_thePort(_server, _request, _s))
+			_s = _server.servers[0];
+	}
+	std::cerr << "server name: " << _s.name << std::endl;
 	_match_theLocation(_s, _location, _request);
+	std::cerr << "location name: " << _location.name << std::endl;
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
 	_get_mims(_response);
