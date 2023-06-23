@@ -26,6 +26,7 @@ void	_get_listed_dir( Request *_request, Response *_response )
 	{
 		_response->status = 404;
 		perror("opendir() error");
+		std::cerr << "olAAAAA comistasss" << std::endl;
 	}
 	else
 	{
@@ -181,9 +182,18 @@ void _body_parser( Request *_request )
 void	_get( Response *_response, Request *_request, Server &_server )
 {
 	(void)_server;
-	std::ifstream _file;
-	_file.open(_request->path);
-	_file ? _get_res_body(_request, _response) : _response->status = 404;
+	// std::ifstream _file;
+	// int ff = open(_request->path);
+	// if (_file)
+	// {
+	// 	_get_res_body(_request, _response);
+	// }
+	// else
+	// {
+	// 	std::cerr << "ppppppppppppp" << _request->path << std::endl;
+	// 	_response->status = 404;
+	// }
+	// close(ff);
 
     _file_or_dir(_request, _response);
 
@@ -236,6 +246,8 @@ void	_get( Response *_response, Request *_request, Server &_server )
 				_get_res_body(_request, _response);
 			_response->status = 200;
 		}
+		// else
+		// 	_response->status = 404;
 	}
 }
 
@@ -280,9 +292,9 @@ void _post( Response *_response, Request *_request, Server &_server )
 		}
 		else
 		{
-			std::ifstream _file;
-			_file.open(_request->path);
-			_file ? _get_res_body(_request, _response) : _response->status = 404;
+			// std::ifstream _file;
+			// _file.open(_request->path);
+			// _file ? _get_res_body(_request, _response) : _response->status = 404;
 
 			_file_or_dir(_request, _response);
 			if (_request->type == "directory")
@@ -319,6 +331,8 @@ void _post( Response *_response, Request *_request, Server &_server )
 					_get_res_body(_request, _response);
 				}
 			}
+			// else
+			// 	_response->status = 404;
 		}
 	}
 }

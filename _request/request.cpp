@@ -81,7 +81,10 @@ void	_validate_request( Server &_server, Location &_location, Request *_request,
 	if (_is_method_allowed(_location, _request))
 		_request->is_method_allowed = 1;
 	if (!_match_theLocation(_server, _location, _request))
+	{
 		_response->status = 404;
+		std::cerr << "xxxxxxxxxxxxxx" << std::endl;
+	}
 	if (_request->redirection.size())
 	{
 		_response->path = _request->redirection[0];
@@ -163,7 +166,7 @@ int	_match_theServer( Parsing &_server, Request *_request, Server &_s)
 {
     for (size_t i=0; i<_server.servers.size(); i++)
     {
-		std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request->headers["Host"] << std::endl;
+		// std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request->headers["Host"] << std::endl;
 		if (_server.servers[i].name == _request->headers["Host"])
         {
 			_s =  _server.servers[i];
@@ -176,11 +179,11 @@ int	_match_theServer( Parsing &_server, Request *_request, Server &_s)
 int	_match_thePort( Parsing &_server, Request *_request, Server &_s)
 {
 	int	_pos = _request->uri.find(':');
-	std::cerr << "Pos: " << _pos << std::endl;
+	// std::cerr << "Pos: " << _pos << std::endl;
 	if (_pos >= 0)
 	{
 		std::string _port = _request->uri.substr(_pos+1, _request->uri.size());
-		std::cerr << "Port: " << _port << std::endl;
+		// std::cerr << "Port: " << _port << std::endl;
 		for (size_t i=0; i<_server.servers.size(); i++)
 		{
 			// std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request->headers["Host"] << std::endl;
@@ -232,28 +235,28 @@ void	_request_parser( Request *_request, std::string r )
 	}
 }
 
-void	_complete_body_filling( Request *_request )
-{
-	// std::cerr << "wew wew: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << " ~ " << _request->body.size() << std::endl;
-	if (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
-	{
-		while (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
-		{
-			char buffer[999999] = {0};
-			// std::cerr << "sizooon: " << _request->fd << std::endl;
-			// int newFd = dup(_request->fd);
-			// // _request->fd = newFd;
-			int data = read(_request->fd, buffer, 999999);
-			// close(newFd);
-			// int data = recv(_request->fd, buffer, 999999, 0);
-			// std::cerr << "sizzzzzzz" << std::endl;
-			if (data < 0)
-				print_error("empty data!");
-			for (int i=0; i<data; i++)
-				_request->body += buffer[i];
-		}
-	}
-}
+// void	_complete_body_filling( Request *_request )
+// {
+// 	// std::cerr << "wew wew: " << str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) << " ~ " << _request->body.size() << std::endl;
+// 	if (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
+// 	{
+// 		while (str_to_num(_request->headers["Content-Length"].substr(0, _request->headers["Content-Length"].size())) > _request->body.size())
+// 		{
+// 			char buffer[999999] = {0};
+// 			// std::cerr << "sizooon: " << _request->fd << std::endl;
+// 			// int newFd = dup(_request->fd);
+// 			// // _request->fd = newFd;
+// 			int data = read(_request->fd, buffer, 999999);
+// 			// close(newFd);
+// 			// int data = recv(_request->fd, buffer, 999999, 0);
+// 			// std::cerr << "sizzzzzzz" << std::endl;
+// 			if (data < 0)
+// 				print_error("empty data!");
+// 			for (int i=0; i<data; i++)
+// 				_request->body += buffer[i];
+// 		}
+// 	}
+// }
 
 void	_get_mims( Response *_response )
 {
@@ -288,7 +291,7 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 	Location _location;
 	
 	_request_parser(_request, s);
-	std::cerr << "req uri: " << _request->uri << " req Method: " << _request->method << std::endl;
+	// std::cerr << "req uri: " << _request->uri << " req Method: " << _request->method << std::endl;
 
 	// if the body is not complete yet
 	// _complete_body_filling(_request);
@@ -300,9 +303,9 @@ void	_request( Parsing &_server, Server &_s, Request *_request, Response *_respo
 		if (!_match_thePort(_server, _request, _s))
 			_s = _server.servers[0];
 	}
-	std::cerr << "server name: " << _s.name << std::endl;
+	// std::cerr << "server name: " << _s.name << std::endl;
 	_match_theLocation(_s, _location, _request);
-	std::cerr << "location name: " << _location.name << std::endl;
+	// std::cerr << "location name: " << _location.name << std::endl;
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
 	_get_mims(_response);

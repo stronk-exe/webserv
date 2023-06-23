@@ -24,14 +24,23 @@ std::string	_get_ex( std::string _file_name )
 int	_get_res_body( Request *_request, Response *_response )
 {
     int fd = open( _request->path.c_str(), O_RDONLY );
-    char buffer[999999] = {0};
-    int data = read(fd, buffer, 999999);
-    for (int i=0; i<data; i++)
-		_response->body += buffer[i];
+    int data=1;
+    while (data>0)
+    {
+        char buffer[999999] = {0};
+        data = read(fd, buffer, 999999);
+        for (int i=0; i<data; i++)
+            _response->body += buffer[i];
+        std::cerr << "data: " << data << " ~ res body: " << _response->body.size() << std::endl;
+    }
     if (_get_ex(_request->path) == "php")
         _response->content_type = "text/html";
     else
         _response->content_type = _response->mims[_get_ex(_request->path)];
+    _response->content_length = _response->body.size();
+    std::cerr << "w3lach: " << _response->content_length << std::endl;
+    
+    close(fd);
     
     // std::cerr << "yyooo: " << _request->path << " ~ " << _get_ex(_request->path) << " ~ " << _response->content_type << std::endl;
 	// std::ifstream myfile;
@@ -67,6 +76,7 @@ void    get_indexed_file_data( Request *_request, Response *_response, std::stri
                 _response->body += myline;
             }
         }
+        myfile.close();
     }
 }
 
@@ -85,6 +95,7 @@ void    get_file_data( Response *_response, std::string path )
 	}
 	else
 		std::cout << "Couldn't open file\n";
+    myfile.close();
 }
 
 void	_response( Response *_response, Request *_request )
@@ -98,7 +109,7 @@ void	_response( Response *_response, Request *_request )
             {
 				if (_response->status == _request->error_pages[i].error_status[j])
                 {
-                    // std::cerr << "ayooo: " << _request->error_pages[i].path << std::endl;
+                    std::cerr << "ayooo: " << _request->error_pages[i].path << " - " << _request->error_pages.size() << std::endl;
 					get_file_data(_response, _request->error_pages[i].path);
                     _status_found=1;
                 }
@@ -110,6 +121,7 @@ void	_response( Response *_response, Request *_request )
 
     if (!_status_found && _response->status != 200)
     {
+        std::cerr << "status found: " << _status_found << " status: " << _response->status << std::endl;
         if (_response->status == 204)
         {
             _response->body = "<html><body><h1>204 No Content</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
