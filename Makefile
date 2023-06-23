@@ -22,12 +22,12 @@ SRCS =  main.cpp \
 
 OBJS = $(SRCS:.cpp=.o)
 
-FLAGS = -fsanitize=address -s -Wall -Wextra -Werror -std=c++98
+FLAGS =  -Wall -Wextra -Werror -std=c++98
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	c++ $(FLAGS) $^ -o $@
+	c++ -fsanitize=address $(FLAGS) $^ -o $@
 
 clean:
 	rm -f $(OBJS)

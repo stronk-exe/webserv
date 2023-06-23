@@ -6,7 +6,7 @@
 /*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:55 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/22 16:50:09 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/06/11 20:29:24 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,6 @@
 #include <sys/types.h>
 #undef _POSIX_SOURCE
 #include <stdio.h>
-
-extern std::string webserv_loc;
 
 struct error_page
 {
@@ -131,8 +129,21 @@ struct Parsing
 class Request
 {
 	public:
-		Request() {};
-		~Request() {};
+
+		Request() {
+			env = new char*[11];
+			for (int i = 0; i < 10; i++)
+				env[i] = NULL;
+		};
+
+		~Request() {
+			for (int i = 0; i < 10; i++)
+			{
+				if (env[i])
+					delete env[i];
+			}
+			delete env;
+		};
 
 		int									fd;
 		std::string							uri;
@@ -145,7 +156,6 @@ class Request
 		std::string							root;
 		std::vector<std::string>			redirection;
 		std::vector<CGI>					cgi;
-		std::string							queryString;
 		char								**env;
 		int									client_body_upload;
 		std::map<std::string, std::string>	headers;
@@ -160,6 +170,7 @@ class Request
 		std::string	upload_file_name;
 		std::string	upload_data;
 		std::string	boundary;
+
 };
 
 class Response
@@ -180,24 +191,42 @@ class Response
 };
 
 
+class Cleint {
+
+	Cleint(int id) {
+		_id = id;
+		_cgi_pid = -2;
+		_kill_pid = true;
+	};
+
+	~Cleint() {};
+
+	int		_id;
+	int		_cgi_pid;
+	bool	_kill_pid;
+
+	Request		_request;
+	Response	_response;
+};
+
 // Socket
-void	_socket( Parsing &_server, Request *_request, Response *_response );
+void	_socket( Parsing &_server );
 
 // Methodes
-void	_get( Response *_response, Request *_request, Server &_server );
-void	_post( Response *_response, Request *_request, Server &_server );
-void	_delete( Response *_response, Request *_request ,Server &_server );
+void	_get( Response &_response, Request &_request, Server &_server );
+void	_post( Response &_response, Request &_request, Server &_server );
+void	_delete( Response &_response, Request &_request ,Server &_server );
 
 // CGI
-void	_cgi( Request *_request, Response *_response, Server &_server );
+void	_cgi( Request &_request, Response &_response, Server &_server );
 
 // Request
-void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, std::string s );
+void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s );
 
 // Response
-void		_response( Response *_response, Request *_request );
-int			_get_res_body( Request *_request, Response *_response );
-void    	get_indexed_file_data( Request *_request, Response *_response, std::string path );
+void		_response( Response &_response, Request &_request );
+int			_get_res_body( Request &_request, Response &_response );
+void    	get_indexed_file_data( Request &_request, Response &_response, std::string path );
 std::string	_get_ex( std::string _file_name );
 
 // Utils
