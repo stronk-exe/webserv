@@ -147,7 +147,7 @@ void _fill_request(Server &_server, Location &_location, Request &_request )
 	// if (_request.uri != "/favicon.ico")
 	// _new_location = _get_Path( _request.uri );
 
-	_request.path = "/Users/mait-jao/Project/hlwa/public/" + _request.root + _request.uri;
+	_request.path = _webserv_loc + "/public/" + _request.root + _request.uri;
 	// std::cerr << "PATH: " << _request.path << std::endl;
 	if (_server.redirection.path.size())
 		_request.redirection.push_back(_server.redirection.path);
@@ -263,7 +263,7 @@ void	_get_mims( Response &_response )
 	std::vector<std::string> v;
 	std::string key, value;
 
-    std::ifstream file("/Users/Project/hlwa/_request/mims");
+    std::ifstream file(( _webserv_loc + "/_request/mims"));
 
     if (file.is_open())
 	{

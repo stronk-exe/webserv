@@ -36,6 +36,8 @@
 #undef _POSIX_SOURCE
 #include <stdio.h>
 
+extern std::string _webserv_loc;
+
 struct error_page
 {
     std::vector<int>  error_status;
@@ -159,7 +161,6 @@ class Request
 		std::string	boundary;
 
 		Request() {
-			std::cerr << "Constructor Request" << std::endl;
 			fd = 0;
 			autoindex = 0;
 			client_body_upload = 0;
@@ -199,7 +200,6 @@ class Request
 
 			for (int i = 0; i < 10; i++)
 			{
-				// std::cerr<< "^^^^^^^^^^^^^" << std::endl;
 				if (env[i])
 					delete env[i];
 				if (req.env[i])
@@ -210,8 +210,8 @@ class Request
 
 			return *this;
 		};
+
 		~Request() {
-			std::cerr << "Destructor Request" << std::endl;
 			for (int i = 0; i < 10; i++)
 			{
 				if (env[i])
@@ -235,9 +235,8 @@ class Response
 		std::string body;
 		std::string	location;
 		std::map<std::string, std::string>	mims;
-		Response() {
-			std::cerr << "constructor Response" << std::endl;
 
+		Response() {
 			status = 0;
 			content_length = 0;
 		};
@@ -256,7 +255,7 @@ class Response
 			return *this; 
 		};
 
-		~Response() {std::cerr << "Destructor Response" << std::endl;};
+		~Response() {};
 
 };
 
@@ -277,10 +276,9 @@ class Client {
 		Request		_request;
 		Response	_response;
 
-		Client( ) {std::cerr << "constructor Client" << std::endl;};
+		Client( ) {};
 
 		Client(const int id ) {
-			std::cerr << "constructor Client" << std::endl;
 			_id = id;
 			_read_status = 1;
 			_write_status = 0;
@@ -296,12 +294,11 @@ class Client {
 			_write_status = client._write_status;
 			_cgi_pid = client._cgi_pid;
 			_kill_pid = client._kill_pid;
-			std::cerr << "++++++++++" << std::endl;
 			_request = client._request;
 			_response = client._response;
 			return *this; 
 		};
-		~Client() {std::cerr << "Destructor Client" << std::endl;};
+		~Client() {};
 
 		bool operator ==(Client &b ) { return _id == b._id; }
 

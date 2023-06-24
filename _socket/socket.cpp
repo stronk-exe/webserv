@@ -294,12 +294,15 @@ void	_socket( Parsing &_server )
 					{
 						if (Clients[e]._cgi_pid == waitpid(Clients[e]._cgi_pid, NULL, WNOHANG))
 						{
+							///// time to exit child for 30second
+							if (remove(Clients[e].file.c_str()))
+               					 perror("remove file");
 							Clients[e]._kill_pid = true;
 							std::cerr << "---------------------Clients[e]._kill_pid : " << Clients[e]._kill_pid << std::endl;	
 							parent_process( Clients[e].body, Clients[e].pipe_fd);
 							get_body(Clients[e]._response, Clients[e].body);
 							// _get_res_body(Clients[e]);
-							std::cerr << " Body : " << Clients[e].body << std::endl;
+							// std::cerr << " Body : " << Clients[e].body << std::endl;
         					Clients[e]._response.content_type = Clients[e]._response.mims[_get_ex(Clients[e]._request.path)];
 							s = generate_response_str(Clients[e]._response);
 						}

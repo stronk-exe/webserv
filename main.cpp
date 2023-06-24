@@ -12,6 +12,8 @@
 
 #include "webserv.hpp"
 
+std::string _webserv_loc;
+
 int main(int ac, char **av)
 {
     // Request *_request = new Request;
@@ -22,9 +24,10 @@ int main(int ac, char **av)
 
     std::string  str;
     Parsing _server;
-
-    if (ac == 2)
+    
+    if (ac == 3)
     {
+        _webserv_loc = av[2];
         _server.file = av[1];
         std::ifstream file(_server.file);
         while (std::getline(file, str))

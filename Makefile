@@ -27,13 +27,17 @@ FLAGS =  -Wall -Wextra -Werror -std=c++98
 all: $(NAME)
 
 $(NAME): $(OBJS)
+	@rm -rf trash/* 
+	@rm -rf trash/.h* 
 	c++ -fsanitize=address $(FLAGS) $^ -o $@
 
 clean:
+	@rm -rf trash/* 
+	@rm -rf trash/.h* 
 	rm -f $(OBJS)
 
 fclean: clean
-		rm -f $(NAME)
+	rm -f $(NAME)
 
 re: fclean all
 
