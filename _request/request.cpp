@@ -56,7 +56,7 @@ int	_is_method_allowed( Location _location, Request &_request )
 {
 	for (size_t i=0 ; i<_location.allows_methods.size(); i++)
 	{
-		std::cerr << "Ayoooo: " << _location.allows_methods[i] << std::endl;
+		// std::cerr << "Ayoooo: " << _location.allows_methods[i] << std::endl;
 		if (_location.allows_methods[i] == _request.method)
 			return 1;
 	}
@@ -147,7 +147,7 @@ void _fill_request(Server &_server, Location &_location, Request &_request )
 	// if (_request.uri != "/favicon.ico")
 	// _new_location = _get_Path( _request.uri );
 
-	_request.path = "/Users/mait-jao/Project/kika/public/" + _request.root + _request.uri;
+	_request.path = "/Users/mait-jao/Project/hlwa/public/" + _request.root + _request.uri;
 	// std::cerr << "PATH: " << _request.path << std::endl;
 	if (_server.redirection.path.size())
 		_request.redirection.push_back(_server.redirection.path);
@@ -263,7 +263,7 @@ void	_get_mims( Response &_response )
 	std::vector<std::string> v;
 	std::string key, value;
 
-    std::ifstream file("/Users/mait-jao/Project/kika/_request/mims");
+    std::ifstream file("/Users/Project/hlwa/_request/mims");
 
     if (file.is_open())
 	{
@@ -303,12 +303,12 @@ void	_request( Parsing &_server, Server &_s, Request &_request, Response &_respo
 		if (!_match_thePort(_server, _request, _s))
 			_s = _server.servers[0];
 	}
-	// std::cerr << "server name: " << _s.name << std::endl;
 	_match_theLocation(_s, _location, _request);
 	// std::cerr << "location name: " << _location.name << std::endl;
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
 	_get_mims(_response);
+	// std::cerr << "_request name: " << _request.root << " - req uri: " << _request.uri << " - PATH: " << _request.path << std::endl;
 
 
 	// std::cerr << "buffer: " << s << std::endl;
