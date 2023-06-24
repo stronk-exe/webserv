@@ -12,13 +12,13 @@
 
 #include "../webserv.hpp"
 
-std::string	generate_response_str(Response *_response)
+std::string	generate_response_str(Response &_response)
 {
-	return "HTTP/1.1 "+ std::to_string(_response->status)+" "+_response->status_message+\
-					"\nContent-Type: "+_response->content_type+\
-					"\nContent-Length: "+std::to_string(_response->content_length)+\
-					"\nLocation: "+_response->location+\
-					"\n\n"+_response->body;
+	return "HTTP/1.1 "+ std::to_string(_response.status)+" "+_response.status_message+\
+					"\nContent-Type: "+_response.content_type+\
+					"\nContent-Length: "+std::to_string(_response.content_length)+\
+					"\nLocation: "+_response.location+\
+					"\n\n"+_response.body;
 }
 
 std::vector<int>	_get_ports( Parsing &_server )
@@ -30,91 +30,93 @@ std::vector<int>	_get_ports( Parsing &_server )
 	return _ports;
 }
 
-void	_init_l3alam( Request *_request, Response *_response)
+void	_init_l3alam( Request &_request, Response &_response)
 {
 	// Request
-	// if (!_request->path.size())
+	// if (!_request.path.size())
 	// {
 		// char buffer[9999];
 		// if (getcwd(buffer, sizeof(buffer)) != nullptr)
-		// 	_request->path = std::string(buffer)+"/public";
+		// 	_request.path = std::string(buffer)+"/public";
 		// else
-		// 	_request->path = "";
+		// 	_request.path = "";
 	// }// char c[9999];
-	// _request->path = std::string(getcwd(c, 9999));
-	_request->body = "";
-	_request->root = "";
-	_request->method = "";
-	_request->type = "";
-	_request->uri = "";
-	_request->autoindex = 0;
-	_request->is_method_allowed = 0;
-	_request->index.clear();
-	_request->error_pages.clear();
-	_request->cgi.clear();
-	_request->redirection.clear();
-	_request->headers.clear();
+	// _request.path = std::string(getcwd(c, 9999));
+	_request.body = "";
+	_request.root = "";
+	_request.method = "";
+	_request.type = "";
+	_request.uri = "";
+	_request.autoindex = 0;
+	_request.is_method_allowed = 0;
+	_request.index.clear();
+	_request.error_pages.clear();
+	_request.cgi.clear();
+	_request.redirection.clear();
+	_request.headers.clear();
 
 	// Response
-	_response->status = 0;
-	_response->content_length = 0;
-	_response->body = "";
-	_response->location = "";
-	_response->status_message = "";
+	_response.status = 0;
+	_response.content_length = 0;
+	_response.body = "";
+	_response.location = "";
+	_response.status_message = "";
 
 }
 
-void	print_shit( Request *_request, Response *_response )
+void	print_shit( Request &_request, Response &_response )
 {
 	std::cerr << "****************************************" << std::endl << "Request: " << std::endl;
-	// std::cerr << "fd: " << _request->fd << std::endl;
-	std::cerr << "uri: " << _request->uri << std::endl;
-	std::cerr << "method: " << _request->method << std::endl;
-	std::cerr << "type: " << _request->type << std::endl;
-	std::cerr << "autoindex: " << _request->autoindex << std::endl;
-	std::cerr << "path: " << _request->path << std::endl;
-	for (size_t i=0; i<_request->index.size(); i++)
-		std::cerr << "index[" << i << "]: " << _request->index[i] << std::endl;
-	std::cerr << "root: " << _request->root << std::endl;
-	for (size_t i=0; i<_request->redirection.size(); i++)
-		std::cerr << "redirection[" << i << "]: " << _request->redirection[i] << std::endl;
-	// for (size_t i=0; i<_request->cgi.size(); i++)
-	// 	std::cerr << "cgi[" << i << "]: " << _request->cgi[i] << std::endl;
-	// std::cerr << "client_body_upload: " << _request->client_body_upload << std::endl;
-	// std::cerr << "headers: " << _request->headers << std::endl;
-	std::cerr << "body: " << _request->body << std::endl;
-	// for (size_t i=0; i<_request->error_pages.size(); i++)
-	// 	std::cerr << "error_pages[" << i << "]: " << _request->error_pages[i] << std::endl;
-	std::cerr << "is_method_allowed: " << _request->is_method_allowed << std::endl;
-	std::cerr << "upload_path: " << _request->upload_path << std::endl;
-	std::cerr << "upload_name: " << _request->upload_name << std::endl;
-	std::cerr << "upload_content_type: " << _request->upload_content_type << std::endl;
-	std::cerr << "upload_file_name: " << _request->upload_file_name << std::endl;
-	std::cerr << "upload_data: " << _request->upload_data << std::endl;
-	std::cerr << "boundary: " << _request->boundary << std::endl;
+	// std::cerr << "fd: " << _request.fd << std::endl;
+	std::cerr << "uri: " << _request.uri << std::endl;
+	std::cerr << "method: " << _request.method << std::endl;
+	std::cerr << "type: " << _request.type << std::endl;
+	std::cerr << "autoindex: " << _request.autoindex << std::endl;
+	std::cerr << "path: " << _request.path << std::endl;
+	for (size_t i=0; i<_request.index.size(); i++)
+		std::cerr << "index[" << i << "]: " << _request.index[i] << std::endl;
+	std::cerr << "root: " << _request.root << std::endl;
+	for (size_t i=0; i<_request.redirection.size(); i++)
+		std::cerr << "redirection[" << i << "]: " << _request.redirection[i] << std::endl;
+	// for (size_t i=0; i<_request.cgi.size(); i++)
+	// 	std::cerr << "cgi[" << i << "]: " << _request.cgi[i] << std::endl;
+	// std::cerr << "client_body_upload: " << _request.client_body_upload << std::endl;
+	// std::cerr << "headers: " << _request.headers << std::endl;
+	std::cerr << "body: " << _request.body << std::endl;
+	// for (size_t i=0; i<_request.error_pages.size(); i++)
+	// 	std::cerr << "error_pages[" << i << "]: " << _request.error_pages[i] << std::endl;
+	std::cerr << "is_method_allowed: " << _request.is_method_allowed << std::endl;
+	std::cerr << "upload_path: " << _request.upload_path << std::endl;
+	std::cerr << "upload_name: " << _request.upload_name << std::endl;
+	std::cerr << "upload_content_type: " << _request.upload_content_type << std::endl;
+	std::cerr << "upload_file_name: " << _request.upload_file_name << std::endl;
+	std::cerr << "upload_data: " << _request.upload_data << std::endl;
+	std::cerr << "boundary: " << _request.boundary << std::endl;
 
 	std::cerr << "****************************************" << std::endl << "Response: " << std::endl;
-	std::cerr << "status: " << _response->status << std::endl;
-	std::cerr << "status_message: " << _response->status_message << std::endl;
-	std::cerr << "content_length: " << _response->content_length << std::endl;
-	std::cerr << "content_type: " << _response->content_type << std::endl;
-	std::cerr << "path: " << _response->path << std::endl;
-	std::cerr << "data: " << _response->data << std::endl;
-	std::cerr << "body: " << _response->body << std::endl;
-	std::cerr << "location: " << _response->location << std::endl;
-	// std::cerr << "mims: " << _response->mims << std::endl;
+	std::cerr << "status: " << _response.status << std::endl;
+	std::cerr << "status_message: " << _response.status_message << std::endl;
+	std::cerr << "content_length: " << _response.content_length << std::endl;
+	std::cerr << "content_type: " << _response.content_type << std::endl;
+	std::cerr << "path: " << _response.path << std::endl;
+	std::cerr << "data: " << _response.data << std::endl;
+	std::cerr << "body: " << _response.body << std::endl;
+	std::cerr << "location: " << _response.location << std::endl;
+	// std::cerr << "mims: " << _response.mims << std::endl;
 
 
 }
 
-void	_socket( Parsing &_server, Request *request, Response *response )
+void	_socket( Parsing &_server )
 {
     int					_socket_fd;
     struct sockaddr_in	address;
     int					addrlen;
     int					default_port;
-	
+	Request		request;
+	Response	response;
 	std::vector<int>	_socket_fds;
+	std::vector<Client> Clients;
 	
 	// std::string			s;
 	
@@ -168,120 +170,165 @@ void	_socket( Parsing &_server, Request *request, Response *response )
 	std::string _test_buffer;
 	std::string s;
 	int					_wr = 0;
-	_init_l3alam(request, response);
+	// _init_l3alam(request, response);
 	int old_data=0;
+	int _first_time=0;
+	
     while (1)
     {
-        // std::cout << "listening ..." << std::endl;
+        std::cout << "listening ..." << std::endl;
 		
 		_sockets = _readfds;
 		_current_sockets = _writefds;
+		// std::cerr << "fd_size: " << fd_size << std::endl;
 		if (select(fd_size + 1, &_sockets, &_current_sockets, NULL, NULL) < 0)
 			print_error("error in select");
 		
-		int x=0;
+		// int x=0;
 		int coming_socket;
 		
 		
 		
-		
-		
-		while (x <= fd_size)
+		// _first_time=0;
+		// while (x <= fd_size)
+		std::vector<int> accepted_shit;
+		for (int x=0; x <= fd_size; x++)
 		{
 			// std::cerr << "check return value of FD_ISSET: " << FD_ISSET(x, &_sockets) << ", at: " << x << std::endl;
 			// std::cerr << "check return value of FD_ISSET current: " << FD_ISSET(x, &_current_sockets) << ", at: " << x << std::endl;
 			if (FD_ISSET(x, &_sockets) || FD_ISSET(x, &_current_sockets))
 			{
-				// std::cerr << "hola mista: " << x << "-" << _reading_lock << "-" << _writing_lock << std::endl;
-				// for (size_t f=0; f<_socket_fds.size(); f++)
-				// 	std::cerr << "_socket_fds[" << f << "]: " << _socket_fds[f] << std::endl;
-				if (std::find(_socket_fds.begin(), _socket_fds.end(), x) != _socket_fds.end() && !_reading_lock && !_writing_lock)
+				for (size_t f=0; f<_socket_fds.size(); f++)
+					std::cerr << "_socket_fds[" << f << "]: " << _socket_fds[f] << std::endl;
+				for (size_t f=0; f<accepted_shit.size(); f++)
+					std::cerr << "accepted_shit[" << f << "]: " << accepted_shit[f] << std::endl;
+				std::cerr << "hola mista: " << x << std::endl;
+
+				if (std::find(_socket_fds.begin(), _socket_fds.end(), x) != _socket_fds.end() && std::find(accepted_shit.begin(), accepted_shit.end(), x) == accepted_shit.end())// && !_reading_lock && !_writing_lock)
 				{
-					std::cerr << "sssssssssssssssssssssss" << std::endl;
+					
 					if ((coming_socket = accept(x, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
+					std::cerr << "coming_socket ::: " << coming_socket << std::endl;
 					int d = fcntl(coming_socket, F_SETFL, O_NONBLOCK);
 					FD_SET(coming_socket, &_readfds);
 					if (coming_socket > fd_size)
 						fd_size = coming_socket;
-					_reading_lock = 1;
+					_first_time = 1;
 					_test_buffer = "";
-
+					accepted_shit.push_back(coming_socket);
+					std::cerr << "ggggg" << Clients.size() << std::endl;
+					
+					Clients.push_back(Client(coming_socket));
+					std::cerr << "sssssssssssssssssssssss: " << Clients.size() << std::endl;
+					std::cerr << "x: " << x << std::endl;
+					// x++;
+					
 					break ;
 				}
-				else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _reading_lock)
+				for (size_t e=0; e<Clients.size(); e++)
 				{
-					char				buffer[999999] = {0};
-					int data;
-
-					if ((data = read(x, buffer, 999999)) <= 0)
+					// else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _reading_lock)
+					std::cerr << "client[" << e << "]: " << Clients[e]._id << " - " << Clients[e]._read_status << " - " << Clients[e]._write_status << std::endl;
+					if ((std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end()) &&  Clients[e]._read_status)
 					{
-						// for (int i=0; i<(old_data-data); i++)
-						// 	_test_buffer += buffer[i];
-						FD_SET(x, &_writefds);
 						
-						Server _s;
-						_request(_server, _s, request, response, _test_buffer);
-						std::cerr << "shity read: " << data << " - " << old_data << std::endl;
+						char				buffer[999999] = {0};
+						int data;
 
-						// checking the method
-						if (request->is_method_allowed)
+						if ((data = read(Clients[e]._id, buffer, 999999)) <= 0)
 						{
-							if (request->method == "GET")
-								_get(response, request, _s);
-							else if (request->method == "POST")
-								_post(response, request, _s);
-							else if (request->method == "DELETE")
-								_delete(response, request, _s);
+							std::cerr << "zzzzzzzzzzzzz" << std::endl;
+							// for (int i=0; i<(old_data-data); i++)
+							// 	_test_buffer += buffer[i];
+							
+							
+							Server _s;
+							_request(_server, _s, Clients[e]._request, Clients[e]._response, Clients[e].buffer);
+							
+							// std::cerr << "shity read: " << data << " - " << old_data << std::endl;
+
+							// checking the method
+							if (Clients[e]._request.is_method_allowed)
+							{
+								if (Clients[e]._request.method == "GET")
+									_get(Clients[e]._response, Clients[e]._request, _s);
+								else if (Clients[e]._request.method == "POST")
+									_post(Clients[e]._response, Clients[e]._request, _s);
+								else if (Clients[e]._request.method == "DELETE")
+									_delete(Clients[e]._response, Clients[e]._request, _s);
+							}
+							else
+								Clients[e]._response.status = 405;
+							
+							std::cerr << "status: " << Clients[e]._response.status << std::endl;
+							
+							_response(Clients[e]._response, Clients[e]._request);
+							s = generate_response_str(Clients[e]._response);
+							Clients[e]._read_status = 0;
+							
+							// _reading_lock = 0;
+							// _writing_lock = 1;
+							// std::cerr << "PATH: " << request.path << std::endl;
+							// x++;
+							// break;
+							// FD_CLR(x, &_readfds);
+							// std::cerr << "buffer: " << _test_buffer << std::endl;
+							// break;
 						}
-						else
-							response->status = 405;
+							std::cerr << "rddddddddddddddddddddd" << data << std::endl;
+						// old_data = data;
 						
-						_response(response, request);
-						s = generate_response_str(response);
-						_reading_lock = 0;
-						_writing_lock = 1;
-						// std::cerr << "PATH: " << request->path << std::endl;
-						x++;
-						// FD_CLR(x, &_readfds);
-						// std::cerr << "buffer: " << _test_buffer << std::endl;
+						for (int i=0; i<data; i++)
+							Clients[e].buffer += buffer[i];
+						
+						FD_SET(Clients[e]._id, &_writefds);
+						Clients[e]._write_status = 1;
 						break;
+						// request.fd = x;
+						// FD_SET(x, &_readfds);
+						// x++;
 					}
-					old_data = data;
-					std::cerr << "rddddddddddddddddddddd" << data << std::endl;
-					for (int i=0; i<data; i++)
-						_test_buffer += buffer[i];
-					// request->fd = x;
-					// FD_SET(x, &_readfds);
-					// x++;
-				}
-				else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _writing_lock)
-				{
-					std::cerr << "wrrrrrrrrrrrrrrrrrrrrr" << std::endl;
-					int return_write = write(x, &s.c_str()[_wr], s.size()-_wr);
-					_wr += return_write;
-					// std::cerr << request->uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;
-					if (return_write <= 0 || _wr == s.size())
+					// else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _writing_lock)
+					else if (std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end() &&  Clients[e]._write_status)
 					{
-						close(x);
-						FD_CLR(x, &_readfds);
-						FD_CLR(x, &_writefds);
-						_writing_lock = 0;
-						_wr=0;
-						std::cerr << "l3zz: " << response->content_type << " - " << response->content_length << std::endl;
-						_test_buffer = "";
-						_init_l3alam(request, response);
-						// print_shit(request, response);
-						x++;
+						std::cerr << "wrrrrrrrrrrrrrrrrrrrrr" << std::endl;
+						int return_write = write(Clients[e]._id, &s.c_str()[_wr], s.size()-_wr);
+						_wr += return_write;
+						// std::cerr << request.uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;
+						if (return_write <= 0 || _wr == s.size())
+						{
+						std::cerr << "hlwaaaaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
+							close(Clients[e]._id);
+							FD_CLR(Clients[e]._id, &_readfds);
+							FD_CLR(Clients[e]._id, &_writefds);
+							// _writing_lock = 0;
+							// Clients[e].init();
+							std::vector<Client>::iterator it = Clients.begin();
+    						std::advance(it, e);
+							std::cerr << "###############" << std::endl;
+							Clients.erase(it);
+							// Clients[e]._write_status = 0;
+							_wr=0;
+							// std::cerr << "l3zz: " << response.content_type << " - " << response.content_length << std::endl;
+							// Clients[e].buffer = "";
+							// _init_l3alam(Clients[e]._request, Clients[e]._response);
+							// _first_time= 0;
+							// print_shit(request, response);
+							// x++;
+						}
+						// x++;
+
 					}
-					x++;
+					// else
+					// 	x++;
 
 				}
-				else
-					x++;
+				// x++;
+				
 			}
-			else
-				x++;
+			// else
+			// 	x++;
 		}
 	}
 }

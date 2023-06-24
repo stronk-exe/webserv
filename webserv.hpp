@@ -21,9 +21,11 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <fstream>
+#include <map>
 #include <fcntl.h>
 #include <sstream>
 #include <vector>
+#include <iterator>
 #include <map>
 #include <sys/stat.h>
 
@@ -128,9 +130,7 @@ struct Parsing
 
 class Request
 {
-	public:
-		Request() {};
-		~Request() {};
+	public :
 
 		int									fd;
 		std::string							uri;
@@ -157,13 +157,74 @@ class Request
 		std::string	upload_file_name;
 		std::string	upload_data;
 		std::string	boundary;
+
+		Request() {
+			std::cerr << "Constructor Request" << std::endl;
+			fd = 0;
+			autoindex = 0;
+			client_body_upload = 0;
+			is_method_allowed = 0;
+			
+			env = new char*[11];
+			for (int i = 0; i < 10; i++)
+				env[i] = NULL;
+		};
+		Request(const Request & req) { *this = req;};
+
+		Request& operator=(  const  Request & req) {
+			fd = req.fd;
+			uri = req.uri;
+			method = req.method;
+			type = req.type;
+			autoindex = req.autoindex;
+			path = req.path;
+			paths = req.paths;
+			index = req.index;
+			root = req.root;
+			redirection = req.redirection;
+			cgi = req.cgi;
+			client_body_upload = req.client_body_upload;
+			headers = req.headers;
+			body = req.body;
+			error_pages = req.error_pages;
+			is_method_allowed = req.is_method_allowed;
+			upload_path = req.upload_path;
+
+		// Uploads
+			upload_name = req.upload_name;
+			upload_content_type = req.upload_content_type;
+			upload_file_name = req.upload_file_name;
+			upload_data = req.upload_data;
+			boundary = req.boundary;
+
+			for (int i = 0; i < 10; i++)
+			{
+				// std::cerr<< "^^^^^^^^^^^^^" << std::endl;
+				if (env[i])
+					delete env[i];
+				if (req.env[i])
+					env[i] = strdup(req.env[i]);
+				else
+					env[i] = NULL;
+			}
+
+			return *this;
+		};
+		~Request() {
+			std::cerr << "Destructor Request" << std::endl;
+			for (int i = 0; i < 10; i++)
+			{
+				if (env[i])
+					delete env[i];
+			}
+			delete[] env;
+		};
+
 };
 
 class Response
 {
 	public:
-		Response() {};
-		~Response() {};
 
 		int			status;
 		std::string status_message;
@@ -174,27 +235,104 @@ class Response
 		std::string body;
 		std::string	location;
 		std::map<std::string, std::string>	mims;
+		Response() {
+			std::cerr << "constructor Response" << std::endl;
+
+			status = 0;
+			content_length = 0;
+		};
+		Response(const Response & res) { *this = res; };
+
+		Response& operator=(  const Response & res) { 
+			status = res.status;
+			status_message = res.status_message;
+			content_length = res.content_length;
+			content_type = res.content_type;
+			path = res.path;
+			data = res.data;
+			body = res.body;
+			location = res.location;
+			mims = res.mims;
+			return *this; 
+		};
+
+		~Response() {std::cerr << "Destructor Response" << std::endl;};
+
 };
 
 
+class Client {
+
+	public:
+
+		int		_id;
+		int		_cgi_pid;
+		bool	_kill_pid;
+		int		_read_status;
+		int		_write_status;
+		std::string	buffer;
+
+		Request		_request;
+		Response	_response;
+
+		Client( ) {std::cerr << "constructor Client" << std::endl;};
+
+		Client(const int id ) {
+			std::cerr << "constructor Client" << std::endl;
+			_id = id;
+			_read_status = 1;
+			_write_status = 0;
+			_cgi_pid = -2;
+			_kill_pid = true;
+		};
+
+		Client(const Client & client) { *this = client; };
+
+		Client& operator= (const Client & client) { 
+			_id = client._id;
+			_read_status = client._read_status;
+			_write_status = client._write_status;
+			_cgi_pid = client._cgi_pid;
+			_kill_pid = client._kill_pid;
+			std::cerr << "++++++++++" << std::endl;
+			_request = client._request;
+			_response = client._response;
+			return *this; 
+		};
+		~Client() {std::cerr << "Destructor Client" << std::endl;};
+
+		bool operator ==(Client &b ) { return _id == b._id; }
+
+		// void init( void ) {
+
+		// 	_read_status = 0;
+		// 	_write_status = 0;
+		// 	_cgi_pid = -2;
+		// 	_kill_pid = true;
+		// 	buffer = "";
+
+		// };
+
+};
+
 // Socket
-void	_socket( Parsing &_server, Request *_request, Response *_response );
+void	_socket( Parsing &_server );
 
 // Methodes
-void	_get( Response *_response, Request *_request, Server &_server );
-void	_post( Response *_response, Request *_request, Server &_server );
-void	_delete( Response *_response, Request *_request ,Server &_server );
+void	_get( Response &_response, Request &_request, Server &_server );
+void	_post( Response &_response, Request &_request, Server &_server );
+void	_delete( Response &_response, Request &_request ,Server &_server );
 
 // CGI
-void	_cgi( Request *_request, Response *_response, Server &_server );
+void	_cgi( Request &_request, Response &_response, Server &_server );
 
 // Request
-void	_request( Parsing &_server, Server &_s, Request *_request, Response *_response, std::string s );
+void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s );
 
 // Response
-void		_response( Response *_response, Request *_request );
-int			_get_res_body( Request *_request, Response *_response );
-void    	get_indexed_file_data( Request *_request, Response *_response, std::string path );
+void		_response( Response &_response, Request &_request );
+int			_get_res_body( Request &_request, Response &_response );
+void    	get_indexed_file_data( Request &_request, Response &_response, std::string path );
 std::string	_get_ex( std::string _file_name );
 
 // Utils
