@@ -14,12 +14,47 @@
 
 std::string	generate_response_str(Response &_response)
 {
+	std::cerr << "HALWA: [" << _response.content_length << "] - [" << num_to_str(_response.content_length) << "]" << std::endl;
+	// std::cerr << "HTTP/1.1 "+ std::to_string(_response.status)+" "+_response.status_message+\
+	// 				"\nContent-Type: "+_response.content_type+\
+	// 				"\nContent-Length: "+num_to_str(_response.content_length)+\
+	// 				"\nLocation: "+_response.location << std::endl;
 	return "HTTP/1.1 "+ std::to_string(_response.status)+" "+_response.status_message+\
 					"\nContent-Type: "+_response.content_type+\
-					"\nContent-Length: "+std::to_string(_response.content_length)+\
+					"\nContent-Length: "+num_to_str(_response.content_length)+\
 					"\nLocation: "+_response.location+\
 					"\n\n"+_response.body;
 }
+
+
+// size_t modifyFile(int fd, off_t offset, std::string newData) {
+    
+//     if (fd == -1) {
+//         perror("open");
+//         return;
+//     }
+
+//     // Move the file pointer to the desired position
+//     off_t result = lseek(fd, offset, SEEK_SET);
+//     if (result == -1) {
+//         perror("lseek");
+//         close(fd);
+//         return;
+//     }
+
+//     // Write the new data at the specified position
+//     size_t bytesWritten = write(fd, newData.c_str(), newData.size());
+//     if (bytesWritten == -1) {
+//         perror("write");
+//         // close(fd);
+//         return 0;
+//     }
+
+//     // Close the file
+//     // close(fd);
+// 	return bytesWritten;
+// }
+
 
 std::vector<int>	_get_ports( Parsing &_server )
 {
@@ -107,6 +142,26 @@ void	print_shit( Request &_request, Response &_response )
 
 }
 
+// std::string replaceSubstring(std::string s, std::string new_str, int _pos, int wld7mida ) {
+//     // std::string::size_type pos = 0;
+//     // while ((pos = str.find(oldSubstr, pos)) != std::string::npos) {
+//     //     str.replace(pos, oldSubstr.length(), newSubstr);
+//     //     pos += newSubstr.length();
+//     // }
+// 	std::string t = s.substr(0, _pos);
+// 	t+= "3231655\n";
+// 	// std::cerr << ";;;;;;;;" << s.substr(0, _pos+new_str.size()+1) << ";;;;;;;;" << std::endl;
+// 	t += s.substr(wld7mida, s.size());
+// 	return t;
+// }
+
+std::string getSubstring(const std::string& str, std::string::size_type startPos, std::string::size_type length) {
+    if (startPos >= str.length())
+        return "";
+
+    return str.substr(startPos, length);
+}
+
 void	_socket( Parsing &_server )
 {
     int					_socket_fd;
@@ -169,7 +224,7 @@ void	_socket( Parsing &_server )
 	int					_reading_lock=0, _writing_lock=0;
 	std::string _test_buffer;
 	std::string s;
-	int					_wr = 0;
+	// int					_wr = 0;
 	// _init_l3alam(request, response);
 	int old_data=0;
 	int _first_time=0;
@@ -198,18 +253,18 @@ void	_socket( Parsing &_server )
 			// std::cerr << "check return value of FD_ISSET current: " << FD_ISSET(x, &_current_sockets) << ", at: " << x << std::endl;
 			if (FD_ISSET(x, &_sockets) || FD_ISSET(x, &_current_sockets))
 			{
-				for (size_t f=0; f<_socket_fds.size(); f++)
-					std::cerr << "_socket_fds[" << f << "]: " << _socket_fds[f] << std::endl;
-				for (size_t f=0; f<accepted_shit.size(); f++)
-					std::cerr << "accepted_shit[" << f << "]: " << accepted_shit[f] << std::endl;
-				std::cerr << "hola mista: " << x << std::endl;
+				// for (size_t f=0; f<_socket_fds.size(); f++)
+				// 	std::cerr << "_socket_fds[" << f << "]: " << _socket_fds[f] << std::endl;
+				// for (size_t f=0; f<accepted_shit.size(); f++)
+				// 	std::cerr << "accepted_shit[" << f << "]: " << accepted_shit[f] << std::endl;
+				// std::cerr << "hola mista: " << x << std::endl;
 
 				if (std::find(_socket_fds.begin(), _socket_fds.end(), x) != _socket_fds.end() && std::find(accepted_shit.begin(), accepted_shit.end(), x) == accepted_shit.end())// && !_reading_lock && !_writing_lock)
 				{
 					
 					if ((coming_socket = accept(x, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
-					std::cerr << "coming_socket ::: " << coming_socket << std::endl;
+					// std::cerr << "coming_socket ::: " << coming_socket << std::endl;
 					int d = fcntl(coming_socket, F_SETFL, O_NONBLOCK);
 					FD_SET(coming_socket, &_readfds);
 					if (coming_socket > fd_size)
@@ -217,11 +272,11 @@ void	_socket( Parsing &_server )
 					_first_time = 1;
 					_test_buffer = "";
 					accepted_shit.push_back(coming_socket);
-					std::cerr << "ggggg" << Clients.size() << std::endl;
+					// std::cerr << "ggggg" << Clients.size() << std::endl;
 					
 					Clients.push_back(Client(coming_socket));
-					std::cerr << "sssssssssssssssssssssss: " << Clients.size() << std::endl;
-					std::cerr << "x: " << x << std::endl;
+					// std::cerr << "sssssssssssssssssssssss: " << Clients.size() << std::endl;
+					// std::cerr << "x: " << x << std::endl;
 					// x++;
 					
 					break ;
@@ -229,15 +284,21 @@ void	_socket( Parsing &_server )
 				for (size_t e=0; e<Clients.size(); e++)
 				{
 					// else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _reading_lock)
-					std::cerr << "client[" << e << "]: " << Clients[e]._id << " - " << Clients[e]._read_status << " - " << Clients[e]._write_status << std::endl;
+					// std::cerr << "client[" << e << "]: " << Clients[e]._id << " - " << Clients[e]._read_status << " - " << Clients[e]._write_status << std::endl;
 					if ((std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end()) &&  Clients[e]._read_status)
 					{
 						
 						char				buffer[999999] = {0};
 						int data;
 
-						if ((data = read(Clients[e]._id, buffer, 999999)) <= 0)
+						if ((data = read(Clients[e]._id, buffer, 999999)) > 0)
 						{
+							for (int i=0; i<data; i++)
+								Clients[e].buffer += buffer[i];
+						}
+						if (!Clients[e].firstTime_HuH)
+						{
+							Clients[e].firstTime_HuH = 1;
 							std::cerr << "zzzzzzzzzzzzz" << std::endl;
 							// for (int i=0; i<(old_data-data); i++)
 							// 	_test_buffer += buffer[i];
@@ -252,20 +313,20 @@ void	_socket( Parsing &_server )
 							if (Clients[e]._request.is_method_allowed)
 							{
 								if (Clients[e]._request.method == "GET")
-									_get(Clients[e]._response, Clients[e]._request, _s);
+									_get(Clients[e], _s);
 								else if (Clients[e]._request.method == "POST")
-									_post(Clients[e]._response, Clients[e]._request, _s);
+									_post(Clients[e], _s);
 								else if (Clients[e]._request.method == "DELETE")
-									_delete(Clients[e]._response, Clients[e]._request, _s);
+									_delete(Clients[e], _s);
 							}
 							else
 								Clients[e]._response.status = 405;
+							_response(Clients[e]);
+							// std::cerr << "status: " << Clients[e]._response.status << std::endl;
 							
-							std::cerr << "status: " << Clients[e]._response.status << std::endl;
 							
-							_response(Clients[e]._response, Clients[e]._request);
-							s = generate_response_str(Clients[e]._response);
-							Clients[e]._read_status = 0;
+							// else
+							// 	Clients[e]._read_status = 0;
 							
 							// _reading_lock = 0;
 							// _writing_lock = 1;
@@ -276,48 +337,95 @@ void	_socket( Parsing &_server )
 							// std::cerr << "buffer: " << _test_buffer << std::endl;
 							// break;
 						}
-							std::cerr << "rddddddddddddddddddddd" << data << std::endl;
+						else
+							_get_res_body(Clients[e]);
+							std::cerr << "rddddddddddddddddddddd" << data << " - " << Clients[e]._done_reading << std::endl;
 						// old_data = data;
 						
-						for (int i=0; i<data; i++)
-							Clients[e].buffer += buffer[i];
+
+							std::cerr << " Clients[e]._response.content_length : " << Clients[e]._response.content_type << std::endl;
+						s = generate_response_str(Clients[e]._response);
+						std::cerr << "Clients[" << e << "]: " << Clients[e]._id << " - done_reading: " << Clients[e]._done_reading << " - file fd: " << Clients[e].fd_file << std::endl;
+						if (Clients[e]._done_reading)
+							Clients[e]._read_status = 0;
+						
+						
 						
 						FD_SET(Clients[e]._id, &_writefds);
 						Clients[e]._write_status = 1;
-						break;
+						
+						// break;
 						// request.fd = x;
 						// FD_SET(x, &_readfds);
 						// x++;
 					}
 					// else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _writing_lock)
-					else if (std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end() &&  Clients[e]._write_status)
+					if (std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end() &&  Clients[e]._write_status)
 					{
-						std::cerr << "wrrrrrrrrrrrrrrrrrrrrr" << std::endl;
-						int return_write = write(Clients[e]._id, &s.c_str()[_wr], s.size()-_wr);
-						_wr += return_write;
-						// std::cerr << request.uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;
-						if (return_write <= 0 || _wr == s.size())
+						if (Clients[e]._cgi_pid == waitpid(Clients[e]._cgi_pid, NULL, WNOHANG))
 						{
-						std::cerr << "hlwaaaaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
-							close(Clients[e]._id);
-							FD_CLR(Clients[e]._id, &_readfds);
-							FD_CLR(Clients[e]._id, &_writefds);
-							// _writing_lock = 0;
-							// Clients[e].init();
-							std::vector<Client>::iterator it = Clients.begin();
-    						std::advance(it, e);
-							std::cerr << "###############" << std::endl;
-							Clients.erase(it);
-							// Clients[e]._write_status = 0;
-							_wr=0;
-							// std::cerr << "l3zz: " << response.content_type << " - " << response.content_length << std::endl;
-							// Clients[e].buffer = "";
-							// _init_l3alam(Clients[e]._request, Clients[e]._response);
-							// _first_time= 0;
-							// print_shit(request, response);
-							// x++;
+							///// time to exit child for 30second
+							if (remove(Clients[e].file.c_str()))
+               					 perror("remove file");
+							Clients[e]._kill_pid = true;
+							// std::cerr << "---------------------Clients[e]._kill_pid : " << Clients[e]._kill_pid << std::endl;	
+							parent_process( Clients[e].body, Clients[e].pipe_fd);
+							get_body(Clients[e]._response, Clients[e].body);
+							// _get_res_body(Clients[e]);
+							// std::cerr << " Body : " << Clients[e].body << std::endl;
+        					Clients[e]._response.content_type = Clients[e]._response.mims[_get_ex(Clients[e]._request.path)];
+							s = generate_response_str(Clients[e]._response);
 						}
+						if (Clients[e]._kill_pid)  
+						{
+							long return_write = 0;
+							// std::cerr << "wrrrrrrrrrrrrrrrrrrrrr: " << Clients[e]._response.content_length << std::endl;
+							// if (Clients[e]._done_reading)
+							// {
+								// size_t _ctPos = s.find("Content-Length: ")+16, wld7mida=0, temp=_ctPos;
+								
+								// while (s[temp] != '\n' && s[temp] != '\0')
+								// {
+								// 	wld7mida++;
+								// 	temp++;
+								// }
+
+								// s = replaceSubstring(s, std::to_string(Clients[e]._response.content_length), _ctPos, wld7mida);
+								// std::cerr << ";;;;;;;;" << s.substr(0, _ctPos+wld7mida+1) << ";;;;;;;;" << std::endl;
+								// std::cerr << "v: " << v << std::endl;
+								// s=v;
+								// _wr += return_write;
+							// }
+							std::string substring = getSubstring(s, Clients[e]._wr, s.length());
+							std::cerr << "s.size() : " << s.size() << " - substring.size() : " << substring.size() << std::endl;
+							return_write = write(Clients[e]._id, substring.c_str(), substring.size());
+							std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+							Clients[e]._wr += return_write;
+							std::cerr << "return_write : " << return_write << " - Clients[e]._wr : " <<  Clients[e]._wr << std::endl;
+							// std::cerr << request.uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;
+							if (return_write <= 0 || Clients[e]._wr == Clients[e]._response.content_length)
+							{
+							std::cerr << "hlwaaaaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
+								close(Clients[e]._id);
+								FD_CLR(Clients[e]._id, &_readfds);
+								FD_CLR(Clients[e]._id, &_writefds);
+								// _writing_lock = 0;
+								// Clients[e].init();
+								std::vector<Client>::iterator it = Clients.begin();
+								std::advance(it, e);
+								std::cerr << "###############" << std::endl;
+								Clients.erase(it);
+								// Clients[e]._write_status = 0;
+								// Clients[e]._wr=0;
+								// std::cerr << "l3zz: " << response.content_type << " - " << response.content_length << std::endl;
+								// Clients[e].buffer = "";
+								// _init_l3alam(Clients[e]._request, Clients[e]._response);
+								// _first_time= 0;
+								// print_shit(request, response);
+								// x++;
+							}
 						// x++;
+						}
 
 					}
 					// else

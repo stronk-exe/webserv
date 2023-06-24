@@ -13,7 +13,7 @@
 #include "../webserv.hpp" 
 
 
-std::string int_to_str(int num)
+std::string num_to_str(size_t num)
 {
     std::ostringstream str1;
     str1 << num;
@@ -37,7 +37,7 @@ void update_env_for_cgi( Request &_request , std::string _path_info, Server _ser
     _request.env[2] = strdup(("CONTENT_TYPE=" + _request.headers["Content-Type"]).c_str());
     _request.env[3] = strdup(("CONTENT_LENGTH=" + _request.headers["Content-Length"]).c_str());
     _request.env[4] = strdup(("SCRIPT_FILENAME=" + _path_info).c_str());
-    _request.env[5] = strdup(("SERVER_PORT=" + int_to_str(_server.listen_port)).c_str());
+    _request.env[5] = strdup(("SERVER_PORT=" + num_to_str(_server.listen_port)).c_str());
     _request.env[6] = strdup(("SERVER_NAME=" + _server.name).c_str());
     _request.env[7] = strdup(("HTTP_COOKIE=" + _request.headers["Cookie"]).c_str());
     _request.env[8] = strdup(("QUERY_STRING=" + queryString).c_str());
@@ -49,12 +49,12 @@ void     printHeaders(std::map<std::string, std::string> headers)
 {
     std::map<std::string, std::string>::iterator i;
         // std::cerr << i.first << " " << i.second << std::endl;
-        std::cerr << "*********************************************" << std::endl;
+        // std::cerr << "*********************************************" << std::endl;
     for ( i = headers.begin(); i != headers.end(); i++)
     {
         std::cerr << i->first << " . " << i->second << std::endl;
     }
-        std::cerr << "*********************************************" << std::endl;
+        // std::cerr << "*********************************************" << std::endl;
 }
 
 bool check_extension(std::string extension, std::string path)
@@ -76,6 +76,7 @@ bool check_path_extension(std::vector<CGI>	&cgi_pass, std::string &path, std::st
     
     for (it = cgi_pass.begin(); it != cgi_pass.end() ; it++)
     {
+        // std::cerr << "extantion: " << (*it).extension << std::endl;
         if (check_extension((*it).extension, path))
         {
             scriptPath = (*it).path + " " + path;
@@ -96,7 +97,7 @@ std::string get_content_type(char *buffer)
 }
 
 
-void parent_process(std::string &result, int *pipe_fd, int pid)
+void parent_process(std::string &result, int *pipe_fd)
 {
     char buffer[4056];
     int status, nbytes;
@@ -107,7 +108,6 @@ void parent_process(std::string &result, int *pipe_fd, int pid)
         result.append(buffer, nbytes);
     }
     close(pipe_fd[0]);
-    wait(NULL);
 }
 
 
@@ -126,12 +126,12 @@ int createFile(const char* filename, std::string data) {
     return fd;
 }
 
-std::string exec_file_cgi(std::string &scriptPath, std::string &_pwd, Request &_request)
+void exec_file_cgi(std::string &scriptPath, Client & client)
 {
-    pid_t pid;
+    // pid_t pid;
     char *av[3];
-    int fd, pipe_fd[2];
-    (void)_pwd;
+    int fd, status;
+    // (void)_pwd;
     std::string result, arg, args[2];
     
     std::istringstream ss(scriptPath);
@@ -142,34 +142,42 @@ std::string exec_file_cgi(std::string &scriptPath, std::string &_pwd, Request &_
         // std::cerr << av[i] << std::endl;
     }
     av[2] = NULL;
-    
+    client._kill_pid = false;
         // std::cerr << "=======================================" << std::endl;
         // std::cerr << "body : \n" << _request.body << std::endl;
         // std::cerr << "=======================================" << std::endl;
-    fd = createFile("hamid", _request.body);
-    if (!(pipe(pipe_fd) > -1 && (pid = fork()) > -1)) {
+    client.file = _webserv_loc + "/_cgi/cgi_utils/" +  generateRandomString(7);
+    fd = createFile(client.file.c_str() , client._request.body);/////////////////////////////////////////////////////////////
+    if (!(pipe(client.pipe_fd) > -1 && (client._cgi_pid = fork()) > -1)) {
         std::cerr << strerror(errno) << std::endl;
         exit(12);
     }
-    if (pid == 0) {
+    if (client._cgi_pid == 0) {
         dup2(fd, STDIN_FILENO);
         // close(fd);
-        close(pipe_fd[0]);
-        dup2(pipe_fd[1], STDOUT_FILENO);
-        close(pipe_fd[1]);
-        execve(av[0], av, _request.env);
+        close(client.pipe_fd[0]);
+        dup2(client.pipe_fd[1], STDOUT_FILENO);
+        close(client.pipe_fd[1]);
+        execve(av[0], av, client._request.env);
         std::cerr << strerror(errno) << std::endl;
         exit(12);
     } else {
-        close(fd);
-        // if (remove(".hamid"))
-        //     perror("remove file");
-        parent_process(result, pipe_fd, pid);///////////////////
+        waitpid(client._cgi_pid, &status, WNOHANG);
+        // if (client._cgi_pid == waitpid(client._cgi_pid, &status, WNOHANG))
+        // {
+        //     std::cerr << "^^^^^^^^^^^^^^^^^^^^^" << std::endl;
+        //     close(fd);
+        //     if (remove(client.file.c_str()))
+        //         perror("remove file");
+        //     client._kill_pid = true;
+        //     parent_process(client.body, client.pipe_fd);///////////////////
+        // }
+            // std::cerr << "*****************************" << std::endl;
     }
     // if (remove(".hamid"))
     //     perror("remove file");
     // write (2, "*********", 10);
-    return result;
+    // return result;
 }
 
 void get_body(Response & _response, std::string & result)
@@ -196,26 +204,41 @@ void get_body(Response & _response, std::string & result)
     _response.status = 200;
 }
 
-void	_cgi( Request &_request, Response &_response , Server &_server )
+std::string generateRandomString(int length) {
+    std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    std::string result = ".h";
+    int charsetLength = charset.length();
+
+    std::srand(std::time(0)); // Seed the random number generator
+
+    for (int i = 2; i < length; ++i) {
+        int randomIndex = std::rand() % charsetLength;
+        result += charset[randomIndex];
+    }
+
+    return result;
+}
+
+void	_cgi( Client & client , Server &_server )
 {
     // printHeaders(_request.headers); 
 	std::string result, scriptPath, arg, _pwd;
     // std::cerr << "-------------------------------" << std::endl;
     // std::cerr << "CGI" << std::endl;
-    // std::cerr << "path in cgi: " << _request.path << std::endl;
-    _pwd = getcwd(NULL, 0);
-    if (!check_path_extension(_request.cgi , _request.path, scriptPath)) {
+    // std::cerr << "path in cgi: " << client._request.path << std::endl;
+    // _pwd = getcwd(NULL, 0);
+    if (!check_path_extension(client._request.cgi , client._request.path, scriptPath)) {
         // std::cerr << "extansion" << std::endl;
-        _response.body = "";
+        client._response.body = "";
         return ;
     }
-    update_env_for_cgi(_request, (_request.path), _server);
+    update_env_for_cgi(client._request, (client._request.path), _server);
     // for (int i = 0; i < 10; i++)
         // std::cerr << "|" << _request.env[i] << "|" << std::endl;
 
     // std::cerr << "jjjjjj: " << scriptPath << std::endl;
-    result = exec_file_cgi(scriptPath, _pwd, _request);
-	get_body(_response, result);
+    exec_file_cgi(scriptPath, client);
+	// get_body(client._response, client.body);
     
 	// std::cerr << "execution output: |" << _response.body <<"|" << std::endl;
 	// std::cerr << "*************************************************" << std::endl;  
