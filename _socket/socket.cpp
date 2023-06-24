@@ -308,7 +308,7 @@ void	_socket( Parsing &_server )
 						}
 						if (Clients[e]._kill_pid)  
 						{
-							std::cerr << "wrrrrrrrrrrrrrrrrrrrrr: " << s << std::endl;
+							// std::cerr << "wrrrrrrrrrrrrrrrrrrrrr: " << s << std::endl;
 							int return_write = write(Clients[e]._id, &s.c_str()[_wr], s.size()-_wr);
 							_wr += return_write;
 							// std::cerr << request.uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;

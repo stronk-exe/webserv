@@ -25,9 +25,9 @@ int main(int ac, char **av)
     std::string  str;
     Parsing _server;
     
-    if (ac == 3)
+    if (ac == 2)
     {
-        _webserv_loc = av[2];
+        _webserv_loc = getcwd(NULL, 0);
         _server.file = av[1];
         std::ifstream file(_server.file);
         while (std::getline(file, str))
