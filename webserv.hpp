@@ -144,6 +144,7 @@ class Request
 		std::vector<std::string>			index;
 		std::string							root;
 		std::vector<std::string>			redirection;
+		std::string							queryString;
 		std::vector<CGI>					cgi;
 		char								**env;
 		int									client_body_upload;
@@ -267,8 +268,9 @@ class Client {
 		int		_id;
 		pid_t	_cgi_pid;
 		bool	_kill_pid;
+		int		status;
 		int		pipe_fd[2];
-		std::string		file, body;
+		std::string		file, body, cookies;
 		int		_read_status;
 		int		_write_status;
 		std::string	buffer;
@@ -278,8 +280,11 @@ class Client {
 
 		Client( ) {};
 
-		Client(const int id ) {
+		Client(const int id , std::string session_id) {
 			_id = id;
+			status = 0;
+			pipe_fd[0] = 0;
+			pipe_fd[1] = 0;
 			_read_status = 1;
 			_write_status = 0;
 			_cgi_pid = -2;
@@ -294,6 +299,9 @@ class Client {
 			_write_status = client._write_status;
 			_cgi_pid = client._cgi_pid;
 			_kill_pid = client._kill_pid;
+			status = client.status;
+			pipe_fd[0] = client.pipe_fd[0];
+			pipe_fd[1] = client.pipe_fd[1];
 			_request = client._request;
 			_response = client._response;
 			return *this; 
@@ -301,7 +309,6 @@ class Client {
 		~Client() {};
 
 		bool operator ==(Client &b ) { return _id == b._id; }
-
 		// void init( void ) {
 
 		// 	_read_status = 0;
@@ -318,9 +325,9 @@ class Client {
 void	_socket( Parsing &_server );
 
 //cgi
-std::string generateRandomString(int length);
+std::string generateRandomString(int length, std::string  ss);
 void parent_process(std::string &result, int *pipe_fd);
-void get_body(Response & _response, std::string & result);
+void get_body( Client &client );
 
 // Methodes
 void	_get( Client & _client, Server &_server );

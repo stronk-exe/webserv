@@ -12,13 +12,19 @@
 
 #include "../webserv.hpp"
 
-std::string	generate_response_str(Response &_response)
+std::string	generate_response_str(Client & client )
 {
-	return "HTTP/1.1 "+ std::to_string(_response.status)+" "+_response.status_message+\
-					"\nContent-Type: "+_response.content_type+\
-					"\nContent-Length: "+std::to_string(_response.content_length)+\
-					"\nLocation: "+_response.location+\
-					"\n\n"+_response.body;
+	std::string response = "HTTP/1.1 "+ std::to_string(client._response.status)+" "+client._response.status_message+\
+					"\nContent-Type: "+client._response.content_type+\
+					"\nContent-Length: "+std::to_string(client._response.content_length);
+	
+	if (!client.cookies.empty())
+		response += "\n" + client.cookies;
+	if (!client._response.location.empty())
+		response += "\nLocation: "+client._response.location;
+					
+	response += "\n\n"+client._response.body;
+	return response;
 }
 
 std::vector<int>	_get_ports( Parsing &_server )
@@ -30,39 +36,6 @@ std::vector<int>	_get_ports( Parsing &_server )
 	return _ports;
 }
 
-void	_init_l3alam( Request &_request, Response &_response)
-{
-	// Request
-	// if (!_request.path.size())
-	// {
-		// char buffer[9999];
-		// if (getcwd(buffer, sizeof(buffer)) != nullptr)
-		// 	_request.path = std::string(buffer)+"/public";
-		// else
-		// 	_request.path = "";
-	// }// char c[9999];
-	// _request.path = std::string(getcwd(c, 9999));
-	_request.body = "";
-	_request.root = "";
-	_request.method = "";
-	_request.type = "";
-	_request.uri = "";
-	_request.autoindex = 0;
-	_request.is_method_allowed = 0;
-	_request.index.clear();
-	_request.error_pages.clear();
-	_request.cgi.clear();
-	_request.redirection.clear();
-	_request.headers.clear();
-
-	// Response
-	_response.status = 0;
-	_response.content_length = 0;
-	_response.body = "";
-	_response.location = "";
-	_response.status_message = "";
-
-}
 
 void	print_shit( Request &_request, Response &_response )
 {
@@ -106,6 +79,7 @@ void	print_shit( Request &_request, Response &_response )
 
 
 }
+
 
 void	_socket( Parsing &_server )
 {
@@ -160,8 +134,6 @@ void	_socket( Parsing &_server )
 		FD_SET(_socket_fd, &_readfds);
 		_socket_fds.push_back(_socket_fd);
 		std::cerr << "fds: " << _socket_fd << std::endl;
-		// _socket_fds.push_back(_socket_fd);
-		// _socket_fds.push_back(_socket_fd);
 
 	}
 	int fd_size = _socket_fds[_socket_fds.size() - 1];
@@ -170,7 +142,6 @@ void	_socket( Parsing &_server )
 	std::string _test_buffer;
 	std::string s;
 	int					_wr = 0;
-	// _init_l3alam(request, response);
 	int old_data=0;
 	int _first_time=0;
 	
@@ -183,30 +154,15 @@ void	_socket( Parsing &_server )
 		// std::cerr << "fd_size: " << fd_size << std::endl;
 		if (select(fd_size + 1, &_sockets, &_current_sockets, NULL, NULL) < 0)
 			print_error("error in select");
-		
-		// int x=0;
 		int coming_socket;
 		
-		
-		
-		// _first_time=0;
-		// while (x <= fd_size)
 		std::vector<int> accepted_shit;
 		for (int x=0; x <= fd_size; x++)
 		{
-			// std::cerr << "check return value of FD_ISSET: " << FD_ISSET(x, &_sockets) << ", at: " << x << std::endl;
-			// std::cerr << "check return value of FD_ISSET current: " << FD_ISSET(x, &_current_sockets) << ", at: " << x << std::endl;
 			if (FD_ISSET(x, &_sockets) || FD_ISSET(x, &_current_sockets))
 			{
-				for (size_t f=0; f<_socket_fds.size(); f++)
-					std::cerr << "_socket_fds[" << f << "]: " << _socket_fds[f] << std::endl;
-				for (size_t f=0; f<accepted_shit.size(); f++)
-					std::cerr << "accepted_shit[" << f << "]: " << accepted_shit[f] << std::endl;
-				std::cerr << "hola mista: " << x << std::endl;
-
 				if (std::find(_socket_fds.begin(), _socket_fds.end(), x) != _socket_fds.end() && std::find(accepted_shit.begin(), accepted_shit.end(), x) == accepted_shit.end())// && !_reading_lock && !_writing_lock)
 				{
-					
 					if ((coming_socket = accept(x, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
 					std::cerr << "coming_socket ::: " << coming_socket << std::endl;
@@ -217,13 +173,7 @@ void	_socket( Parsing &_server )
 					_first_time = 1;
 					_test_buffer = "";
 					accepted_shit.push_back(coming_socket);
-					std::cerr << "ggggg" << Clients.size() << std::endl;
-					
-					Clients.push_back(Client(coming_socket));
-					std::cerr << "sssssssssssssssssssssss: " << Clients.size() << std::endl;
-					std::cerr << "x: " << x << std::endl;
-					// x++;
-					
+					Clients.push_back(Client(coming_socket, generateRandomString(6, "id")));
 					break ;
 				}
 				for (size_t e=0; e<Clients.size(); e++)
@@ -239,15 +189,8 @@ void	_socket( Parsing &_server )
 						if ((data = read(Clients[e]._id, buffer, 999999)) <= 0)
 						{
 							std::cerr << "zzzzzzzzzzzzz" << std::endl;
-							// for (int i=0; i<(old_data-data); i++)
-							// 	_test_buffer += buffer[i];
-							
-							
 							Server _s;
 							_request(_server, _s, Clients[e]._request, Clients[e]._response, Clients[e].buffer);
-							
-							// std::cerr << "shity read: " << data << " - " << old_data << std::endl;
-
 							// checking the method
 							if (Clients[e]._request.is_method_allowed)
 							{
@@ -263,52 +206,51 @@ void	_socket( Parsing &_server )
 							
 							std::cerr << "status: " << Clients[e]._response.status << std::endl;
 							
-							_response(Clients[e]);
-							s = generate_response_str(Clients[e]._response);
-							Clients[e]._read_status = 0;
 							
-							// _reading_lock = 0;
-							// _writing_lock = 1;
-							// std::cerr << "PATH: " << request.path << std::endl;
-							// x++;
-							// break;
-							// FD_CLR(x, &_readfds);
-							// std::cerr << "buffer: " << _test_buffer << std::endl;
-							// break;
+							_response(Clients[e]);
+							s = generate_response_str(Clients[e]);
+							Clients[e]._read_status = 0;
 						}
-							std::cerr << "rddddddddddddddddddddd" << data << std::endl;
-						// old_data = data;
-						
+
 						for (int i=0; i<data; i++)
 							Clients[e].buffer += buffer[i];
 						
 						FD_SET(Clients[e]._id, &_writefds);
 						Clients[e]._write_status = 1;
 						break;
-						// request.fd = x;
-						// FD_SET(x, &_readfds);
-						// x++;
+
 					}
-					// else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _writing_lock)
 					else if (std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end() &&  Clients[e]._write_status)
 					{
-						if (Clients[e]._cgi_pid == waitpid(Clients[e]._cgi_pid, NULL, WNOHANG))
+						if (waitpid(Clients[e]._cgi_pid, &Clients[e].status, WNOHANG) > 0)
 						{
-							///// time to exit child for 30second
 							if (remove(Clients[e].file.c_str()))
                					 perror("remove file");
+							///// time to exit child for 30second
+							std::cerr << "Clients[e].status : " << Clients[e].status << std::endl;
 							Clients[e]._kill_pid = true;
-							std::cerr << "---------------------Clients[e]._kill_pid : " << Clients[e]._kill_pid << std::endl;	
-							parent_process( Clients[e].body, Clients[e].pipe_fd);
-							get_body(Clients[e]._response, Clients[e].body);
+							if (WIFSIGNALED(Clients[e].status) && (WTERMSIG(Clients[e].status) == SIGALRM))
+							{
+								std::cerr << "@@@@@@@@@@@@@" << std::endl;
+
+								Clients[e]._response.status = 508;
+								_response(Clients[e]);
+							}
+							else {
+								std::cerr << "---------------------Clients[e]._kill_pid : " << Clients[e]._kill_pid << std::endl;	
+								parent_process( Clients[e].body, Clients[e].pipe_fd);
+							std::cerr << "body : "  << Clients[e].body << std::endl;
+								get_body(Clients[e]);
+							std::cerr << "Clients[e]._response.content_type : "  << Clients[e]._response.content_type << std::endl;
+							}
 							// _get_res_body(Clients[e]);
-							// std::cerr << " Body : " << Clients[e].body << std::endl;
-        					Clients[e]._response.content_type = Clients[e]._response.mims[_get_ex(Clients[e]._request.path)];
-							s = generate_response_str(Clients[e]._response);
+							// std::cerr << "body : "  << Clients[e]._response.body << std::endl;
+							
+        					// Clients[e]._response.content_type = Clients[e]._response.mims[_get_ex(Clients[e]._request.path)];
+							s = generate_response_str(Clients[e]);
 						}
 						if (Clients[e]._kill_pid)  
 						{
-							// std::cerr << "wrrrrrrrrrrrrrrrrrrrrr: " << s << std::endl;
 							int return_write = write(Clients[e]._id, &s.c_str()[_wr], s.size()-_wr);
 							_wr += return_write;
 							// std::cerr << request.uri << " - Response: " << s.size() << " - Write return: " << _wr << " - reminds: " << s.size()-_wr << std::endl;
@@ -318,34 +260,16 @@ void	_socket( Parsing &_server )
 								close(Clients[e]._id);
 								FD_CLR(Clients[e]._id, &_readfds);
 								FD_CLR(Clients[e]._id, &_writefds);
-								// _writing_lock = 0;
-								// Clients[e].init();
 								std::vector<Client>::iterator it = Clients.begin();
 								std::advance(it, e);
-								std::cerr << "###############" << std::endl;
 								Clients.erase(it);
-								// Clients[e]._write_status = 0;
 								_wr=0;
-								// std::cerr << "l3zz: " << response.content_type << " - " << response.content_length << std::endl;
-								// Clients[e].buffer = "";
-								// _init_l3alam(Clients[e]._request, Clients[e]._response);
-								// _first_time= 0;
-								// print_shit(request, response);
-								// x++;
 							}
-						// x++;
 						}
-
 					}
-					// else
-					// 	x++;
 
 				}
-				// x++;
-				
 			}
-			// else
-			// 	x++;
 		}
 	}
 }

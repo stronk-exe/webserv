@@ -100,6 +100,8 @@ void    get_file_data( Response &_response, std::string path )
 
 void	_response( Client & _client )
 {
+	// std::cerr << "2-client.sessionID : " << _client.sessionID << std::endl;
+
 	int _status_found=0;
     if (_client._request.error_pages.size())
     {
@@ -172,6 +174,11 @@ void	_response( Client & _client )
             _client._response.body = "<html><body><h1>501 Not Implemented</h1><img src=\"https://3.bp.blogspot.com/-l_OPWrz4AZo/VtLroz9u1cI/AAAAAAAANPU/mGoZb0ZKwdk/s1600/zytel.jpg\" slt=\"not_implemented\"/></body></html>";
             _client._response.status_message = "Not Implemented";
         }
+        else if (_client._response.status == 508)
+        {
+            _client._response.body = "<html><body><h1>508 Loop Detected</h1><img src=\"https://d3mvlb3hz2g78.cloudfront.net/wp-content/uploads/2017/12/thumb_720_450_Haiku_Stairsdreamstime_xl_50641068_1.jpg\" slt=\"Loop Detected\"/></body></html>";
+            _client._response.status_message = "Loop Detected";
+        }
         _client._response.content_type = "text/html";
     }
     // else
@@ -187,10 +194,15 @@ void	_response( Client & _client )
     // std::cerr << "wa lwzz: " << _response.content_type << "~" << _response.status << std::endl;
 	if (_client._response.body.empty() && _client._kill_pid)
 	{
+	std::cerr << "*************************************************" << std::endl;  
+
     	_get_res_body(_client);
         _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
     }
+	std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;  
     _client._response.content_length = _client._response.body.size();
+	// std::cerr << "3-client.sessionID : " << _client.sessionID << std::endl;
+
     
     // std::cerr << "gg: " << _request.path << std::endl;
 }
