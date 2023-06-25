@@ -146,7 +146,7 @@ void exec_file_cgi(std::string &scriptPath, Client & client)
         // std::cerr << "=======================================" << std::endl;
         // std::cerr << "body : \n" << _request.body << std::endl;
         // std::cerr << "=======================================" << std::endl;
-    client.file = _webserv_loc + "/_cgi/cgi_utils/" +  generateRandomString(7);
+    client.file = _webserv_loc + "/_cgi/" +  generateRandomString(7);
     fd = createFile(client.file.c_str() , client._request.body);/////////////////////////////////////////////////////////////
     if (!(pipe(client.pipe_fd) > -1 && (client._cgi_pid = fork()) > -1)) {
         std::cerr << strerror(errno) << std::endl;

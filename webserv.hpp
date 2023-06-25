@@ -23,11 +23,16 @@
 #include <fstream>
 #include <map>
 #include <fcntl.h>
+#include <limits.h>
 #include <sstream>
 #include <vector>
 #include <iterator>
-#include <map>
 #include <sys/stat.h>
+#include <map>
+
+
+#include <errno.h>
+
 
 #define _POSIX_SOURCE
 #include <dirent.h>
@@ -35,6 +40,8 @@
 #include <sys/types.h>
 #undef _POSIX_SOURCE
 #include <stdio.h>
+
+extern std::string _webserv_loc;
 
 struct error_page
 {
@@ -159,7 +166,6 @@ class Request
 		std::string	boundary;
 
 		Request() {
-			std::cerr << "Constructor Request" << std::endl;
 			fd = 0;
 			autoindex = 0;
 			client_body_upload = 0;
@@ -199,7 +205,6 @@ class Request
 
 			for (int i = 0; i < 10; i++)
 			{
-				// std::cerr<< "^^^^^^^^^^^^^" << std::endl;
 				if (env[i])
 					delete env[i];
 				if (req.env[i])
@@ -210,8 +215,8 @@ class Request
 
 			return *this;
 		};
+
 		~Request() {
-			std::cerr << "Destructor Request" << std::endl;
 			for (int i = 0; i < 10; i++)
 			{
 				if (env[i])
@@ -228,16 +233,15 @@ class Response
 
 		int			status;
 		std::string status_message;
-		int			content_length;
+		size_t		content_length;
 		std::string content_type;
 		std::string path;
 		std::string data;
 		std::string body;
 		std::string	location;
 		std::map<std::string, std::string>	mims;
-		Response() {
-			std::cerr << "constructor Response" << std::endl;
 
+		Response() {
 			status = 0;
 			content_length = 0;
 		};
@@ -256,7 +260,7 @@ class Response
 			return *this; 
 		};
 
-		~Response() {std::cerr << "Destructor Response" << std::endl;};
+		~Response() {};
 
 };
 
@@ -266,22 +270,34 @@ class Client {
 	public:
 
 		int		_id;
-		int		_cgi_pid;
+		pid_t	_cgi_pid;
 		bool	_kill_pid;
+		size_t	_wr;
+		int		pipe_fd[2];
+		std::string		file, body;
 		int		_read_status;
 		int		_write_status;
+		long return_write;
+		int		_done_reading;
+		int		fd_file, data;
+		int		firstTime_HuH;
 		std::string	buffer;
+		std::string substring, s;
 
 		Request		_request;
 		Response	_response;
 
-		Client( ) {std::cerr << "constructor Client" << std::endl;};
+		Client( ) {};
 
 		Client(const int id ) {
-			std::cerr << "constructor Client" << std::endl;
 			_id = id;
+			_wr = 0;
 			_read_status = 1;
 			_write_status = 0;
+			_done_reading = 0;
+			return_write = 0;
+			firstTime_HuH= 0;
+			fd_file = 0;
 			_cgi_pid = -2;
 			_kill_pid = true;
 		};
@@ -290,16 +306,20 @@ class Client {
 
 		Client& operator= (const Client & client) { 
 			_id = client._id;
+			_wr = client._wr;
+			return_write = client.return_write;
 			_read_status = client._read_status;
 			_write_status = client._write_status;
+			_done_reading = client._done_reading;
+			fd_file = client.fd_file;
+			firstTime_HuH = client.firstTime_HuH;
 			_cgi_pid = client._cgi_pid;
 			_kill_pid = client._kill_pid;
-			std::cerr << "++++++++++" << std::endl;
 			_request = client._request;
 			_response = client._response;
 			return *this; 
 		};
-		~Client() {std::cerr << "Destructor Client" << std::endl;};
+		~Client() {};
 
 		bool operator ==(Client &b ) { return _id == b._id; }
 
@@ -318,20 +338,26 @@ class Client {
 // Socket
 void	_socket( Parsing &_server );
 
+//cgi
+std::string generateRandomString(int length);
+void parent_process(std::string &result, int *pipe_fd);
+void get_body(Response & _response, std::string & result);
+
 // Methodes
-void	_get( Response &_response, Request &_request, Server &_server );
-void	_post( Response &_response, Request &_request, Server &_server );
-void	_delete( Response &_response, Request &_request ,Server &_server );
+void	_get( Client & _client, Server &_server );
+void	_post( Client & _client, Server &_server );
+void	_delete( Client & _client ,Server &_server );
 
 // CGI
-void	_cgi( Request &_request, Response &_response, Server &_server );
+void	_cgi( Client & _client , Server &_server );
+std::string num_to_str(size_t num);
 
 // Request
 void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s );
 
 // Response
-void		_response( Response &_response, Request &_request );
-int			_get_res_body( Request &_request, Response &_response );
+void		_response( Client & _client );
+int			_get_res_body( Client & _client );
 void    	get_indexed_file_data( Request &_request, Response &_response, std::string path );
 std::string	_get_ex( std::string _file_name );
 
@@ -348,5 +374,5 @@ void	info_err_status(std::vector<error_page> &errors, std::vector<std::string>::
 void	info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void	print_data(Parsing &parss);
 std::vector<std::string>	info_(std::vector<std::string>::iterator &it);
-
+int createFile(const char* filename, std::string data);
 #endif

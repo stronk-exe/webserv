@@ -38,7 +38,7 @@ size_t getFileSize(const char* filename) {
 
 int _get_res_body( Client & _client )
 {
-    std::cerr << "yo fd file: " << _client.fd_file << std::endl;
+    std::cerr << "\e[93myo fd file for -:\e[0m" << _client._id << "\e[92m- is \e[0m" << _client.fd_file << std::endl;
     if (!_client.fd_file)
     {
         _client.fd_file = open( _client._request.path.c_str(), O_RDONLY );
