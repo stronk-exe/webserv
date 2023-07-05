@@ -39,6 +39,7 @@ size_t getFileSize(const char* filename) {
 int _get_res_body( Client & _client )
 {
     // std::cerr << "\e[93myo fd file for -:\e[0m" << _client._id << "\e[92m- is \e[0m" << _client.fd_file << std::endl;
+
     if (!_client.fd_file)
     {
         _client.fd_file = open( _client._request.path.c_str(), O_RDONLY );
@@ -52,7 +53,7 @@ int _get_res_body( Client & _client )
         data = read(_client.fd_file, buffer, 999999);
         for (int i=0; i<data; i++)
             _client._response.body += buffer[i];
-        std::cerr << "file data: " << data << std::endl;
+        std::cerr << "file data: " << _client.fd_file << " ---- " << data << std::endl;
         if (data>0)
             _client._done_writing = 0;
         else
