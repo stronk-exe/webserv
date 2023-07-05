@@ -81,10 +81,7 @@ void	_validate_request( Server &_server, Location &_location, Request &_request,
 	if (_is_method_allowed(_location, _request))
 		_request.is_method_allowed = 1;
 	if (!_match_theLocation(_server, _location, _request))
-	{
 		_response.status = 404;
-		std::cerr << "xxxxxxxxxxxxxx" << std::endl;
-	}
 	if (_request.redirection.size())
 	{
 		_response.path = _request.redirection[0];

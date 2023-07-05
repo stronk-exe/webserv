@@ -38,7 +38,7 @@ size_t getFileSize(const char* filename) {
 
 int _get_res_body( Client & _client )
 {
-    std::cerr << "\e[93myo fd file for -:\e[0m" << _client._id << "\e[92m- is \e[0m" << _client.fd_file << std::endl;
+    // std::cerr << "\e[93myo fd file for -:\e[0m" << _client._id << "\e[92m- is \e[0m" << _client.fd_file << std::endl;
     if (!_client.fd_file)
     {
         _client.fd_file = open( _client._request.path.c_str(), O_RDONLY );
@@ -52,26 +52,26 @@ int _get_res_body( Client & _client )
         data = read(_client.fd_file, buffer, 999999);
         for (int i=0; i<data; i++)
             _client._response.body += buffer[i];
-        std::cerr << "yo data: " << data << std::endl;
+        std::cerr << "file data: " << data << std::endl;
         if (data>0)
-            _client._done_reading = 0;
+            _client._done_writing = 0;
         else
         {
-            std::cerr << "PPPPPPPPPP" << std::endl;
-            _client._done_reading = 1;
+            // std::cerr << "PPPPPPPPPP" << std::endl;
+            _client._done_writing = 1;
             close(_client.fd_file);
         }
         if (_client._response.content_type.empty())
         {
-            std::cerr << "................" << std::endl;
-            if (_get_ex(_client._request.path) == "php")
+            // std::cerr << "................" << std::endl;
+            _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
+            if (!_client._response.content_type.size())
                 _client._response.content_type = "text/html";
-            else
-                _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
+            // else
         }
         if (!_client._response.content_length)
             _client._response.content_length = _client._response.body.size();
-        // std::cerr << "data: " << data << " ~ res body: " << _client._response.body.size() << std::endl;
+        // std::cerr <<"size of res_body: " << _client._response.body.size() << std::endl;
     // }
     
     // std::cerr << "w3lach: " << _client._response.content_length << std::endl;
@@ -229,5 +229,5 @@ void	_response( Client & _client )
     if (!_client._response.content_length)
         _client._response.content_length = _client._response.body.size();
     
-    std::cerr << "gg: " << _client._response.content_type << std::endl;
+    // std::cerr << "gg: " << _client._response.content_type << std::endl;
 }
