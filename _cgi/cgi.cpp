@@ -146,7 +146,7 @@ void exec_file_cgi(std::string &scriptPath, Client & client)
         // std::cerr << "=======================================" << std::endl;
         // std::cerr << "body : \n" << _request.body << std::endl;
         // std::cerr << "=======================================" << std::endl;
-    client.file = _webserv_loc + "/_cgi/cgi_utils/" +  generateRandomString(7, ".h");
+    client.file = _webserv_loc +  generateRandomString(7, ".h");
     fd = createFile(client.file.c_str() , client._request.body);/////////////////////////////////////////////////////////////
     if (!(pipe(client.pipe_fd) > -1 && (client._cgi_pid = fork()) > -1)) {
         std::cerr << strerror(errno) << std::endl;
@@ -217,6 +217,10 @@ void get_body( Client & client)
     // std::istringstream ss(result);
        ///////////set cookies
     int pos0, pos1;
+    // std::cerr << "------------------"<< std::endl;
+    // std::cerr << client.body << std::endl;
+    // std::cerr << "------------------"<< std::endl;
+    // std::cerr << client.body << std::endl;
     set_cookies(client.cookies, client.body);
     pos0 = client.body.find("Content-Type:");
     if (pos0 == -1)
@@ -270,7 +274,7 @@ void	_cgi( Client & client , Server &_server )
     // for (int i = 0; i < 10; i++)
         // std::cerr << "|" << _request.env[i] << "|" << std::endl;
 
-    // std::cerr << "jjjjjj: " << scriptPath << std::endl;
+    std::cerr << "jjjjjj: " << scriptPath << std::endl;
     exec_file_cgi(scriptPath, client);
 	// get_body(client._response, client.body);
     

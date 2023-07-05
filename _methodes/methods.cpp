@@ -26,7 +26,7 @@ void	_get_listed_dir( Client & _client )
 	{
 		_client._response.status = 404;
 		perror("opendir() error");
-		std::cerr << "olAAAAA comistasss" << std::endl;
+		// std::cerr << "olAAAAA comistasss" << std::endl;
 	}
 	else
 	{
@@ -91,7 +91,7 @@ void	_file_or_dir(  Client & _client )
 	struct stat info;
 
 	// std::cerr << "lpath lmrid: " << _client._request.path << std::endl;
-	std::cerr << "-----STATUS: " << _client._response.status << std::endl;
+	// std::cerr << "-----STATUS: " << _client._response.status << std::endl;
 	if (stat(_client._request.path.c_str(), &info) != 0)
 		_client._response.status = 404;
 
@@ -101,7 +101,7 @@ void	_file_or_dir(  Client & _client )
 		_client._request.type = "file";
 	else
 		_client._response.status = 404;
-	std::cerr << "STATUS: " << _client._response.status << std::endl;
+	// std::cerr << "STATUS: " << _client._response.status << std::endl;
 }
 
 void _body_parser(  Client & _client )
@@ -198,7 +198,7 @@ void	_get( Client & _client, Server &_server )
 	// close(ff);
 
     _file_or_dir(_client);
-	std::cerr << "---------------------------" << std:: endl;
+	// std::cerr << "---------------------------" << std:: endl;
 
 	std::cout << "GET" << _client._response.status << std::endl;
 

@@ -81,10 +81,7 @@ void	_validate_request( Server &_server, Location &_location, Request &_request,
 	if (_is_method_allowed(_location, _request))
 		_request.is_method_allowed = 1;
 	if (!_match_theLocation(_server, _location, _request))
-	{
 		_response.status = 404;
-		std::cerr << "xxxxxxxxxxxxxx" << std::endl;
-	}
 	if (_request.redirection.size())
 	{
 		_response.path = _request.redirection[0];
@@ -285,24 +282,13 @@ void	_get_mims( Response &_response )
 	}
 }
 
-////////////////////////////////////////
-void check_QueryString(std::string & path, std::string & queryString)
-{    
-    int pos = path.find('?');
-    if (pos != -1)
-        queryString = path.substr(pos, path.size() - pos); 
-
-	std::cerr << "path.substr(0, pos) > " << path.substr(0, pos) << std::endl;
-	path = path.substr(0, pos);
-}
-////////////////////////////////////////
-
 void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s )
 {
 	// Server _s;
 	Location _location;
 	
 	_request_parser(_request, s);
+	// std::cerr << "req uri: " << _request.uri << " req Method: " << _request.method << std::endl;
 
 	// if the body is not complete yet
 	// _complete_body_filling(_request);
@@ -319,10 +305,9 @@ void	_request( Parsing &_server, Server &_s, Request &_request, Response &_respo
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
 	_get_mims(_response);
-	std::cerr << "\e[31mreq path: \e[0m" << _request.path << " req Method: " << _request.method << std::endl;
 	// std::cerr << "_request name: " << _request.root << " - req uri: " << _request.uri << " - PATH: " << _request.path << std::endl;
 
-	check_QueryString(_request.path, _request.queryString);
+
 	// std::cerr << "buffer: " << s << std::endl;
 	// std::map<std::string, std::string>::iterator iter;
     // for (iter = _response.mims.begin(); iter != _response.mims.end(); iter++)

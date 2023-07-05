@@ -21,26 +21,63 @@ std::string	_get_ex( std::string _file_name )
 	return "";
 }
 
+size_t getFileSize(const char* filename) {
+    FILE* file = fopen(filename, "rb");
+    if (!file) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return -1;
+    }
+
+    fseek(file, 0, SEEK_END);
+    size_t fileSize = ftell(file);
+
+    fclose(file);
+
+    return fileSize;
+}
+
 int _get_res_body( Client & _client )
 {
-    int fd = open( _client._request.path.c_str(), O_RDONLY );
-    int data=1;
-    while (data>0)
+    // std::cerr << "\e[93myo fd file for -:\e[0m" << _client._id << "\e[92m- is \e[0m" << _client.fd_file << std::endl;
+
+    if (!_client.fd_file)
     {
+        _client.fd_file = open( _client._request.path.c_str(), O_RDONLY );
+        std::cerr << "file length: " << getFileSize(_client._request.path.c_str()) << std::endl;
+        _client._response.content_length = getFileSize(_client._request.path.c_str());
+    }
+    int data=1;
+    // while (data>0)
+    // {
         char buffer[999999] = {0};
-        data = read(fd, buffer, 999999);
+        data = read(_client.fd_file, buffer, 999999);
         for (int i=0; i<data; i++)
             _client._response.body += buffer[i];
-        std::cerr << "data: " << data << " ~ res body: " << _client._response.body.size() << std::endl;
-    }
-    if (_get_ex(_client._request.path) == "php")
-        _client._response.content_type = "text/html";
-    else
-        _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
-    _client._response.content_length = _client._response.body.size();
-    std::cerr << "w3lach: " << _client._response.content_length << std::endl;
+        std::cerr << "file data: " << _client.fd_file << " ---- " << data << std::endl;
+        if (data>0)
+            _client._done_writing = 0;
+        else
+        {
+            // std::cerr << "PPPPPPPPPP" << std::endl;
+            _client._done_writing = 1;
+            close(_client.fd_file);
+        }
+        if (_client._response.content_type.empty())
+        {
+            // std::cerr << "................" << std::endl;
+            _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
+            if (!_client._response.content_type.size())
+                _client._response.content_type = "text/html";
+            // else
+        }
+        if (!_client._response.content_length)
+            _client._response.content_length = _client._response.body.size();
+        // std::cerr <<"size of res_body: " << _client._response.body.size() << std::endl;
+    // }
     
-    close(fd);
+    // std::cerr << "w3lach: " << _client._response.content_length << std::endl;
+    
+    
     
     // std::cerr << "yyooo: " << _request.path << " ~ " << _get_ex(_request.path) << " ~ " << _response.content_type << std::endl;
 	// std::ifstream myfile;
@@ -100,8 +137,6 @@ void    get_file_data( Response &_response, std::string path )
 
 void	_response( Client & _client )
 {
-	// std::cerr << "2-client.sessionID : " << _client.sessionID << std::endl;
-
 	int _status_found=0;
     if (_client._request.error_pages.size())
     {
@@ -111,7 +146,7 @@ void	_response( Client & _client )
             {
 				if (_client._response.status == _client._request.error_pages[i].error_status[j])
                 {
-                    std::cerr << "ayooo: " << _client._request.error_pages[i].path << " - " << _client._request.error_pages.size() << std::endl;
+                    // std::cerr << "ayooo: " << _client._request.error_pages[i].path << " - " << _client._request.error_pages.size() << std::endl;
 					get_file_data(_client._response, _client._request.error_pages[i].path);
                     _status_found=1;
                 }
@@ -194,15 +229,11 @@ void	_response( Client & _client )
     // std::cerr << "wa lwzz: " << _response.content_type << "~" << _response.status << std::endl;
 	if (_client._response.body.empty() && _client._kill_pid)
 	{
-	std::cerr << "*************************************************" << std::endl;  
-
     	_get_res_body(_client);
-        _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
+        // _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
     }
-	std::cerr << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;  
-    _client._response.content_length = _client._response.body.size();
-	// std::cerr << "3-client.sessionID : " << _client.sessionID << std::endl;
-
+    if (!_client._response.content_length)
+        _client._response.content_length = _client._response.body.size();
     
-    // std::cerr << "gg: " << _request.path << std::endl;
+    // std::cerr << "gg: " << _client._response.content_type << std::endl;
 }

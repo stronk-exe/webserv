@@ -2,24 +2,20 @@
 
 use strict;
 use warnings;
-use CGI;
 
-# Create CGI object
-my $cgi = CGI->new;
+print "Content-type: text/html\n\n";
+print "<html><body>\n";
 
-# Print Content-Type header
-print $cgi->header;
+print "<h1>Hello CGI Perl!</h1>\n";
 
-# Check if a file was uploaded
-if ($cgi->param('upload_file')) {
-    my $filename = $cgi->param('upload_file');
-    my $upload_filehandle = $cgi->upload('upload_file');
-    open(my $file, '>', $filename) or die "Could not open file: $!";
-    while (my $chunk = $upload_filehandle->getline()) {
-        print $file $chunk;
-    }
-    close($file);
-    print "File uploaded successfully.";
-} else {
-    print "No file uploaded.";
+print "<h2>Request Parameters:</h2>\n";
+print "<ul>\n";
+
+foreach my $param (param()) {
+    my @values = param($param);
+    print "<li><strong>$param:</strong> " . join(", ", @values) . "</li>\n";
 }
+
+print "</ul>\n";
+
+print "</body></html>\n";

@@ -23,11 +23,16 @@
 #include <fstream>
 #include <map>
 #include <fcntl.h>
+#include <limits.h>
 #include <sstream>
 #include <vector>
 #include <iterator>
-#include <map>
 #include <sys/stat.h>
+#include <map>
+
+
+#include <errno.h>
+
 
 #define _POSIX_SOURCE
 #include <dirent.h>
@@ -136,7 +141,7 @@ class Request
 
 		int									fd;
 		std::string							uri;
-		std::string							method;
+		std::string							method, queryString;
 		std::string 						type;
 		int									autoindex;
 		std::string							path;
@@ -144,7 +149,6 @@ class Request
 		std::vector<std::string>			index;
 		std::string							root;
 		std::vector<std::string>			redirection;
-		std::string							queryString;
 		std::vector<CGI>					cgi;
 		char								**env;
 		int									client_body_upload;
@@ -181,6 +185,7 @@ class Request
 			autoindex = req.autoindex;
 			path = req.path;
 			paths = req.paths;
+			queryString = req.queryString;
 			index = req.index;
 			root = req.root;
 			redirection = req.redirection;
@@ -229,7 +234,7 @@ class Response
 
 		int			status;
 		std::string status_message;
-		int			content_length;
+		size_t		content_length;
 		std::string content_type;
 		std::string path;
 		std::string data;
@@ -268,25 +273,34 @@ class Client {
 		int		_id;
 		pid_t	_cgi_pid;
 		bool	_kill_pid;
-		int		status;
+		size_t	_wr;
 		int		pipe_fd[2];
-		std::string		file, body, cookies;
-		int		_read_status;
-		int		_write_status;
+		std::string		file,  body, cookies;
+		int		_read_status, status;
+		int		_write_status, _done_writing;
+		long return_write;
+		int		_done_reading;
+		int		fd_file, data;
+		int		firstTime_HuH;
 		std::string	buffer;
+		std::string substring, s;
 
 		Request		_request;
 		Response	_response;
 
 		Client( ) {};
 
-		Client(const int id , std::string session_id) {
+		Client(const int id ) {
 			_id = id;
-			status = 0;
-			pipe_fd[0] = 0;
-			pipe_fd[1] = 0;
+			_wr = 0;
 			_read_status = 1;
+			status = 0;
 			_write_status = 0;
+			_done_reading = 0;
+			return_write = 0;
+			firstTime_HuH= 0;
+			_done_writing = 0;
+			fd_file = 0;
 			_cgi_pid = -2;
 			_kill_pid = true;
 		};
@@ -295,29 +309,28 @@ class Client {
 
 		Client& operator= (const Client & client) { 
 			_id = client._id;
+			_wr = client._wr;
+			return_write = client.return_write;
+			status = client.status;
 			_read_status = client._read_status;
 			_write_status = client._write_status;
+			_done_reading = client._done_reading;
+			_done_writing = client._done_writing;
+			fd_file = client.fd_file;
+			firstTime_HuH = client.firstTime_HuH;
 			_cgi_pid = client._cgi_pid;
 			_kill_pid = client._kill_pid;
-			status = client.status;
-			pipe_fd[0] = client.pipe_fd[0];
-			pipe_fd[1] = client.pipe_fd[1];
 			_request = client._request;
+			body  = client.body;
+			cookies  = client.cookies;
 			_response = client._response;
 			return *this; 
 		};
 		~Client() {};
 
 		bool operator ==(Client &b ) { return _id == b._id; }
-		// void init( void ) {
 
-		// 	_read_status = 0;
-		// 	_write_status = 0;
-		// 	_cgi_pid = -2;
-		// 	_kill_pid = true;
-		// 	buffer = "";
 
-		// };
 
 };
 
@@ -325,9 +338,9 @@ class Client {
 void	_socket( Parsing &_server );
 
 //cgi
-std::string generateRandomString(int length, std::string  ss);
+std::string generateRandomString(int length);
 void parent_process(std::string &result, int *pipe_fd);
-void get_body( Client &client );
+void get_body(Client & client);
 
 // Methodes
 void	_get( Client & _client, Server &_server );
@@ -335,7 +348,9 @@ void	_post( Client & _client, Server &_server );
 void	_delete( Client & _client ,Server &_server );
 
 // CGI
+std::string generateRandomString(int length, std::string ss);
 void	_cgi( Client & _client , Server &_server );
+std::string num_to_str(ssize_t num);
 
 // Request
 void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s );
@@ -359,5 +374,5 @@ void	info_err_status(std::vector<error_page> &errors, std::vector<std::string>::
 void	info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void	print_data(Parsing &parss);
 std::vector<std::string>	info_(std::vector<std::string>::iterator &it);
-
+int createFile(const char* filename, std::string data);
 #endif
