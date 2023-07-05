@@ -296,6 +296,8 @@ void	_socket( Parsing &_server )
 				
 				for (size_t e=0; e<Clients.size(); e++)
 				{
+					if (Clients[e]._request.method == "GET")
+					{
 					if (FD_ISSET(Clients[e]._id, &_sockets) && FD_ISSET(Clients[e]._id, &_current_sockets)) {
 						std::cerr << "waaa hasssaaaan: " << Clients[e]._id << std::endl;
 						FD_CLR(Clients[e]._id, &_readfds);
@@ -308,6 +310,7 @@ void	_socket( Parsing &_server )
 						// close(Clients[e].fd_file);
 						// Clients[e].fd_file = 0;
 						break;
+					}
 					}
 					// else if (std::find(_socket_fds.begin(), _socket_fds.end(), x) == _socket_fds.end() && _reading_lock)
 					// std::cerr << "client[" << e << "]: " << Clients[e]._id << " - " << Clients[e]._read_status << " - " << Clients[e]._write_status << std::endl;
@@ -324,7 +327,8 @@ void	_socket( Parsing &_server )
 							for (int i=0; i<Clients[e].data; i++)
 								Clients[e].buffer += buffer[i];
 							Clients[e]._done_reading = 0;
-							// std::cerr << "yyyyy" << Clients[e].data << std::endl;
+							Clients[e]._read_status = 1;
+							std::cerr << "yyyyy" << Clients[e].data << std::endl;
 							// break ;
 						}
 						else
@@ -338,6 +342,7 @@ void	_socket( Parsing &_server )
 					// std::cerr << Clients[e]._read_status << " ~ " << Clients[e]._read_status << " ~ " << Clients[e]._write_status << std::endl;
 					else if (x == Clients[e]._id && Clients[e]._done_reading && !Clients[e]._read_status && !Clients[e]._write_status)
 					{
+						Clients[e].data = 0;
 						std::cerr << "PARSINGGGGGGGGGGGGGG" << std::endl;
 						Server _s;
 						_request(_server, _s, Clients[e]._request, Clients[e]._response, Clients[e].buffer);
@@ -381,6 +386,17 @@ void	_socket( Parsing &_server )
 						}
 						if (Clients[e]._kill_pid)
 						{
+							if (Clients[e]._request.method == "POST")
+							{
+								Clients[e].return_write = write(Clients[e]._id, &Clients[e].s[Clients[e]._wr], Clients[e].s.size()-Clients[e]._wr);
+								close(Clients[e]._id);
+								FD_CLR(Clients[e]._id, &_readfds);
+								FD_CLR(Clients[e]._id, &_writefds);
+								std::vector<Client>::iterator it = Clients.begin();
+								std::advance(it, e);
+								Clients.erase(it);
+								break;
+							}
 							// Clients[e].return_write=0;
 							std::cerr << "~~~~~~~~~: " << Clients[e]._id << " - " << Clients[e].s.size() << " - " << Clients[e]._wr << std::endl;
 							Clients[e].return_write = write(Clients[e]._id, &Clients[e].s[Clients[e]._wr], Clients[e].s.size()-Clients[e]._wr);
