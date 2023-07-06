@@ -24,7 +24,7 @@ std::string	_get_ex( std::string _file_name )
 size_t getFileSize(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
-        std::cerr << "Failed to open file: " << filename << std::endl;
+        //std::cerr << "Failed to open file: " << filename << std::endl;
         return -1;
     }
 
@@ -38,12 +38,12 @@ size_t getFileSize(const char* filename) {
 
 int _get_res_body( Client & _client )
 {
-    // std::cerr << "\e[93myo fd file for -:\e[0m" << _client._id << "\e[92m- is \e[0m" << _client.fd_file << std::endl;
+    // //std::cerr << "\e[93myo fd file for -:\e[0m" << _client._id << "\e[92m- is \e[0m" << _client.fd_file << std::endl;
 
     if (!_client.fd_file)
     {
         _client.fd_file = open( _client._request.path.c_str(), O_RDONLY );
-        std::cerr << "file length: " << getFileSize(_client._request.path.c_str()) << std::endl;
+        //std::cerr << "file length: " << getFileSize(_client._request.path.c_str()) << std::endl;
         _client._response.content_length = getFileSize(_client._request.path.c_str());
     }
     int data=1;
@@ -53,18 +53,18 @@ int _get_res_body( Client & _client )
         data = read(_client.fd_file, buffer, 999999);
         for (int i=0; i<data; i++)
             _client._response.body += buffer[i];
-        std::cerr << "file data: " << _client.fd_file << " ---- " << data << std::endl;
+        // //std::cerr << "file data: " << _client.fd_file << " ---- " << data << std::endl;
         if (data>0)
             _client._done_writing = 0;
         else
         {
-            // std::cerr << "PPPPPPPPPP" << std::endl;
+            // //std::cerr << "PPPPPPPPPP" << std::endl;
             _client._done_writing = 1;
             close(_client.fd_file);
         }
         if (_client._response.content_type.empty())
         {
-            // std::cerr << "................" << std::endl;
+            // //std::cerr << "................" << std::endl;
             _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
             if (!_client._response.content_type.size())
                 _client._response.content_type = "text/html";
@@ -72,17 +72,17 @@ int _get_res_body( Client & _client )
         }
         if (!_client._response.content_length)
             _client._response.content_length = _client._response.body.size();
-        // std::cerr <<"size of res_body: " << _client._response.body.size() << std::endl;
+        // //std::cerr <<"size of res_body: " << _client._response.body.size() << std::endl;
     // }
     
-    // std::cerr << "w3lach: " << _client._response.content_length << std::endl;
+    // //std::cerr << "w3lach: " << _client._response.content_length << std::endl;
     
     
     
-    // std::cerr << "yyooo: " << _request.path << " ~ " << _get_ex(_request.path) << " ~ " << _response.content_type << std::endl;
+    // //std::cerr << "yyooo: " << _request.path << " ~ " << _get_ex(_request.path) << " ~ " << _response.content_type << std::endl;
 	// std::ifstream myfile;
 	// myfile.open(_request.path);
-    // std::cerr << "path: " << _request.path << std::endl;
+    // //std::cerr << "path: " << _request.path << std::endl;
 	// std::string myline;
 	// _response.body = "";
 	// if ( myfile.is_open() )
@@ -146,7 +146,7 @@ void	_response( Client & _client )
             {
 				if (_client._response.status == _client._request.error_pages[i].error_status[j])
                 {
-                    // std::cerr << "ayooo: " << _client._request.error_pages[i].path << " - " << _client._request.error_pages.size() << std::endl;
+                    // //std::cerr << "ayooo: " << _client._request.error_pages[i].path << " - " << _client._request.error_pages.size() << std::endl;
 					get_file_data(_client._response, _client._request.error_pages[i].path);
                     _status_found=1;
                 }
@@ -154,11 +154,11 @@ void	_response( Client & _client )
         }
     }
     
-	// std::cerr << "-----------------------------" << std::endl;
+	// //std::cerr << "-----------------------------" << std::endl;
 
     if (!_status_found && _client._response.status != 200)
     {
-        std::cerr << "status found: " << _status_found << " status: " << _client._response.status << std::endl;
+        //std::cerr << "status found: " << _status_found << " status: " << _client._response.status << std::endl;
         if (_client._response.status == 204)
         {
             _client._response.body = "<html><body><h1>204 No Content</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
@@ -223,10 +223,10 @@ void	_response( Client & _client )
 	// Response heders
 	// if (_response.content_length <= 0)
     //     _response.content_length = (_response.body).size();
-    // // std::cerr << "Content Lenght: " << _response.content_length << " | body: " << _response.body << std::endl;
+    // // //std::cerr << "Content Lenght: " << _response.content_length << " | body: " << _response.body << std::endl;
 	// if (!_response.content_type.size())
     //     _response.content_type = "text/html";
-    // std::cerr << "wa lwzz: " << _response.content_type << "~" << _response.status << std::endl;
+    // //std::cerr << "wa lwzz: " << _response.content_type << "~" << _response.status << std::endl;
 	if (_client._response.body.empty() && _client._kill_pid)
 	{
     	_get_res_body(_client);
@@ -235,5 +235,5 @@ void	_response( Client & _client )
     if (!_client._response.content_length)
         _client._response.content_length = _client._response.body.size();
     
-    // std::cerr << "gg: " << _client._response.content_type << std::endl;
+    // //std::cerr << "gg: " << _client._response.content_type << std::endl;
 }

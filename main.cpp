@@ -16,12 +16,6 @@ std::string _webserv_loc;
 
 int main(int ac, char **av)
 {
-    // Request *_request = new Request;
-    // Response *_response = new Response;
-    // _request.env = new char*[11];
-    // for (int i = 0; i < 10; i++)
-    //     _request.env[i] = NULL;
-
     std::string  str;
     Parsing _server;
     
@@ -41,6 +35,6 @@ int main(int ac, char **av)
         _socket(_server);
     }
     else
-        std::cerr << "invalid number of arguments!" << std::endl;
+        //std::cerr << "invalid number of arguments!" << std::endl;
     return 0;
 }

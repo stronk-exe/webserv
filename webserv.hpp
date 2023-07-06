@@ -282,7 +282,7 @@ class Client {
 		int		_done_reading;
 		int		fd_file, data;
 		int		firstTime_HuH;
-		std::string	buffer;
+		std::string	buffer, prsing_req;
 		std::string substring, s;
 
 		Request		_request;
@@ -293,6 +293,7 @@ class Client {
 		Client(const int id ) {
 			_id = id;
 			_wr = 0;
+			data = 0;
 			_read_status = 1;
 			status = 0;
 			_write_status = 0;
@@ -310,6 +311,8 @@ class Client {
 		Client& operator= (const Client & client) { 
 			_id = client._id;
 			_wr = client._wr;
+			data = client.data;
+			prsing_req = client.prsing_req;
 			return_write = client.return_write;
 			status = client.status;
 			_read_status = client._read_status;

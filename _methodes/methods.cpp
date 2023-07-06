@@ -14,7 +14,7 @@
 
 void print_error(std::string s)
 {
-	std::cerr << s << std::endl;
+	//std::cerr << s << std::endl;
     exit(1);
 }
 
@@ -26,7 +26,7 @@ void	_get_listed_dir( Client & _client )
 	{
 		_client._response.status = 404;
 		perror("opendir() error");
-		// std::cerr << "olAAAAA comistasss" << std::endl;
+		// //std::cerr << "olAAAAA comistasss" << std::endl;
 	}
 	else
 	{
@@ -83,15 +83,15 @@ void	_get_listed_dir( Client & _client )
     //     entry = readdir(dir);
     // }
 	// _client._response.body = _client._request.body;
-	// std::cerr << "Ayoo: " << _client._request.body << std::endl;
+	// //std::cerr << "Ayoo: " << _client._request.body << std::endl;
 }
 
 void	_file_or_dir(  Client & _client )
 {
 	struct stat info;
 
-	// std::cerr << "lpath lmrid: " << _client._request.path << std::endl;
-	// std::cerr << "-----STATUS: " << _client._response.status << std::endl;
+	// //std::cerr << "lpath lmrid: " << _client._request.path << std::endl;
+	// //std::cerr << "-----STATUS: " << _client._response.status << std::endl;
 	if (stat(_client._request.path.c_str(), &info) != 0)
 		_client._response.status = 404;
 
@@ -101,7 +101,7 @@ void	_file_or_dir(  Client & _client )
 		_client._request.type = "file";
 	else
 		_client._response.status = 404;
-	// std::cerr << "STATUS: " << _client._response.status << std::endl;
+	// //std::cerr << "STATUS: " << _client._response.status << std::endl;
 }
 
 void _body_parser(  Client & _client )
@@ -112,13 +112,13 @@ void _body_parser(  Client & _client )
 	std::string delimiter = "\r\n\r\n";
     size_t pos = _client._request.body.find(delimiter);
     std::string header = _client._request.body.substr(0, pos);
-	// std::cerr << "kayyn: " << header << std::endl;
+	// //std::cerr << "kayyn: " << header << std::endl;
 	_client._request.upload_data = "";
-	// std::cerr << "body:\n" << _client._request.body << std::endl;
+	// //std::cerr << "body:\n" << _client._request.body << std::endl;
 	for (size_t i=pos+4; i < _client._request.body.size(); i++)
 	{	_client._request.upload_data += _client._request.body[i];
 	}
-	// std::cerr << "yo upload: " << _client._request.body.size() << std::endl;
+	// //std::cerr << "yo upload: " << _client._request.body.size() << std::endl;
 
 	size_t boundary_pos = _client._request.headers["Content-Type"].find("boundary=")+9;
 	_client._request.boundary = _client._request.headers["Content-Type"].substr(boundary_pos);
@@ -153,7 +153,7 @@ void _body_parser(  Client & _client )
 	}
 
 	pos = m["Content-Disposition"].find(";");
-	// std::cerr << "Content-Disposition: " << m["Content-Disposition"] << std::endl;
+	// //std::cerr << "Content-Disposition: " << m["Content-Disposition"] << std::endl;
 	if (pos)
 	{
 		std::vector<std::string> v;
@@ -174,11 +174,11 @@ void _body_parser(  Client & _client )
 	}
 	_client._request.upload_content_type = m["Content-Type"];
 
-	// std::cerr << "upload shit:" << std::endl;
-	// std::cerr << "upload_name: " << _client._request.upload_name << std::endl;
-	// std::cerr << "upload_file_name: " << _client._request.upload_file_name << std::endl;
-	// std::cerr << "upload_content_type: " << _client._request.upload_content_type << std::endl;
-	// std::cerr << "data: " << _client._request.upload_data << std::endl;
+	// //std::cerr << "upload shit:" << std::endl;
+	// //std::cerr << "upload_name: " << _client._request.upload_name << std::endl;
+	// //std::cerr << "upload_file_name: " << _client._request.upload_file_name << std::endl;
+	// //std::cerr << "upload_content_type: " << _client._request.upload_content_type << std::endl;
+	// //std::cerr << "data: " << _client._request.upload_data << std::endl;
 }
 
 void	_get( Client & _client, Server &_server )
@@ -192,15 +192,15 @@ void	_get( Client & _client, Server &_server )
 	// }
 	// else
 	// {
-	// 	std::cerr << "ppppppppppppp" << _client._request.path << std::endl;
+	// 	//std::cerr << "ppppppppppppp" << _client._request.path << std::endl;
 	// 	_client._response.status = 404;
 	// }
 	// close(ff);
 
     _file_or_dir(_client);
-	// std::cerr << "---------------------------" << std:: endl;
+	// //std::cerr << "---------------------------" << std:: endl;
 
-	std::cout << "GET" << _client._response.status << std::endl;
+	// std::cout << "GET" << _client._response.status << std::endl;
 
 	if (!_client._response.status)
 	{
@@ -211,7 +211,7 @@ void	_get( Client & _client, Server &_server )
 				_client._request.path+='/';
 				_client._response.status = 301;
 				_client._response.location = _client._request.uri+'/';
-				// std::cerr << "iiiii: " << _client._request.path << std::endl;
+				// //std::cerr << "iiiii: " << _client._request.path << std::endl;
 				// _get( _client._response, _client._request, _server );
 			}
 			else
@@ -233,7 +233,7 @@ void	_get( Client & _client, Server &_server )
 					{
 						_get_listed_dir(_client);
 						_client._response.body = _client._request.body;
-						// std::cerr << "khsk tkni hna " << _client._request.path << " : " << _client._response.body << std::endl;
+						// //std::cerr << "khsk tkni hna " << _client._request.path << " : " << _client._response.body << std::endl;
 						_client._response.content_type = "text/html";
 						_client._response.status = 200;
 					}
@@ -242,7 +242,7 @@ void	_get( Client & _client, Server &_server )
 		}
 		else if (_client._request.type == "file")
 		{
-			// std::cerr << "path: " << _client._request.uri << std::endl;
+			// //std::cerr << "path: " << _client._request.uri << std::endl;
 			if (_client._request.cgi.size())
 				_cgi(_client, _server);
 			else
@@ -270,7 +270,7 @@ void _post(  Client & _client , Server &_server )
 			_client._response.content_length = _client._request.body.size();//_client._request.upload_data.size();
 			_client._response.content_type = "text/html";//_client._request.upload_content_type;
 			
-			// std::cerr << "multipart shit: " << _client._request.upload_file_name << std::endl;
+			// //std::cerr << "multipart shit: " << _client._request.upload_file_name << std::endl;
 			// creating the file
 			
 			// fill it
@@ -287,9 +287,9 @@ void _post(  Client & _client , Server &_server )
 				_client._response.content_type = _client._response.mims[_get_ex(_client._request.upload_file_name)];
 				_client._response.body = _client._request.body;
 				_client._response.content_length = _client._response.body.size();
-				// std::cerr << "file size: " << _client._response.body.size() << std::endl;
-				// std::cerr << "wa lwzz: " << _client._response.content_type << std::endl;
-				// std::cerr << "gg: " << _client._response.content_type << std::endl;
+				// //std::cerr << "file size: " << _client._response.body.size() << std::endl;
+				// //std::cerr << "wa lwzz: " << _client._response.content_type << std::endl;
+				// //std::cerr << "gg: " << _client._response.content_type << std::endl;
 			}
 			_client._response.status = 200;
 		}
@@ -348,7 +348,7 @@ void _delete( Client & _client , Server &_server )
 	// _file ? _get_res_body(_request, _response) : _response->status = 404;
 
     _file_or_dir(_client);
-	std::cerr << "--------_request->type : " << _client._request.type << std::endl;
+	//std::cerr << "--------_request->type : " << _client._request.type << std::endl;
 	if (_client._request.type == "directory")
 	{
 		if (_client._request.path[_client._request.path.size()-1] != '/')
@@ -370,7 +370,7 @@ void _delete( Client & _client , Server &_server )
 	{
 
 		_client._response.status = 204;// No Content
-		std::cerr << "delete path : " << _client._request.path << std::endl;
+		//std::cerr << "delete path : " << _client._request.path << std::endl;
 		if (std::remove(_client._request.path.c_str()) != 0) {
 			perror("Error deleting the file");
 		}

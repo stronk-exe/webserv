@@ -22,7 +22,7 @@ std::string int_to_str(int num)
 
 void update_env_for_cgi( Request &_request , std::string _path_info, Server _server )
 {///////////
-    // std::cerr << "{" << _request.uri << "}"<< std::endl;
+    // //std::cerr << "{" << _request.uri << "}"<< std::endl;
     // for (int i = 0; i < 10; i++)
     // {
     //     if (_request.env[i])
@@ -48,13 +48,13 @@ void update_env_for_cgi( Request &_request , std::string _path_info, Server _ser
 void     printHeaders(std::map<std::string, std::string> headers)
 {
     std::map<std::string, std::string>::iterator i;
-        // std::cerr << i.first << " " << i.second << std::endl;
-        std::cerr << "*********************************************" << std::endl;
+        // //std::cerr << i.first << " " << i.second << std::endl;
+        //std::cerr << "*********************************************" << std::endl;
     for ( i = headers.begin(); i != headers.end(); i++)
     {
-        std::cerr << i->first << " . " << i->second << std::endl;
+        //std::cerr << i->first << " . " << i->second << std::endl;
     }
-        std::cerr << "*********************************************" << std::endl;
+        //std::cerr << "*********************************************" << std::endl;
 }
 
 bool check_extension(std::string extension, std::string path)
@@ -76,7 +76,7 @@ bool check_path_extension(std::vector<CGI>	&cgi_pass, std::string &path, std::st
     
     for (it = cgi_pass.begin(); it != cgi_pass.end() ; it++)
     {
-        std::cerr << "extantion: " << (*it).extension << std::endl;
+        //std::cerr << "extantion: " << (*it).extension << std::endl;
         if (check_extension((*it).extension, path))
         {
             scriptPath = (*it).path + " " + path;
@@ -104,7 +104,7 @@ void parent_process(std::string &result, int *pipe_fd)
     close(pipe_fd[1]);
     while ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
     {
-        // std::cerr << "..................................." << std::endl;
+        // //std::cerr << "..................................." << std::endl;
         result.append(buffer, nbytes);
     }
     close(pipe_fd[0]);
@@ -118,7 +118,7 @@ int createFile(const char* filename, std::string data) {
         write(fd, data.c_str(), data.size());
         // close(fd); 
     } else {
-        std::cerr << strerror(errno) << std::endl;
+        // std::cerr << strerror(errno) << std::endl;
         exit(12);
     }
     close(fd);
@@ -139,17 +139,17 @@ void exec_file_cgi(std::string &scriptPath, Client & client)
         std::getline(ss, arg, ' ');
         args[i] = arg;
         av[i] = const_cast<char*>(args[i].c_str());
-        // std::cerr << av[i] << std::endl;
+        // //std::cerr << av[i] << std::endl;
     }
     av[2] = NULL;
     client._kill_pid = false;
-        // std::cerr << "=======================================" << std::endl;
-        // std::cerr << "body : \n" << _request.body << std::endl;
-        // std::cerr << "=======================================" << std::endl;
+        // //std::cerr << "=======================================" << std::endl;
+        // //std::cerr << "body : \n" << _request.body << std::endl;
+        // //std::cerr << "=======================================" << std::endl;
     client.file = _webserv_loc +  generateRandomString(7, ".h");
     fd = createFile(client.file.c_str() , client._request.body);/////////////////////////////////////////////////////////////
     if (!(pipe(client.pipe_fd) > -1 && (client._cgi_pid = fork()) > -1)) {
-        std::cerr << strerror(errno) << std::endl;
+        //std::cerr << strerror(errno) << std::endl;
         exit(12);
     }
     if (client._cgi_pid == 0) {
@@ -160,21 +160,21 @@ void exec_file_cgi(std::string &scriptPath, Client & client)
         close(client.pipe_fd[1]);
         alarm(25);
         execve(av[0], av, client._request.env);
-        std::cerr << strerror(errno) << std::endl;
+        //std::cerr << strerror(errno) << std::endl;
         exit(1337);
     } else {
 
         waitpid(client._cgi_pid, &client.status, WNOHANG);
         // if (client._cgi_pid == waitpid(client._cgi_pid, &status, WNOHANG))
         // {
-        //     std::cerr << "^^^^^^^^^^^^^^^^^^^^^" << std::endl;
+        //     //std::cerr << "^^^^^^^^^^^^^^^^^^^^^" << std::endl;
         //     close(fd);
         //     if (remove(client.file.c_str()))
         //         perror("remove file");
         //     client._kill_pid = true;
         //     parent_process(client.body, client.pipe_fd);///////////////////
         // }
-            std::cerr << "waitpid(client._cgi_pid, &client.status, WNOHANG) = " << client.status << std::endl;
+            //std::cerr << "waitpid(client._cgi_pid, &client.status, WNOHANG) = " << client.status << std::endl;
     }
     // if (remove(".hamid"))
     //     perror("remove file");
@@ -203,10 +203,10 @@ std::vector<std::string> extractSetCookieSubstrings(const std::string& text) {
 void set_cookies(std::string & Cookies, std::string & result)
 {
     std::vector<std::string> arry = extractSetCookieSubstrings(result);
-    // std::cerr << "\e[38;5;208marry.size = \e[0m" << arry.size() << std::endl;
+    // //std::cerr << "\e[38;5;208marry.size = \e[0m" << arry.size() << std::endl;
     for (int i = 0; i < arry.size(); i++)
         Cookies += arry[i] + "\n";
-    std::cerr << "\e[38;5;108mCookies : \e[0m" << Cookies << std::endl;
+    //std::cerr << "\e[38;5;108mCookies : \e[0m" << Cookies << std::endl;
     if (!Cookies.empty())
         Cookies.erase(Cookies.end() - 1);
 }
@@ -217,10 +217,10 @@ void get_body( Client & client)
     // std::istringstream ss(result);
        ///////////set cookies
     int pos0, pos1;
-    // std::cerr << "------------------"<< std::endl;
-    // std::cerr << client.body << std::endl;
-    // std::cerr << "------------------"<< std::endl;
-    // std::cerr << client.body << std::endl;
+    // //std::cerr << "------------------"<< std::endl;
+    // //std::cerr << client.body << std::endl;
+    // //std::cerr << "------------------"<< std::endl;
+    // //std::cerr << client.body << std::endl;
     set_cookies(client.cookies, client.body);
     pos0 = client.body.find("Content-Type:");
     if (pos0 == -1)
@@ -229,7 +229,7 @@ void get_body( Client & client)
     if (pos0 != -1)
     {
         client._response.content_type = client.body.substr(pos0 + 13 , pos1 - pos0 - 13);
-        std::cerr << "_response.content_type : " << client._response.content_type << std::endl;
+        //std::cerr << "_response.content_type : " << client._response.content_type << std::endl;
         client.body.erase(0, pos1 + 1);
     }
     else
@@ -253,7 +253,7 @@ std::string generateRandomString(int length, std::string ss) {
         result += charset[randomIndex];
     }
 
-	// std::cerr << "generateRandomString : " << result << std::endl;
+	// //std::cerr << "generateRandomString : " << result << std::endl;
     return result;
 }
 
@@ -261,23 +261,23 @@ void	_cgi( Client & client , Server &_server )
 {
     // printHeaders(_request.headers); 
 	std::string result, scriptPath, arg, _pwd;
-    // std::cerr << "-------------------------------" << std::endl;
-    // std::cerr << "CGI" << std::endl;
-    // std::cerr << "path in cgi: " << client._request.path << std::endl;
+    // //std::cerr << "-------------------------------" << std::endl;
+    // //std::cerr << "CGI" << std::endl;
+    // //std::cerr << "path in cgi: " << client._request.path << std::endl;
     // _pwd = getcwd(NULL, 0);
     update_env_for_cgi(client._request, (client._request.path), _server);
     if (!check_path_extension(client._request.cgi , client._request.path, scriptPath)) {
-        std::cerr << "extansion" << std::endl;
+        //std::cerr << "extansion" << std::endl;
         client._response.body = "";
         return ;
     }
     // for (int i = 0; i < 10; i++)
-        // std::cerr << "|" << _request.env[i] << "|" << std::endl;
+        // //std::cerr << "|" << _request.env[i] << "|" << std::endl;
 
-    std::cerr << "jjjjjj: " << scriptPath << std::endl;
+    //std::cerr << "jjjjjj: " << scriptPath << std::endl;
     exec_file_cgi(scriptPath, client);
 	// get_body(client._response, client.body);
     
-	// std::cerr << "execution output: |" << _response.body <<"|" << std::endl;
-	// std::cerr << "*************************************************" << std::endl;  
+	// //std::cerr << "execution output: |" << _response.body <<"|" << std::endl;
+	// //std::cerr << "*************************************************" << std::endl;  
 }
