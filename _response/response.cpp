@@ -3,128 +3,186 @@
 /*                                                        :::      ::::::::   */
 /*   response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:45 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/05/11 11:39:50 by ael-asri         ###   ########.fr       */
+/*   Updated: 2023/06/11 20:39:38 by mait-jao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../webserv.hpp"
 
-int	_get_res_body( Request *_request, Response *_response )
+std::string	_get_ex( std::string _file_name )
 {
-	std::ifstream myfile;
-	myfile.open(_request->path);
-	std::string myline;
-	_response->body = "";
-	if ( myfile.is_open() )
+	size_t dotPos = _file_name.find_last_of('.');
+    if (dotPos != std::string::npos && dotPos < _file_name.length() - 1)
+		return _file_name.substr(dotPos + 1);
+	return "";
+}
+
+size_t getFileSize(const char* filename) {
+    FILE* file = fopen(filename, "rb");
+    if (!file)
+		return -1;
+
+    fseek(file, 0, SEEK_END);
+    size_t fileSize = ftell(file);
+
+    fclose(file);
+
+    return fileSize;
+}
+
+int _get_res_body( Client & _client )
+{
+	if (!_client.fd_file)
 	{
-		while ( myfile ) {
-			std::getline (myfile, myline);
-			_response->body += myline;
-		}
+		_client.fd_file = open( _client._request.path.c_str(), O_RDONLY );
+		_client._response.content_length = getFileSize(_client._request.path.c_str());
 	}
+
+	int data=1;
+	char buffer[999999] = {0};
+	data = read(_client.fd_file, buffer, 999999);
+	for (int i=0; i<data; i++)
+	    _client._response.body += buffer[i];
+	if (data>0)
+	    _client._done_writing = 0;
 	else
-		std::cout << "Couldn't open file\n";
-	_response->body.erase(_response->body.size()-myline.size(), myline.size());
+	{
+	    _client._done_writing = 1;
+	    close(_client.fd_file);
+	}
+	if (_client._response.content_type.empty())
+	{
+	    _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
+	    if (!_client._response.content_type.size())
+	        _client._response.content_type = "text/html";
+	}
+	if (!_client._response.content_length)
+	    _client._response.content_length = _client._response.body.size();
 	return 1;
 }
 
-void    get_file_data( Response *_response, std::string path )
+void    get_indexed_file_data( Request &_request, Response &_response, std::string path )
 {
-    std::cerr << "l path: " << path << std::endl;
+    for (size_t i=0; i<_request.index.size(); i++)
+    {
+        std::ifstream myfile;
+        myfile.open(path+_request.index[i]);
+        std::string myline;
+        _response.body = "";
+        if ( myfile.is_open() )
+        {
+            while ( myfile )
+			{
+                std::getline (myfile, myline);
+                _response.body += myline;
+            }
+        }
+        myfile.close();
+    }
+}
+
+void    get_file_data( Response &_response, std::string path )
+{
     std::ifstream myfile;
 	myfile.open(path);
 	std::string myline;
-	_response->body = "";
+	_response.body = "";
 	if ( myfile.is_open() )
 	{
-		while ( myfile ) {
+		while ( myfile )
+		{
 			std::getline (myfile, myline);
-			_response->body += myline;
+			_response.body += myline;
 		}
 	}
 	else
 		std::cout << "Couldn't open file\n";
+    myfile.close();
 }
 
-void	_response( Response *_response, Request *_request )
+void	_response( Client & _client )
 {
 	int _status_found=0;
-    if (_request->error_pages.size())
+    if (_client._request.error_pages.size())
     {
-        for (size_t i=0; i<_request->error_pages.size(); i++)
+        for (size_t i=0; i<_client._request.error_pages.size(); i++)
         {
-            std::cerr << "this path " << _request->error_pages[i].path << " is for:" << std::endl;
-            
-            for (size_t j=0; j<_request->error_pages[i].error_status[j]; j++)
+            for (size_t j=0; j<_client._request.error_pages[i].error_status[j]; j++)
             {
-				if (_response->status == _request->error_pages[i].error_status[j])
+				if (_client._response.status == _client._request.error_pages[i].error_status[j])
                 {
-					get_file_data(_response, _request->error_pages[i].path);
+					get_file_data(_client._response, _client._request.error_pages[i].path);
                     _status_found=1;
                 }
             }
-
-            //     std::cout << _request->error_pages[i].error_status[j] << std::endl;
-            // std::cerr << "------------------" << std::endl;
         }
     }
-    if (!_status_found)
+
+    if (!_status_found && _client._response.status != 200)
     {
-        if (_response->status == 400)
+        if (_client._response.status == 204)
         {
-            _response->body = "<html><body><h1>400 Bad Request</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
-            _response->status_message = "Bad Request";
+            _client._response.body = "<html><body><h1>204 No Content</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
+            _client._response.status_message = "No Content";
         }
-        else if (_response->status == 403)
+        else if (_client._response.status == 400)
         {
-            _response->body = "<html><body><h1>403 Forbidden</h1><img src=\"https://i.kym-cdn.com/entries/icons/original/000/028/434/We_Believe__The_Best_Men_Can_Be___Gillette_(Short_Film)_1-4_screenshot.jpg\" alt=\"forbidden\"/></body></html>";
-            _response->status_message = "Forbidden";
+            _client._response.body = "<html><body><h1>400 Bad Request</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
+            _client._response.status_message = "Bad Request";
         }
-        else if (_response->status == 404)
+        else if (_client._response.status == 403)
         {
-            _response->body = "<html><body><h1>404 Not Found</h1><img src=\"https://media.makeameme.org/created/file-not-found-c17b083c9c.jpg\" alt=\"404_not_found.gif\"/></body></html>";
-            _response->status_message = "Not Found";
+            _client._response.body = "<html><body><h1>403 Forbidden</h1><img src=\"https://i.kym-cdn.com/entries/icons/original/000/028/434/We_Believe__The_Best_Men_Can_Be___Gillette_(Short_Film)_1-4_screenshot.jpg\" alt=\"forbidden\"/></body></html>";
+            _client._response.status_message = "Forbidden";
         }
-        else if (_response->status == 405)
+        else if (_client._response.status == 404)
         {
-            _response->body = "<html><body><h1>405 Method Not Allowed</h1><img src=\"https://en.meming.world/images/en/a/a3/We_Don%27t_Do_That_Here.jpg\" alt=\"method_not_allowed\"/></body></html>";
-            _response->status_message = "Method Not Allowed";
+            _client._response.body = "<html><body><h1>404 Not Found</h1><img src=\"https://media.makeameme.org/created/file-not-found-c17b083c9c.jpg\" alt=\"404_not_found.gif\"/></body></html>";
+            _client._response.status_message = "Not Found";
         }
-        else if (_response->status == 413)
+        else if (_client._response.status == 405)
         {
-            _response->body = "<html><body><h1>413 Request Entity Too Large</h1><img src=\"https://preview.redd.it/request-entity-too-large-all-of-a-sudden-pics-i-could-send-v0-dqgu5n5guhh91.jpg?auto=webp&s=a83ff042398f7dc5cbb36cf21ae8b1fc97bc7b68\" alt=\"request_entity_too_large\"/></body></html>";
-            _response->status_message = "Request Entity Too Large";
+            _client._response.body = "<html><body><h1>405 Method Not Allowed</h1><img src=\"https://en.meming.world/images/en/a/a3/We_Don%27t_Do_That_Here.jpg\" alt=\"method_not_allowed\"/></body></html>";
+            _client._response.status_message = "Method Not Allowed";
         }
-        else if (_response->status == 414)
+        else if (_client._response.status == 409)
         {
-            _response->body = "<html><body><h1>414 Request-URI Too Long</h1><img src=\"https://www.catalystdigital.com/wp-content/uploads/url-too-long.jpg\" alt=\"request_uri_too_long\"/></body></html>";
-            _response->status_message = "Request-URI Too Long";
+            _client._response.body = "<html><body><h1>409 Conflict</h1><img src=\"https://en.meming.world/images/en/a/a3/We_Don%27t_Do_That_Here.jpg\" alt=\"method_not_allowed\"/></body></html>";
+            _client._response.status_message = "Conflict";
         }
-        else if (_response->status == 501)
+        else if (_client._response.status == 413)
         {
-            _response->body = "<html><body><h1>501 Not Implemented</h1><img src=\"https://3.bp.blogspot.com/-l_OPWrz4AZo/VtLroz9u1cI/AAAAAAAANPU/mGoZb0ZKwdk/s1600/zytel.jpg\" slt=\"not_implemented\"/></body></html>";
-            _response->status_message = "Not Implemented";
+            _client._response.body = "<html><body><h1>413 Request Entity Too Large</h1><img src=\"https://preview.redd.it/request-entity-too-large-all-of-a-sudden-pics-i-could-send-v0-dqgu5n5guhh91.jpg?auto=webp&s=a83ff042398f7dc5cbb36cf21ae8b1fc97bc7b68\" alt=\"request_entity_too_large\"/></body></html>";
+            _client._response.status_message = "Request Entity Too Large";
         }
+        else if (_client._response.status == 414)
+        {
+            _client._response.body = "<html><body><h1>414 Request-URI Too Long</h1><img src=\"https://www.catalystdigital.com/wp-content/uploads/url-too-long.jpg\" alt=\"request_uri_too_long\"/></body></html>";
+            _client._response.status_message = "Request-URI Too Long";
+        }
+        else if (_client._response.status == 500)
+        {
+            _client._response.body = "<html><body><h1>500 Internal Server Error</h1><img src=\"https://3.bp.blogspot.com/-l_OPWrz4AZo/VtLroz9u1cI/AAAAAAAANPU/mGoZb0ZKwdk/s1600/zytel.jpg\" slt=\"not_implemented\"/></body></html>";
+            _client._response.status_message = "Internal Server Error";
+        }
+        else if (_client._response.status == 501)
+        {
+            _client._response.body = "<html><body><h1>501 Not Implemented</h1><img src=\"https://3.bp.blogspot.com/-l_OPWrz4AZo/VtLroz9u1cI/AAAAAAAANPU/mGoZb0ZKwdk/s1600/zytel.jpg\" slt=\"not_implemented\"/></body></html>";
+            _client._response.status_message = "Not Implemented";
+        }
+        else if (_client._response.status == 508)
+        {
+            _client._response.body = "<html><body><h1>508 Loop Detected</h1><img src=\"https://d3mvlb3hz2g78.cloudfront.net/wp-content/uploads/2017/12/thumb_720_450_Haiku_Stairsdreamstime_xl_50641068_1.jpg\" slt=\"Loop Detected\"/></body></html>";
+            _client._response.status_message = "Loop Detected";
+        }
+        _client._response.content_type = "text/html";
     }
-    else
-    {
-	// 	_response->body = "<html><body><h1>server says: 9oraydiss</h1></body></html>";
-    //     _response->status_message = "OK";
-    // }
-	
 
-	// Response body
-		if (!_response->body.size())
-			_get_res_body(_request, _response);
-	}
-    std::cerr << "_status: " << _status_found << std::endl;
-
-	std::cerr << "body: " << _response->body << std::endl;
-	
-	// Response heders
-	_response->content_length = (_response->body).size();
-	_response->content_type = "text/html";
+	if (_client._response.body.empty() && _client._kill_pid)
+    	_get_res_body(_client);
+    if (!_client._response.content_length)
+        _client._response.content_length = _client._response.body.size();
 }

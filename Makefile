@@ -22,18 +22,22 @@ SRCS =  main.cpp \
 
 OBJS = $(SRCS:.cpp=.o)
 
-FLAGS = -Wall -Wextra -Werror -std=c++98
+FLAGS =  -Wall -Wextra -Werror -std=c++98
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	c++ $(FLAGS) $^ -o $@
+	@rm -rf _cgi/cgi_utils/* 
+	@rm -rf _cgi/cgi_utils/.h* 
+	c++ -g -fsanitize=address $(FLAGS) $^ -o $@
 
 clean:
+	@rm -rf _cgi/cgi_utils/* 
+	@rm -rf _cgi/cgi_utils/.h* 
 	rm -f $(OBJS)
 
 fclean: clean
-		rm -f $(NAME)
+	rm -f $(NAME)
 
 re: fclean all
 

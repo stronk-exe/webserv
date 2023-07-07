@@ -8,6 +8,7 @@ void split_conf(std::vector<std::string> &data, std::string str)
 
     for (size_t i = 0; i < str.size() ; i++)
     {
+
         if ((str[i] == ' ' || str[i] == '\t'))
         {
             if (!tmp.empty())
@@ -23,7 +24,12 @@ void split_conf(std::vector<std::string> &data, std::string str)
             tmp = "";
         }
         else
-            tmp += str[i];
+        {
+            if (str[i] == '#')
+                break ;
+            else
+                tmp += str[i];
+        }
     }
     if (!tmp.empty())
         data.push_back(tmp);
@@ -61,11 +67,13 @@ void info_err_status(std::vector<error_page> &errors, std::vector<std::string>::
         error("location of the error page, not set");
 }
 
-void info_(std::vector<std::string>  &vec, std::vector<std::string>::iterator &it)
+std::vector<std::string> info_(std::vector<std::string>::iterator &it)
 {
+    std::vector<std::string>  vec;
     for (; * (it + 1) != ";" ; it++)
         vec.push_back(*it);
     vec.push_back(*it);
+    return vec;
 }
 
 void info_autoindex(Location &loc, std::string &str) 
@@ -76,6 +84,17 @@ void info_autoindex(Location &loc, std::string &str)
         loc.autoindex = false;
     else
         error("autoindex error");
+}
+
+CGI info_cgi( std::vector<std::string>::iterator &it )
+{
+    CGI _struct;
+    std::vector<std::string> vec = info_(it);
+    if (vec.size() != 2)
+        error("cgi_pass path error");
+    _struct.extension = *vec.begin();
+    _struct.path = *(vec.begin() + 1);
+    return _struct;    
 }
 
 void info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it)
@@ -90,11 +109,13 @@ void info_location(std::vector<Location> &locations, std::vector<std::string>::i
         if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
             loc.root_location = *(++it);
         else if (*it == "index")
-            info_(loc.index, ++it); 
+            loc.index = info_(++it); 
+        else if (*it == "upload" && *(it + 1) != ";" && *(it + 2) == ";")
+            loc.uploadDir = *(++it);
         else if (*it == "allow_methods")
-            info_(loc.allows_methods, ++it); 
+            loc.allows_methods = info_(++it);
         else if (*it == "cgi_pass")
-            info_(loc.cgi_pass, ++it); 
+            loc.cgi_pass.push_back(info_cgi(++it)); 
         else if (*it == "autoindex" && *(it + 1) != ";" && *(it + 2) == ";") 
             info_autoindex(loc, *(++it));
         else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
@@ -132,6 +153,19 @@ void info_listen(Server &serv, std::vector<std::string>::iterator &it)
     }
 }
 
+
+void info_nameServ(Server &serv, std::string &data)
+{
+    int pos = data.find(":");
+    if (pos != -1)
+    {
+        serv.name = data.substr(0, pos);
+        serv.listen_port = str_to_num(data.substr(pos + 1, data.size()));
+    }
+    else
+        serv.name = data;
+}
+
 void parss_info(Parsing &parss)
 {
     Server serv;
@@ -139,12 +173,13 @@ void parss_info(Parsing &parss)
     
     for (it = parss.data.begin(); it != parss.data.end(); it++)
     {
+        
         if (*it == "server" && *(++it) == "{")
         {
             for (it++; *it != "}"; it += 2)
             {
                 if (*it == "server_name" && *(it + 1) != ";" && *(it + 2) == ";")
-                    serv.name = *(++it);
+                    info_nameServ(serv, *(++it));
                 else if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
                     serv.root_location = *(++it);
                 else if (*it == "client_max_body_size" && *(it + 1) != ";" && *(it + 2) == ";")
@@ -154,14 +189,14 @@ void parss_info(Parsing &parss)
                 else if (*it == "error_page")
                     info_err_status(serv.errors, ++it);
                 else if (*it == "index")
-                    info_(serv.index, ++it);   
+                    info_(++it);   
                 else if (*it == "location")
                     info_location(serv.locations, ++it);
                 else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
                     serv.redirection.return_status = str_to_num(*(++it));
                     serv.redirection.path = *(++it);
                 }
-                else
+                else if (*it != ";")
                     error("not understood");
             }
             if (*it == "}")
@@ -201,6 +236,16 @@ void print_err(std::vector<error_page> &vec)
     }
 }
 
+void print_cgi(std::vector<CGI> &vec)
+{
+    std::vector<CGI>::iterator it;
+    int i = 0;
+    for ( it = vec.begin(); it != vec.end(); it++, i++) {
+        std::cout <<"\n" <<  i << ":  " << "CGI.path=" << (*it).path << std::endl;
+        std::cout <<"\n" <<  i << ":  " << "CGI.extension=" << (*it).extension << std::endl;
+    }
+}
+
 void print_loc(std::vector<Location> &vec)
 {
     std::vector<Location>::iterator it;
@@ -211,9 +256,10 @@ void print_loc(std::vector<Location> &vec)
         std::cout << i << ":  "<< "location.autoindex "  <<  (*it).autoindex << std::endl;
         std::cout << i << ":  "<< "location.name "  <<  (*it).name << std::endl;
         std::cout << i << ":  "<< "location.root_location " <<  (*it).root_location << std::endl;
+        std::cout << i << ":  "<< "location.upload " <<  (*it).uploadDir << std::endl;
         print_str((*it).index, "index ");
         print_str((*it).allows_methods, "allows_methods ");
-        print_str((*it).cgi_pass, "cgi_pass ");
+        print_cgi((*it).cgi_pass);
 
         std::cout << "\n-------------------------------" << std::endl;
     }
@@ -238,21 +284,3 @@ void print_data(Parsing &parss)
     }
 
 }
-
-// int main(int ac, char *av[])
-// {
-//     std::string  str;
-//     Parsing parss;
-
-//     if (ac == 2) 
-//     {
-//         parss.file = av[1];
-//         std::ifstream file(parss.file);
-//         while (std::getline(file, str))
-//             split_conf(parss.data, str);
-//         parss_info(parss);
-//         print_data(parss);
-//         file.close();
-//     }
-//     return 0;
-// }
