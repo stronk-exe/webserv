@@ -56,10 +56,11 @@ int	_is_method_allowed( Location _location, Request &_request )
 {
 	for (size_t i=0 ; i<_location.allows_methods.size(); i++)
 	{
-		// std::cerr << "Ayoooo: " << _location.allows_methods[i] << std::endl;
+		// //std::cerr << "Ayoooo: " << _location.allows_methods[i] << std::endl;
 		if (_location.allows_methods[i] == _request.method)
 			return 1;
 	}
+	//std::cerr << "BZAF KAYTGHDAWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW" << std::endl;
 	return 0;
 }
 
@@ -80,6 +81,8 @@ void	_validate_request( Server &_server, Location &_location, Request &_request,
 		_response.status = 413;
 	if (_is_method_allowed(_location, _request))
 		_request.is_method_allowed = 1;
+	else
+		_request.is_method_allowed = 0;
 	if (!_match_theLocation(_server, _location, _request))
 		_response.status = 404;
 	if (_request.redirection.size())
@@ -94,6 +97,7 @@ void _extract_first_line( Request &_request, std::string s )
     std::vector<std::string> v;
     char *_line = strtok(&s[0], " ");
 
+	//std::cerr << "STTTTRRRRRRRRRRRRRRRR: " << s << std::endl;
     while (_line != NULL)
     {
         v.push_back(_line);
@@ -145,7 +149,7 @@ void _fill_request(Server &_server, Location &_location, Request &_request )
 	// _new_location = _get_Path( _request.uri );
 
 	_request.path = _webserv_loc + "/public/" + _request.root + _request.uri;
-	// std::cerr << "PATH: " << _request.path << std::endl;
+	// //std::cerr << "PATH: " << _request.path << std::endl;
 	if (_server.redirection.path.size())
 		_request.redirection.push_back(_server.redirection.path);
 
@@ -163,7 +167,7 @@ int	_match_theServer( Parsing &_server, Request &_request, Server &_s)
 {
     for (size_t i=0; i<_server.servers.size(); i++)
     {
-		// std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request.headers["Host"] << std::endl;
+		// //std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request.headers["Host"] << std::endl;
 		if (_server.servers[i].name == _request.headers["Host"])
         {
 			_s =  _server.servers[i];
@@ -176,14 +180,14 @@ int	_match_theServer( Parsing &_server, Request &_request, Server &_s)
 int	_match_thePort( Parsing &_server, Request &_request, Server &_s)
 {
 	int	_pos = _request.uri.find(':');
-	// std::cerr << "Pos: " << _pos << std::endl;
+	// //std::cerr << "Pos: " << _pos << std::endl;
 	if (_pos >= 0)
 	{
 		std::string _port = _request.uri.substr(_pos+1, _request.uri.size());
-		// std::cerr << "Port: " << _port << std::endl;
+		// //std::cerr << "Port: " << _port << std::endl;
 		for (size_t i=0; i<_server.servers.size(); i++)
 		{
-			// std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request.headers["Host"] << std::endl;
+			// //std::cerr << "srvers names: " << _server.servers[i].name << " - " << _request.headers["Host"] << std::endl;
 			if (_server.servers[i].listen_port == str_to_num(_port))
 			{
 				_s =  _server.servers[i];
@@ -218,7 +222,9 @@ void	_request_parser( Request &_request, std::string r )
     v.push_back(header);
 
 	// extract the method, the uri and the http-version
+	//std::cerr << "SIIIZEEEEEEEEEE: " << r << std::endl;
 	_extract_first_line(_request, v[0]);
+	//std::cerr << "MEEEEEETHHOOOOOD: " << _request.method << std::endl;
 
 	std::string key, value;
 	for (size_t i=0; i < v.size(); i++)
@@ -234,19 +240,19 @@ void	_request_parser( Request &_request, std::string r )
 
 // void	_complete_body_filling( Request *_request )
 // {
-// 	// std::cerr << "wew wew: " << str_to_num(_request.headers["Content-Length"].substr(0, _request.headers["Content-Length"].size())) << " ~ " << _request.body.size() << std::endl;
+// 	// //std::cerr << "wew wew: " << str_to_num(_request.headers["Content-Length"].substr(0, _request.headers["Content-Length"].size())) << " ~ " << _request.body.size() << std::endl;
 // 	if (str_to_num(_request.headers["Content-Length"].substr(0, _request.headers["Content-Length"].size())) > _request.body.size())
 // 	{
 // 		while (str_to_num(_request.headers["Content-Length"].substr(0, _request.headers["Content-Length"].size())) > _request.body.size())
 // 		{
 // 			char buffer[999999] = {0};
-// 			// std::cerr << "sizooon: " << _request.fd << std::endl;
+// 			// //std::cerr << "sizooon: " << _request.fd << std::endl;
 // 			// int newFd = dup(_request.fd);
 // 			// // _request.fd = newFd;
 // 			int data = read(_request.fd, buffer, 999999);
 // 			// close(newFd);
 // 			// int data = recv(_request.fd, buffer, 999999, 0);
-// 			// std::cerr << "sizzzzzzz" << std::endl;
+// 			// //std::cerr << "sizzzzzzz" << std::endl;
 // 			if (data < 0)
 // 				print_error("empty data!");
 // 			for (int i=0; i<data; i++)
@@ -282,14 +288,40 @@ void	_get_mims( Response &_response )
 	}
 }
 
+std::string urlcode(const std::string& input) {
+  std::ostringstream decoded;
+  std::istringstream encoded(input);
+
+  char ch;
+  while (encoded.get(ch)) {
+    if (ch == '%') {
+      // Check for '%20' encoding
+      if (encoded.peek() == '2' && (encoded.get(), encoded.peek() == '0')) {
+        decoded << ' ';  // Decode space
+        encoded.get();
+      } else {
+        // Decode other percent-encoded values
+        int hex;
+        if (!(encoded >> std::hex >> hex))
+          break;
+        decoded << static_cast<char>(hex);
+      }
+    } else {
+      decoded << ch;
+    }
+  }
+
+  return decoded.str();
+}
+
 void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s )
 {
 	// Server _s;
 	Location _location;
 	
+	//std::cerr << "req Method: " <<s << std::endl;
 	_request_parser(_request, s);
-	// std::cerr << "req uri: " << _request.uri << " req Method: " << _request.method << std::endl;
-
+	// _request.uri = urlcode(_request.uri);
 	// if the body is not complete yet
 	// _complete_body_filling(_request);
 	
@@ -301,14 +333,16 @@ void	_request( Parsing &_server, Server &_s, Request &_request, Response &_respo
 			_s = _server.servers[0];
 	}
 	_match_theLocation(_s, _location, _request);
-	// std::cerr << "location name: " << _location.name << std::endl;
+	// //std::cerr << "location name: " << _location.name << std::endl;
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
+	//std::cerr << "BZAF KAYTGHDAQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ: " << _request.is_method_allowed << std::endl;
 	_get_mims(_response);
-	// std::cerr << "_request name: " << _request.root << " - req uri: " << _request.uri << " - PATH: " << _request.path << std::endl;
+	//std::cerr << "BZAF KAYTGHDAWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW: " << _request.is_method_allowed << std::endl;
+	// //std::cerr << "_request name: " << _request.root << " - req uri: " << _request.uri << " - PATH: " << _request.path << std::endl;
 
 
-	// std::cerr << "buffer: " << s << std::endl;
+	// //std::cerr << "buffer: " << s << std::endl;
 	// std::map<std::string, std::string>::iterator iter;
     // for (iter = _response.mims.begin(); iter != _response.mims.end(); iter++)
     // {

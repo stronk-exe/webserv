@@ -22,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_COOKIE['name'] = $_POST['name'];
                 $_COOKIE['email'] = $_POST['email'];
                 $_COOKIE['avatar'] = $avatar_destination;
-                // setcookie('name', $_POST['name'], time() + 3600 * 24 * 7);
-                // setcookie('email', $_POST['email'], time() + 3600 * 24 * 7);
-                // setcookie('avatar', $avatar_destination, time() + 3600 * 24 * 7);
+                setcookie('name', $_POST['name'], time() + 3600 * 24 * 7);
+                setcookie('email', $_POST['email'], time() + 3600 * 24 * 7);
+                setcookie('avatar', $avatar_destination, time() + 3600 * 24 * 7);
             } else {
                 echo 'File too big';
                 exit(1);

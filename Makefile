@@ -29,7 +29,7 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	@rm -rf _cgi/cgi_utils/* 
 	@rm -rf _cgi/cgi_utils/.h* 
-	c++ -fsanitize=address $(FLAGS) $^ -o $@
+	c++ -g -fsanitize=address $(FLAGS) $^ -o $@
 
 clean:
 	@rm -rf _cgi/cgi_utils/* 
