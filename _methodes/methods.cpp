@@ -25,7 +25,7 @@ void	_get_listed_dir( Client & _client )
 	if ((dir = opendir(_client._request.path.c_str())) == NULL)
 	{
 		_client._response.status = 404;
-		perror("opendir() error");
+		strerror(errno);
 	}
 	else
 	{
@@ -78,7 +78,7 @@ void _body_parser(  Client & _client )
 	size_t boundary_pos = _client._request.headers["Content-Type"].find("boundary=")+9;
 	_client._request.boundary = _client._request.headers["Content-Type"].substr(boundary_pos);
 
-    int psps= _client._request.upload_data.find(_client._request.boundary);
+    size_t psps= _client._request.upload_data.find(_client._request.boundary);
 	std::string _real_data = "";
 
 	for (size_t i=0; i < _client._request.upload_data.size() && i < psps-4; i++)
@@ -238,19 +238,23 @@ void _post(  Client & _client , Server &_server )
 	}
 }
 
-void _delete( Client & _client , Server &_server )
+void _delete( Client & _client )
 {
     _file_or_dir(_client);
 
+	// std::cerr << "_client._response.status : " << _client._response.status << std::endl;
+	if (_client._response.status == 404)
+		return ;
+	// 	_client._response.status = 404;
 	if (_client._request.type == "directory")
 	{
 		if (_client._request.path[_client._request.path.size()-1] != '/')
 			_client._response.status = 409;//Conflict
 		else
 		{
-			if (rmdir(_client._request.path.c_str()) != 0)
+			if (std::system(("rm -rf " + _client._request.path).c_str())!= 0)
 			{
-				perror("Error deleting the directory");
+				strerror(errno);
 				if (!access(_client._request.path.c_str(), W_OK))
 					_client._response.status = 500;// Internal Server Error
 				else
@@ -265,6 +269,6 @@ void _delete( Client & _client , Server &_server )
 
 		_client._response.status = 204;// No Content
 		if (std::remove(_client._request.path.c_str()) != 0)
-			perror("Error deleting the file");
+			strerror(errno);
 	}
 }

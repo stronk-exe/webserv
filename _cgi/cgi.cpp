@@ -76,7 +76,7 @@ std::string get_content_type(char *buffer)
 void parent_process(std::string &result, int *pipe_fd)
 {
     char buffer[4056];
-    int status, nbytes;
+    int nbytes;
 
     close(pipe_fd[1]);
     while ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
@@ -155,7 +155,7 @@ std::vector<std::string> extractSetCookieSubstrings(const std::string& text) {
 void set_cookies(std::string & Cookies, std::string & result)
 {
     std::vector<std::string> arry = extractSetCookieSubstrings(result);
-    for (int i = 0; i < arry.size(); i++)
+    for (size_t i = 0; i < arry.size(); i++)
         Cookies += arry[i] + "\n";
     if (!Cookies.empty())
         Cookies.erase(Cookies.end() - 1);

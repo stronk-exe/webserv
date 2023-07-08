@@ -20,10 +20,13 @@ std::string	_get_ex( std::string _file_name )
 	return "";
 }
 
-size_t getFileSize(const char* filename) {
+ssize_t getFileSize(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file)
+    {
+        // std::cerr << "=========" << std::endl;
 		return -1;
+    }
 
     fseek(file, 0, SEEK_END);
     size_t fileSize = ftell(file);
@@ -38,7 +41,12 @@ int _get_res_body( Client & _client )
 	if (!_client.fd_file)
 	{
 		_client.fd_file = open( _client._request.path.c_str(), O_RDONLY );
-		_client._response.content_length = getFileSize(_client._request.path.c_str());
+        // std::cerr << "MS3OODA" << _client._response.content_length << std::endl;
+
+        int a = getFileSize(_client._request.path.c_str());
+        if (a != -1)
+		    _client._response.content_length = a;
+        // std::cerr << "MS3OODA" << _client._response.content_length << std::endl;
 	}
 
 	int data=1;
@@ -110,22 +118,24 @@ void	_response( Client & _client )
     {
         for (size_t i=0; i<_client._request.error_pages.size(); i++)
         {
-            for (size_t j=0; j<_client._request.error_pages[i].error_status[j]; j++)
+            for (int j=0; j <_client._request.error_pages[i].error_status[j]; j++)
             {
 				if (_client._response.status == _client._request.error_pages[i].error_status[j])
                 {
 					get_file_data(_client._response, _client._request.error_pages[i].path);
                     _status_found=1;
+                    _client._response.content_type = "text/html";
                 }
             }
         }
     }
-
+    
+	// std::cerr << "_client._response.status : " << _client._response.status << std::endl;
     if (!_status_found && _client._response.status != 200)
     {
         if (_client._response.status == 204)
         {
-            _client._response.body = "<html><body><h1>204 No Content</h1><img src=\"https://cdn.hashnode.com/res/hashnode/image/upload/v1611008552253/F5teDDfzj.png?auto=compress,format&format=webp\" alt=\"bad request\"/></body></html>";
+            _client._response.body = "<html><body><h1>204 No Content</h1><img src=\"https://i.imgflip.com/1ujhxy.jpg\" alt=\"bad request\"/></body></html>";
             _client._response.status_message = "No Content";
         }
         else if (_client._response.status == 400)
@@ -179,6 +189,7 @@ void	_response( Client & _client )
             _client._response.status_message = "Loop Detected";
         }
         _client._response.content_type = "text/html";
+        // std::cerr << "---------------------: " << _client._response.content_type << std::endl;
     }
 
 	if (_client._response.body.empty() && _client._kill_pid)

@@ -45,13 +45,13 @@ int _match_theLocation( Server &_server, Location &_location, Request &_request 
 	return 1;
 }
 
-int _valid_url_chars( std::string s )
-{
-    std::string t = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
-	for (size_t i=0; i<s.size(); i++)
-		if (t.find(s[i])<0)
-			return 0;
-    return 1;
+bool isCharacterAllowed(std::string ss) {
+    for (size_t i = 0; i < ss.size(); i++ )
+    {
+        if (!(std::isalnum(ss[i]) || ss[i] == '-' || ss[i] == '_' || ss[i] == '.' || ss[i] == '/'))
+            return false;
+    }
+    return true;
 }
 
 int	_is_method_allowed( Location _location, Request &_request )
@@ -67,11 +67,12 @@ void	_validate_request( Server &_server, Location &_location, Request &_request,
     std::map<std::string, std::string>::iterator _transfer_encoding_iter = _request.headers.find("Transfer-Ecoding");
 	std::map<std::string, std::string>::iterator _content_length_iter = _request.headers.find("Content-Length");
 
+		// std::cerr << "+++++++++" << std::endl;
 	if (_transfer_encoding_iter != _request.headers.end() && _transfer_encoding_iter->second != "chunked")
 		_response.status = 501;
 	if (_transfer_encoding_iter == _request.headers.end() && _content_length_iter == _request.headers.end() && _request.method == "POST")
 		_response.status = 400;
-	if (!_valid_url_chars(_request.uri))
+	if (!isCharacterAllowed(_request.uri))
 		_response.status = 400;
 	if ((_request.uri).size() > 2048)
 		_response.status = 414;
@@ -149,7 +150,7 @@ int	_match_thePort( Parsing &_server, Request &_request, Server &_s)
 	if (_pos >= 0)
 	{
 		std::string _port = _request.uri.substr(_pos+1, _request.uri.size());
-		for (size_t i=0; i<_server.servers.size(); i++)
+		for (size_t i=0; i <_server.servers.size(); i++)
 		{
 			if (_server.servers[i].listen_port == str_to_num(_port))
 			{
@@ -214,7 +215,7 @@ void	_get_mims( Response &_response )
 	
 	for (size_t i=0; i < v.size(); i++)
 	{
-		int pos = v[i].find(" ");
+		size_t pos = v[i].find(" ");
 		if (pos != std::string::npos)
 		{
 			key = v[i].substr(0, pos);
@@ -233,18 +234,10 @@ std::string urlcode(const std::string& input) {
 	{
 		if (ch == '%')
 		{
-			if (encoded.peek() == '2' && (encoded.get(), encoded.peek() == '0'))
-			{
-				decoded << ' ';
-				encoded.get();
-			}
-			else
-			{
-				int hex;
-				if (!(encoded >> std::hex >> hex))
-					break;
-				decoded << static_cast<char>(hex);
-			}
+			int hex;
+			if (!(encoded >> std::hex >> hex))
+				break;
+			decoded << static_cast<char>(hex);
 		}
 		else
 		  decoded << ch;
@@ -253,12 +246,22 @@ std::string urlcode(const std::string& input) {
   return decoded.str();
 }
 
+void check_QueryString(std::string & path, std::string & queryString)
+{    
+    int pos = path.find('?');
+    if (pos != -1)
+        queryString = path.substr(pos + 1, path.size() - pos); 
+
+	path = path.substr(0, pos);
+}
+
 void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s )
 {
 	Location _location;
 
 	_request_parser(_request, s);
 	_request.uri = urlcode(_request.uri);
+	check_QueryString(_request.uri, _request.queryString);
     if (!_match_theServer(_server, _request, _s))
 	{
 		if (!_match_thePort(_server, _request, _s))

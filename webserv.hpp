@@ -115,6 +115,7 @@ struct Server
 	Redirection					redirection;
     size_t						listen_port;
 
+	Server () { listen_port = 0; }
 	Server& operator=(const Server& serv) {
 		this->name = serv.name;
 		this->root_location = serv.root_location;
@@ -356,7 +357,7 @@ void get_body(Client & client);
 // Methodes
 void	_get( Client & _client, Server &_server );
 void	_post( Client & _client, Server &_server );
-void	_delete( Client & _client ,Server &_server );
+void	_delete( Client & _client );
 
 // CGI
 std::string generateRandomString(int length, std::string ss);
@@ -377,13 +378,15 @@ void	print_error(std::string s);
 
 // Parsing
 void	error(std::string err);
-ssize_t str_to_num(std::string str);
+size_t str_to_num(std::string str);
 void	parss_info(Parsing &parss);
 void	info_autoindex(Location &loc, std::string &str);
-void	split_conf(std::vector<std::string> &data, std::string str);
+void 	split_conf(std::vector<std::string> &data, std::string str);
 void	info_err_status(std::vector<error_page> &errors, std::vector<std::string>::iterator &it);
 void	info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void	print_data(Parsing &parss);
 std::vector<std::string>	info_(std::vector<std::string>::iterator &it);
 int createFile(const char* filename, std::string data);
+
+
 #endif

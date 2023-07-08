@@ -41,7 +41,7 @@ void error(std::string err)
     exit(1337);
 }
 
-ssize_t str_to_num(std::string str)
+size_t str_to_num(std::string str)
 {
     char *_p;
     ssize_t _int;
@@ -95,6 +95,26 @@ CGI info_cgi( std::vector<std::string>::iterator &it )
     _struct.extension = *vec.begin();
     _struct.path = *(vec.begin() + 1);
     return _struct;    
+}
+
+void check_error(std::string s, Server &serv)
+{
+    if (s == "server")
+    {
+        if (serv.name.empty())
+            error("NO name in server");
+        if (serv.locations.empty())
+            error("NO location in server");
+        if (!serv.listen_port)
+            error("NO listen_port in server");
+    }
+    for (size_t i = 0; i < serv.locations.size(); i++)
+    {
+        if (serv.locations[i].root_location.empty() && serv.root_location.empty())
+            error("NO root in location");
+        else
+            serv.locations[i].root_location = serv.root_location;
+    }
 }
 
 void info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it)
@@ -203,6 +223,7 @@ void parss_info(Parsing &parss)
                 parss.servers.push_back(serv);
             else 
                 error("server bracket");
+            check_error("server", serv);
         }
         else
             error("not understood");
