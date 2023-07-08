@@ -258,7 +258,7 @@ void	_socket( Parsing &_server )
 						}
 						if (Clients[e]._kill_pid)
 						{
-							if (isFileDescriptorAvailable(Clients[e]._id))
+							if (isFileDescriptorAvailable(Clients[e]._id) && Clients[e].s.size()-Clients[e]._wr)
 								Clients[e].return_write = write(Clients[e]._id, &Clients[e].s[Clients[e]._wr], Clients[e].s.size()-Clients[e]._wr);
 							if (Clients[e].return_write > 0)
 								Clients[e]._wr += Clients[e].return_write;
