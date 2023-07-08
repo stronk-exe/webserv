@@ -58,6 +58,23 @@ bool	isFileDescriptorAvailable(int fd) {
     return (flags != -1);
 }
 
+ssize_t get_content_length(std::string &req)
+{
+	int pos0, pos1;
+	std::string s;
+    
+
+    pos0 = req.find("Content-Length:");
+    if (pos0 == -1)
+        pos0 = req.find("Content-length:");
+	if (pos0 == -1)
+		return -1;
+    pos1 = req.find("\n", pos0);
+	s = req.substr(pos0 + 15 , pos1 - pos0 - 16);
+	std::cerr << "|" << s  << "|" << std::endl;
+	return (str_to_num(s));
+}
+
 void	_socket( Parsing &_server )
 {
     int					_socket_fd;
@@ -160,7 +177,7 @@ void	_socket( Parsing &_server )
 					if (x == Clients[e]._id && (std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end()) &&  Clients[e]._read_status)
 					{
 						std::cerr << "\e[32mREADINGGGGGGGGGGGGGG \e[0m _id : "<< Clients[e]._id << std::endl;
-						
+						int check = 0;
 						char				buffer[999999] = {0};
 
 						Clients[e].data = read(Clients[e]._id, buffer, 999999);
@@ -168,10 +185,26 @@ void	_socket( Parsing &_server )
 						{
 							for (int i=0; i<Clients[e].data; i++)
 								Clients[e].buffer += buffer[i];
+							if (Clients[e].prsing_req.empty())
+								check = 1;///////// intial 
+
 							Clients[e].prsing_req = Clients[e].buffer;
+							if (check == 1)
+								Clients[e].post_legnth = get_content_length(Clients[e].prsing_req);
+							std::cerr << " Clients[e].post_legnth :: " << Clients[e].post_legnth << std::endl;
+
+						}
+						// std::cerr << " Cli :: " << Clients[e].prsing_req << std::endl;
+						std::cerr << " _id : " << Clients[e]._id << " Clients[e].data : " << Clients[e].data  << " - Clients[e].prsing_req.size() : " << Clients[e].prsing_req.size() << std::endl;
+						if (Clients[e].post_legnth >= 0 && Clients[e].prsing_req.size() > Clients[e].post_legnth)
+						{
+							std::cout << "----------" << std::endl;
+								Clients[e]._done_reading = 1;
+								Clients[e]._read_status = 0;
+								FD_SET(Clients[e]._id, &_writefds);
 						}
 
-						if (Clients[e].data <= 0 || Clients[e].data < 999999)
+						else if (Clients[e].post_legnth == -1 && (Clients[e].data <= 0 || Clients[e].data < 999999))
 						{
 								
 								Clients[e]._done_reading = 1;

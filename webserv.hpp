@@ -283,6 +283,7 @@ class Client {
 		int		_file_done_reading;
 		int		fd_file, data;
 		int		firstTime_HuH;
+		ssize_t	post_legnth, read;
 		std::string	buffer, prsing_req;
 		std::string substring, s;
 
@@ -296,6 +297,8 @@ class Client {
 			_wr = 0;
 			data = 0;
 			_read_status = 1;
+			post_legnth  = 0;
+			read  = 0;
 			status = 0;
 			_write_status = 0;
 			_done_reading = 0;
@@ -314,6 +317,8 @@ class Client {
 			_id = client._id;
 			_wr = client._wr;
 			data = client.data;
+			read = client.read;
+			post_legnth = client.post_legnth;
 			prsing_req = client.prsing_req;
 			return_write = client.return_write;
 			status = client.status;
@@ -372,7 +377,7 @@ void	print_error(std::string s);
 
 // Parsing
 void	error(std::string err);
-int		str_to_num(std::string str);
+ssize_t str_to_num(std::string str);
 void	parss_info(Parsing &parss);
 void	info_autoindex(Location &loc, std::string &str);
 void	split_conf(std::vector<std::string> &data, std::string str);

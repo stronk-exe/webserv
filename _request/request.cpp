@@ -258,7 +258,7 @@ void	_request( Parsing &_server, Server &_s, Request &_request, Response &_respo
 	Location _location;
 
 	_request_parser(_request, s);
-
+	_request.uri = urlcode(_request.uri);
     if (!_match_theServer(_server, _request, _s))
 	{
 		if (!_match_thePort(_server, _request, _s))

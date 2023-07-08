@@ -41,10 +41,10 @@ void error(std::string err)
     exit(1337);
 }
 
-int str_to_num(std::string str)
+ssize_t str_to_num(std::string str)
 {
     char *_p;
-    size_t _int;
+    ssize_t _int;
     
     _int = std::strtol(str.c_str(), &_p, 10);
     if (*_p != '\0')
