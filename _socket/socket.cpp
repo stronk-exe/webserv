@@ -164,7 +164,7 @@ void	_socket( Parsing &_server )
 					if ((coming_socket = accept(x, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
 					else
-						std::cerr << "\033[1;92mACCEPTINGGGGGGGGGGGGGG\e[0m _id : " << coming_socket << std::endl;
+						// std::cerr << "\033[1;92mACCEPTINGGGGGGGGGGGGGG\e[0m _id : " << coming_socket << std::endl;
 					fcntl(coming_socket, F_SETFL, O_NONBLOCK);
 					FD_SET(coming_socket, &_readfds);
 					if (coming_socket > fd_size)
@@ -177,7 +177,7 @@ void	_socket( Parsing &_server )
 				{
 					if (x == Clients[e]._id && (std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end()) &&  Clients[e]._read_status)
 					{
-						std::cerr << "\033[1;95mREADINGGGGGGGGGGGGGG \e[0m _id : "<< Clients[e]._id << std::endl;
+						// std::cerr << "\033[1;95mREADINGGGGGGGGGGGGGG \e[0m _id : "<< Clients[e]._id << std::endl;
 						int check = 0;
 						char				buffer[999999] = {0};
 
@@ -214,7 +214,7 @@ void	_socket( Parsing &_server )
 					// Request parsing
 					else if (x == Clients[e]._id && Clients[e]._done_reading && !Clients[e]._read_status && !Clients[e]._write_status)
 					{
-						std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< Clients[e]._id  << std::endl;
+						// std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< Clients[e]._id  << std::endl;
 						Server _s;
 						_request(_server, _s, Clients[e]._request, Clients[e]._response, Clients[e].prsing_req);
 	
@@ -238,7 +238,7 @@ void	_socket( Parsing &_server )
 					}
 					else if (x == Clients[e]._id && std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end() && Clients[e]._write_status/* && !Clients[e]._done_writing*/)
 					{
-						std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< Clients[e]._id << std::endl;
+						// std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< Clients[e]._id << std::endl;
 						if (waitpid(Clients[e]._cgi_pid, &Clients[e].status, WNOHANG) > 0)
 						{
 							if (remove(Clients[e].file.c_str()))
@@ -264,7 +264,7 @@ void	_socket( Parsing &_server )
 								Clients[e]._wr += Clients[e].return_write;
 							if (Clients[e]._done_writing)
 							{
-								std::cerr << "\033[1;91mDROPIGGGGGGGGGG CLIENT \e[0m_id : "<< Clients[e]._id << std::endl;
+								// std::cerr << "\033[1;91mDROPIGGGGGGGGGG CLIENT \e[0m_id : "<< Clients[e]._id << std::endl;
 
 								close(Clients[e]._id);
 								FD_CLR(Clients[e]._id, &_readfds);
