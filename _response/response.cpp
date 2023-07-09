@@ -23,10 +23,7 @@ std::string	_get_ex( std::string _file_name )
 ssize_t getFileSize(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file)
-    {
-        // std::cerr << "=========" << std::endl;
 		return -1;
-    }
 
     fseek(file, 0, SEEK_END);
     size_t fileSize = ftell(file);
@@ -41,12 +38,10 @@ int _get_res_body( Client & _client )
 	if (!_client.fd_file)
 	{
 		_client.fd_file = open( _client._request.path.c_str(), O_RDONLY );
-        // std::cerr << "MS3OODA" << _client._response.content_length << std::endl;
 
         int a = getFileSize(_client._request.path.c_str());
         if (a != -1)
 		    _client._response.content_length = a;
-        // std::cerr << "MS3OODA" << _client._response.content_length << std::endl;
 	}
 
 	int data=1;
@@ -54,9 +49,9 @@ int _get_res_body( Client & _client )
 	data = read(_client.fd_file, buffer, 999999);
 	for (int i=0; i<data; i++)
 	    _client._response.body += buffer[i];
-	if (data>0)
+	if (data > 0)
 	    _client._done_writing = 0;
-	else
+	else if (data < 0 || _client._wr == _client._response.content_length)
 	{
 	    _client._done_writing = 1;
 	    close(_client.fd_file);
@@ -107,7 +102,7 @@ void    get_file_data( Response &_response, std::string path )
 		}
 	}
 	else
-		std::cout << "Couldn't open file\n";
+		std::cout << "-------Couldn't open file\n";
     myfile.close();
 }
 
@@ -123,6 +118,7 @@ void	_response( Client & _client )
 				if (_client._response.status == _client._request.error_pages[i].error_status[j])
                 {
 					get_file_data(_client._response, _client._request.error_pages[i].path);
+
                     _status_found=1;
                     _client._response.content_type = "text/html";
                 }
@@ -130,7 +126,6 @@ void	_response( Client & _client )
         }
     }
     
-	// std::cerr << "_client._response.status : " << _client._response.status << std::endl;
     if (!_status_found && _client._response.status != 200)
     {
         if (_client._response.status == 204)
@@ -189,7 +184,6 @@ void	_response( Client & _client )
             _client._response.status_message = "Loop Detected";
         }
         _client._response.content_type = "text/html";
-        // std::cerr << "---------------------: " << _client._response.content_type << std::endl;
     }
 
 	if (_client._response.body.empty() && _client._kill_pid)

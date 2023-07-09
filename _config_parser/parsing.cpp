@@ -108,12 +108,10 @@ void check_error( Server &serv)
         error("NO listen_port in server");
     for (size_t i = 0; i < serv.locations.size(); i++)
     {
-        // std::cerr << i << "----- serv.locations[i].root_location :" << serv.locations[i].root_location << std::endl;
         if (serv.locations[i].root_location.empty() && serv.root_location.empty())
             error("NO root in location");
         else if (serv.locations[i].root_location.empty())
             serv.locations[i].root_location = serv.root_location;
-        // std::cerr << i << " serv.locations[i].root_location :" << serv.locations[i].root_location << std::endl;
     }
 }
 
@@ -221,7 +219,6 @@ void parss_info(Parsing &parss)
             }
             if (*it == "}") 
             {
-                // std::cerr << "++++++++++++" <<std::endl;
                 check_error(serv);
                 parss.servers.push_back(serv);
                 serv.clear();

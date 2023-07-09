@@ -54,14 +54,6 @@ bool isCharacterAllowed(std::string ss) {
     return true;
 }
 
-// int	_is_method_allowed( Location _location, Request &_request )
-// {
-// 	for (size_t i=0 ; i<_location.allows_methods.size(); i++)
-// 		if (_location.allows_methods[i] == _request.method)
-// 			return 1;
-// 	return 0;
-// }
-
 int    _is_method_allowed( Location _location, Request &_request, Response &_response )
 {
     for (size_t i=0 ; i<_location.allows_methods.size(); i++)
@@ -79,7 +71,6 @@ void	_validate_request( Server &_server, Location &_location, Request &_request,
     std::map<std::string, std::string>::iterator _transfer_encoding_iter = _request.headers.find("Transfer-Ecoding");
 	std::map<std::string, std::string>::iterator _content_length_iter = _request.headers.find("Content-Length");
 
-		// std::cerr << "+++++++++" << std::endl;
 	if (_transfer_encoding_iter != _request.headers.end() && _transfer_encoding_iter->second != "chunked")
 		_response.status = 501;
 	if (_transfer_encoding_iter == _request.headers.end() && _content_length_iter == _request.headers.end() && _request.method == "POST")
@@ -166,13 +157,11 @@ int	_match_theServer( Parsing &_server, Request &_request, Server &_s)
     {		
 		if (_server.servers[i].name == host)
         {
-		// std::cerr <<  "Host : "  << host  << " - port "  << port <<  std::endl;
 			_s =  _server.servers[i];
 			return 1;
 		}
 	}
 	_s =  _server.servers[0];
-		// std::cerr <<  "--------------" <<  std::endl;
 	return 0;
 }
 

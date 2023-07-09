@@ -185,7 +185,6 @@ void _post(  Client & _client , Server &_server )
 	{
 		if (_client._request.upload_path.size())
 		{
-			// std::cerr << "upload_path " << _client._request.upload_path << std::endl;
 			_client._response.content_length = _client._request.body.size();
 			_client._response.content_type = "text/html";
 
@@ -193,7 +192,6 @@ void _post(  Client & _client , Server &_server )
 			if (!_client._response.body.size())
 			{
 				_body_parser(_client);
-				// std::cerr << "_client._request.upload_file_name "  << _client._request.upload_file_name << std::endl;
 				std::ofstream _upload_file(_client._request.path+'/'+_client._request.upload_file_name);
 				
 				_upload_file << _client._request.upload_data;
@@ -244,10 +242,8 @@ void _delete( Client & _client )
 {
     _file_or_dir(_client);
 
-	// std::cerr << "_client._response.status : " << _client._response.status << std::endl;
 	if (_client._response.status == 404)
 		return ;
-	// 	_client._response.status = 404;
 	if (_client._request.type == "directory")
 	{
 		if (_client._request.path[_client._request.path.size()-1] != '/')

@@ -164,6 +164,14 @@ struct Parsing
 	std::string					file;
 	std::vector<std::string>	data;
 	std::vector<Server>			servers;
+	
+	Parsing& operator=(const Parsing& pars) {
+		this->file = pars.file;
+		this->data = pars.data;
+		this->servers = pars.servers;
+    	return *this;
+  	}
+
 };
 
 class Request
@@ -374,6 +382,18 @@ class Client {
 
 
 
+};
+
+struct Socket 
+{
+	int					_socket_fd, fd_size, x, coming_socket;
+    struct sockaddr_in	address;
+    int					addrlen;
+    int					default_port;
+	std::vector<int>	_socket_fds;
+	std::vector<Client> Clients;
+	fd_set				_sockets, _current_sockets, _readfds, _writefds;
+	Parsing 			_server;
 };
 
 // Socket
