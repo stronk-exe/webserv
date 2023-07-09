@@ -104,8 +104,8 @@ void	_socket( Parsing &_server )
 		memset((char *)&address, 0, sizeof(address));
 		address.sin_family = AF_INET;
 		address.sin_addr.s_addr = htonl(INADDR_ANY);
+		// std::cerr << "address.sin_addr.s_addr " << address.sin_addr.s_addr << std::endl;
 		address.sin_port = htons(_server.servers[i].listen_port);
-
 		int on = 1;
 		if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
 			print_error("port in use!");
@@ -164,7 +164,7 @@ void	_socket( Parsing &_server )
 					if ((coming_socket = accept(x, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 						print_error("acception failed!");
 					else
-						// std::cerr << "\033[1;92mACCEPTINGGGGGGGGGGGGGG\e[0m _id : " << coming_socket << std::endl;
+						std::cerr << "\033[1;92mACCEPTINGGGGGGGGGGGGGG\e[0m _id : " << coming_socket << std::endl;
 					fcntl(coming_socket, F_SETFL, O_NONBLOCK);
 					FD_SET(coming_socket, &_readfds);
 					if (coming_socket > fd_size)
@@ -177,7 +177,7 @@ void	_socket( Parsing &_server )
 				{
 					if (x == Clients[e]._id && (std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end()) &&  Clients[e]._read_status)
 					{
-						// std::cerr << "\033[1;95mREADINGGGGGGGGGGGGGG \e[0m _id : "<< Clients[e]._id << std::endl;
+						std::cerr << "\033[1;95mREADINGGGGGGGGGGGGGG \e[0m _id : "<< Clients[e]._id << std::endl;
 						int check = 0;
 						char				buffer[999999] = {0};
 
@@ -192,7 +192,6 @@ void	_socket( Parsing &_server )
 							Clients[e].prsing_req = Clients[e].buffer;
 							if (check == 1)
 								Clients[e].post_legnth = get_content_length(Clients[e].prsing_req);
-							// std::cerr << " Clients[e].post_legnth :: " << Clients[e].post_legnth << std::endl;
 
 						}
 						if (Clients[e].post_legnth >= 0 && static_cast<ssize_t>(Clients[e].prsing_req.size()) > Clients[e].post_legnth)
@@ -203,8 +202,9 @@ void	_socket( Parsing &_server )
 								FD_SET(Clients[e]._id, &_writefds);
 						}
 
-						else if (Clients[e].post_legnth == -1 && (Clients[e].data <= 0 || Clients[e].data < 999999))
+						else if (Clients[e].post_legnth <= 0 && (Clients[e].data <= 0 || Clients[e].data < 999999))
 						{
+							// std::cerr << " Clients[e].prsing_req :: " << Clients[e].prsing_req << std::endl;
 								
 								Clients[e]._done_reading = 1;
 								Clients[e]._read_status = 0;
@@ -214,7 +214,7 @@ void	_socket( Parsing &_server )
 					// Request parsing
 					else if (x == Clients[e]._id && Clients[e]._done_reading && !Clients[e]._read_status && !Clients[e]._write_status)
 					{
-						// std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< Clients[e]._id  << std::endl;
+						std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< Clients[e]._id  << std::endl;
 						Server _s;
 						_request(_server, _s, Clients[e]._request, Clients[e]._response, Clients[e].prsing_req);
 	
@@ -238,7 +238,7 @@ void	_socket( Parsing &_server )
 					}
 					else if (x == Clients[e]._id && std::find(_socket_fds.begin(), _socket_fds.end(), Clients[e]._id) == _socket_fds.end() && Clients[e]._write_status/* && !Clients[e]._done_writing*/)
 					{
-						// std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< Clients[e]._id << std::endl;
+						std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< Clients[e]._id << std::endl;
 						if (waitpid(Clients[e]._cgi_pid, &Clients[e].status, WNOHANG) > 0)
 						{
 							if (remove(Clients[e].file.c_str()))
@@ -264,7 +264,7 @@ void	_socket( Parsing &_server )
 								Clients[e]._wr += Clients[e].return_write;
 							if (Clients[e]._done_writing)
 							{
-								// std::cerr << "\033[1;91mDROPIGGGGGGGGGG CLIENT \e[0m_id : "<< Clients[e]._id << std::endl;
+								std::cerr << "\033[1;91mDROPIGGGGGGGGGG CLIENT \e[0m_id : "<< Clients[e]._id << std::endl;
 
 								close(Clients[e]._id);
 								FD_CLR(Clients[e]._id, &_readfds);

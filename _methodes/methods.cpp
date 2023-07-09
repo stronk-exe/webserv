@@ -185,6 +185,7 @@ void _post(  Client & _client , Server &_server )
 	{
 		if (_client._request.upload_path.size())
 		{
+			// std::cerr << "upload_path " << _client._request.upload_path << std::endl;
 			_client._response.content_length = _client._request.body.size();
 			_client._response.content_type = "text/html";
 
@@ -192,6 +193,7 @@ void _post(  Client & _client , Server &_server )
 			if (!_client._response.body.size())
 			{
 				_body_parser(_client);
+				// std::cerr << "_client._request.upload_file_name "  << _client._request.upload_file_name << std::endl;
 				std::ofstream _upload_file(_client._request.path+'/'+_client._request.upload_file_name);
 				
 				_upload_file << _client._request.upload_data;

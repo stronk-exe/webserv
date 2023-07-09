@@ -80,6 +80,12 @@ struct Redirection
 		this->path = red.path;
 		return *this;
 	}
+	
+	void clear(void)
+	{
+		return_status = 0;
+		path.clear();
+	}
 };
 
 struct Location
@@ -103,6 +109,18 @@ struct Location
 		this->uploadDir = loc.uploadDir;
 		return *this;
 	}
+
+	void clear(void)
+	{
+		name.clear();
+		root_location.clear();
+		autoindex = false;
+		index.clear();
+		allows_methods.clear();
+		redirection.clear();
+		cgi_pass.clear();
+		uploadDir.clear();
+	};
 };
     
 
@@ -125,8 +143,20 @@ struct Server
 		this->locations = serv.locations;
 		this->redirection = serv.redirection;
 		this->errors = serv.errors;
-    return *this;
-  }
+    	return *this;
+  	}
+
+	void clear (void)
+	{
+		name.clear();
+		root_location.clear();
+		client_max_body_size.clear();
+		listen_port = 0;
+		index.clear();
+		locations.clear();
+		redirection.clear();
+		errors.clear();
+	};
 };
 
 struct Parsing

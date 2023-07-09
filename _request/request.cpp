@@ -133,14 +133,34 @@ void _fill_request(Server &_server, Location &_location, Request &_request )
 
 int	_match_theServer( Parsing &_server, Request &_request, Server &_s)
 {
+	int pos;
+	size_t port = 0;
+	std::string host = _request.headers["Host"];
+	pos = host.find(":");
+	if (pos != -1)
+	{
+		port = str_to_num(host.substr(pos + 1, host.size()));
+		host.erase(pos, 5);
+		for (size_t i=0; i<_server.servers.size(); i++)
+		{
+			if (_server.servers[i].listen_port == port)
+			{
+				_s =  _server.servers[i];
+				return 1;
+			}
+		}
+	}
     for (size_t i=0; i<_server.servers.size(); i++)
-    {
-		if (_server.servers[i].name == _request.headers["Host"])
+    {		
+		if (_server.servers[i].name == host)
         {
+		// std::cerr <<  "Host : "  << host  << " - port "  << port <<  std::endl;
 			_s =  _server.servers[i];
 			return 1;
 		}
 	}
+	_s =  _server.servers[0];
+		// std::cerr <<  "--------------" <<  std::endl;
 	return 0;
 }
 
@@ -262,11 +282,7 @@ void	_request( Parsing &_server, Server &_s, Request &_request, Response &_respo
 	_request_parser(_request, s);
 	_request.uri = urlcode(_request.uri);
 	check_QueryString(_request.uri, _request.queryString);
-    if (!_match_theServer(_server, _request, _s))
-	{
-		if (!_match_thePort(_server, _request, _s))
-			_s = _server.servers[0];
-	}
+    _match_theServer(_server, _request, _s);
 	_match_theLocation(_s, _location, _request);
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);

@@ -97,23 +97,23 @@ CGI info_cgi( std::vector<std::string>::iterator &it )
     return _struct;    
 }
 
-void check_error(std::string s, Server &serv)
+void check_error( Server &serv)
 {
-    if (s == "server")
-    {
-        if (serv.name.empty())
-            error("NO name in server");
-        if (serv.locations.empty())
-            error("NO location in server");
-        if (!serv.listen_port)
-            error("NO listen_port in server");
-    }
+
+    if (serv.name.empty())
+        error("NO name in server");
+    if (serv.locations.empty())
+        error("NO location in server");
+    if (!serv.listen_port)
+        error("NO listen_port in server");
     for (size_t i = 0; i < serv.locations.size(); i++)
     {
+        // std::cerr << i << "----- serv.locations[i].root_location :" << serv.locations[i].root_location << std::endl;
         if (serv.locations[i].root_location.empty() && serv.root_location.empty())
             error("NO root in location");
-        else
+        else if (serv.locations[i].root_location.empty())
             serv.locations[i].root_location = serv.root_location;
+        // std::cerr << i << " serv.locations[i].root_location :" << serv.locations[i].root_location << std::endl;
     }
 }
 
@@ -219,11 +219,15 @@ void parss_info(Parsing &parss)
                 else if (*it != ";")
                     error("not understood");
             }
-            if (*it == "}")
+            if (*it == "}") 
+            {
+                // std::cerr << "++++++++++++" <<std::endl;
+                check_error(serv);
                 parss.servers.push_back(serv);
+                serv.clear();
+            }
             else 
                 error("server bracket");
-            check_error("server", serv);
         }
         else
             error("not understood");
