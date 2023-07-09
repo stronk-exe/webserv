@@ -228,8 +228,8 @@ void	_socket( Parsing &_server )
 							else if (Clients[e]._request.method == "DELETE")
 								_delete(Clients[e]);
 						}
-						else if (Clients[e]._response.status != 400)
-							Clients[e]._response.status = 405;
+						// else if (Clients[e]._response.status != 400)
+						// 	Clients[e]._response.status = 405;
 			
 						_response(Clients[e]);
 						Clients[e].s = generate_response_str(Clients[e]);

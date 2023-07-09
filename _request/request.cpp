@@ -54,12 +54,24 @@ bool isCharacterAllowed(std::string ss) {
     return true;
 }
 
-int	_is_method_allowed( Location _location, Request &_request )
+// int	_is_method_allowed( Location _location, Request &_request )
+// {
+// 	for (size_t i=0 ; i<_location.allows_methods.size(); i++)
+// 		if (_location.allows_methods[i] == _request.method)
+// 			return 1;
+// 	return 0;
+// }
+
+int    _is_method_allowed( Location _location, Request &_request, Response &_response )
 {
-	for (size_t i=0 ; i<_location.allows_methods.size(); i++)
-		if (_location.allows_methods[i] == _request.method)
-			return 1;
-	return 0;
+    for (size_t i=0 ; i<_location.allows_methods.size(); i++)
+        if (_location.allows_methods[i] == _request.method)
+            return 1;
+    if (_request.method == "PUT" || _request.method == "HEAD" || _request.method == "PATCH" || _request.method == "OPTIONS" || _request.method == "TRACE")
+        _response.status = 501;
+    else
+        _response.status = 405;
+    return 0;
 }
 
 void	_validate_request( Server &_server, Location &_location, Request &_request, Response &_response )
@@ -78,7 +90,7 @@ void	_validate_request( Server &_server, Location &_location, Request &_request,
 		_response.status = 414;
 	if (static_cast<int>(_request.body.size()) > (str_to_num(_server.client_max_body_size)* 1e6) )
 		_response.status = 413;
-	if (_is_method_allowed(_location, _request))
+	if (_is_method_allowed(_location, _request, _response))
 		_request.is_method_allowed = 1;
 	else
 		_request.is_method_allowed = 0;
