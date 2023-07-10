@@ -115,6 +115,17 @@ void check_error( Server &serv)
     }
 }
 
+void info_root_loc(std::string &root_location, std::string &str, std::string  _error)
+{
+    if (!str.empty() && str[0] == '/' && str[1] && str[str.size() - 1] == '/')
+        root_location = str;
+    else if (!str.empty() && str[0] == '/' && str[1] == '\0')
+        root_location = str;
+    else
+        error(("NO error " + _error + " : /"));
+}
+
+
 void info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it)
 {
     Location loc;
@@ -125,11 +136,11 @@ void info_location(std::vector<Location> &locations, std::vector<std::string>::i
     for (it += 2; *it != "}"; it += 2)
     {
         if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
-            loc.root_location = *(++it);
+            info_root_loc(loc.root_location, *(++it), "root_location");
         else if (*it == "index")
             loc.index = info_(++it); 
         else if (*it == "upload" && *(it + 1) != ";" && *(it + 2) == ";")
-            loc.uploadDir = *(++it);
+            info_root_loc(loc.uploadDir, *(++it), "uploadDir");
         else if (*it == "allow_methods")
             loc.allows_methods = info_(++it);
         else if (*it == "cgi_pass")
@@ -150,6 +161,18 @@ void info_location(std::vector<Location> &locations, std::vector<std::string>::i
     it--;
 }
 
+// void info_nameServ(Server &serv, std::string &data)
+// {
+//     int pos = data.find(":");
+//     if (pos != -1)
+//     {
+//         serv.name = data.substr(0, pos);
+//         serv.listen_port = str_to_num(data.substr(pos + 1, data.size()));
+//     }
+//     else
+//         serv.name = data;
+// }
+
 void info_listen(Server &serv, std::vector<std::string>::iterator &it)
 {
 
@@ -164,24 +187,11 @@ void info_listen(Server &serv, std::vector<std::string>::iterator &it)
     if (vec.size() == 2) {
         if (serv.name.empty())
             serv.name = *vec.begin();
+        serv.ip_add = *vec.begin();
         serv.listen_port = str_to_num(*(vec.begin() + 1));
     }
-    else if (vec.size() == 1){
-        serv.listen_port = str_to_num(*vec.begin());
-    }
-}
-
-
-void info_nameServ(Server &serv, std::string &data)
-{
-    int pos = data.find(":");
-    if (pos != -1)
-    {
-        serv.name = data.substr(0, pos);
-        serv.listen_port = str_to_num(data.substr(pos + 1, data.size()));
-    }
     else
-        serv.name = data;
+        error("NO ip_address");
 }
 
 void parss_info(Parsing &parss)
@@ -197,9 +207,9 @@ void parss_info(Parsing &parss)
             for (it++; *it != "}"; it += 2)
             {
                 if (*it == "server_name" && *(it + 1) != ";" && *(it + 2) == ";")
-                    info_nameServ(serv, *(++it));
+                    serv.name = *(++it);
                 else if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
-                    serv.root_location = *(++it);
+                    info_root_loc(serv.root_location, *(++it), "root_location");
                 else if (*it == "client_max_body_size" && *(it + 1) != ";" && *(it + 2) == ";")
                     serv.client_max_body_size = *(++it);   
                 else if (*it == "listen" && *(it + 1) != ";" && *(it + 2) == ";")

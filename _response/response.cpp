@@ -87,9 +87,10 @@ void    get_indexed_file_data( Request &_request, Response &_response, std::stri
     }
 }
 
-void    get_file_data( Response &_response, std::string path )
+void    get_file_data( Response &_response, std::string & path )
 {
     std::ifstream myfile;
+		std::cout << "path : " << path << std::endl;
 	myfile.open(path);
 	std::string myline;
 	_response.body = "";
@@ -108,7 +109,7 @@ void    get_file_data( Response &_response, std::string path )
 
 void	_response( Client & _client )
 {
-	int _status_found=0;
+	bool _status_found = false;
     if (_client._request.error_pages.size())
     {
         for (size_t i=0; i<_client._request.error_pages.size(); i++)
@@ -117,15 +118,17 @@ void	_response( Client & _client )
             {
 				if (_client._response.status == _client._request.error_pages[i].error_status[j])
                 {
-					get_file_data(_client._response, _client._request.error_pages[i].path);
-
-                    _status_found=1;
+                    get_file_data(_client._response, _client._request.error_pages[i].path);
+                    _status_found = true;
                     _client._response.content_type = "text/html";
+                    break;
                 }
             }
+            if (_status_found)
+                break;
         }
     }
-    
+    std::cerr << "_client._response.status : " << _client._response.status << " - status_found : " << _status_found << std::endl;
     if (!_status_found && _client._response.status != 200)
     {
         if (_client._response.status == 204)

@@ -128,7 +128,7 @@ struct Location
 
 struct Server
 {
-    std::string					name, root_location, client_max_body_size, chyata;
+    std::string					name, root_location, client_max_body_size, chyata, ip_add;
     std::vector<std::string>	index;
     std::vector<Location>		locations;
     std::vector<error_page>		errors;
@@ -138,6 +138,7 @@ struct Server
 	Server () { listen_port = 0; }
 	Server& operator=(const Server& serv) {
 		this->name = serv.name;
+		this->ip_add = serv.ip_add;
 		this->chyata = serv.chyata;
 		this->root_location = serv.root_location;
 		this->client_max_body_size = serv.client_max_body_size;
@@ -152,6 +153,7 @@ struct Server
 	void clear (void)
 	{
 		name.clear();
+		ip_add.clear();
 		root_location.clear();
 		client_max_body_size.clear();
 		listen_port = 0;

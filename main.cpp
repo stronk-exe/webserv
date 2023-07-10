@@ -28,6 +28,8 @@ int main(int ac, char **av)
         while (std::getline(file, str))
             split_conf(_server.data, str);
 
+        if (_server.data.empty())
+            error("Nothing in configFile.conf");
         // 1- Config File:
         parss_info(_server);
         // print_data(_server);

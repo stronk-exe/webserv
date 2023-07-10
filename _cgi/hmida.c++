@@ -1,20 +1,35 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 
-size_t findSubstring(const std::string& str, const std::string& subStr, size_t startPos) {
-    return str.find(subStr, startPos);
+bool isValidIPAddress(const std::string& ipAddress) {
+    std::istringstream iss(ipAddress);
+    int num;
+    char dot;
+    int count = 0;
+
+    while (iss >> num >> dot) {
+        if (num >= 0 && num <= 255 && dot == '.') {
+            count++;
+        }
+        else {
+            return false;
+        }
+    }
+
+    return count == 4 && !(iss >> num);
 }
 
 int main() {
-    std::string str = "/sc/hmoda/";
-    std::string subStr = "/";
-    size_t startPos = 3 + 1;  // Start searching from position 7
+    std::string ipAddress;
+    std::cout << "Enter an IP address: ";
+    std::cin >> ipAddress;
 
-    size_t foundPos = findSubstring(str, subStr, startPos);
-    if (foundPos != std::string::npos) {
-        std::cout << "Substring found at position " << foundPos << std::endl;
-    } else {
-        std::cout << "Substring not found" << std::endl;
+    if (isValidIPAddress(ipAddress)) {
+        std::cout << "Valid IP address." << std::endl;
+    }
+    else {
+        std::cout << "Invalid IP address." << std::endl;
     }
 
     return 0;

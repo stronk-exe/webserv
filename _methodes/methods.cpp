@@ -61,6 +61,8 @@ void	_file_or_dir(  Client & _client )
 		_client._request.type = "file";
 	else
 		_client._response.status = 404;
+    std::cerr << "_client._response.status : " << _client._response.status << std::endl;
+	// _cli
 }
 
 void _body_parser(  Client & _client )
@@ -132,7 +134,7 @@ void	_get( Client & _client, Server &_server )
 {
     _file_or_dir(_client);
 
-	if (!_client._response.status || _client._request.redirection.size())
+	if (!_client._response.status)
 	{
 		std::cerr << "yoooooooooooo" << _client._response.status << std::endl;
 		if (_client._request.type == "directory")
@@ -254,11 +256,12 @@ void _delete( Client & _client )
 		{
 			if (std::system(("rm -rf " + _client._request.path).c_str())!= 0)
 			{
-				strerror(errno);
 				if (!access(_client._request.path.c_str(), W_OK))
 					_client._response.status = 500;// Internal Server Error
 				else
 					_client._response.status = 403;// Forbidden
+				std::cerr << "------------" << std::endl;
+				strerror(errno);
 			}
 			else
 				_client._response.status = 204;// No Content
@@ -268,7 +271,14 @@ void _delete( Client & _client )
 	{
 
 		_client._response.status = 204;// No Content
-		if (std::remove(_client._request.path.c_str()) != 0)
+		// std::cerr << "access(_client._request.path.c_str(), W_OK) " << access(_client._request.path.c_str(), W_OK) <<std::endl;
+		if (access(_client._request.path.c_str(), W_OK))
+			_client._response.status = 403;// Forbidden
+		else if (std::remove(_client._request.path.c_str()) != 0)
+		{
+			if (!access(_client._request.path.c_str(), W_OK))
+				_client._response.status = 500;// Internal Server Error
 			strerror(errno);
+		}
 	}
 }
