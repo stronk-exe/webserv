@@ -425,8 +425,8 @@ void	_request( Parsing &_server, Server &_s, Request &_request, Response &_respo
 
 // Response
 void		_response( Client & _client );
-int			_get_res_body( Client & _client );
-void    	get_indexed_file_data( Request &_request, Response &_response, std::string path );
+int			_get_res_body( Client & _client , std::string path );
+void    	get_indexed_file_data( Client & _client );
 std::string	_get_ex( std::string _file_name );
 
 // Utils

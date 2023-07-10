@@ -100,10 +100,15 @@ mpeg video/mpeg
 mpg video/mpeg
 mov video/quicktime
 webm video/webm
-flv video/x-flv
+flv video/x-fl0v
 m4v video/x-m4v
 mng video/x-mng
 asx video/x-ms-asf
 asf video/x-ms-asf
 wmv video/x-ms-wmv
 avi video/x-msvideo
+jpg image/jpeg  
+png image/png   
+gif image/gif   
+webp image/webp  
+avif image/avif  

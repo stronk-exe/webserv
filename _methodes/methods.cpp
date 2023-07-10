@@ -152,7 +152,7 @@ void	_get( Client & _client, Server &_server )
 					if (_client._request.cgi.size())
 						_cgi(_client, _server);
 					else
-						get_indexed_file_data(_client._request, _client._response, _client._request.path);
+						get_indexed_file_data(_client);
 					_client._response.status = 200;
 				}
 				else
@@ -176,7 +176,7 @@ void	_get( Client & _client, Server &_server )
 			if (_client._request.cgi.size())
 				_cgi(_client, _server);
 			else
-				_get_res_body(_client);
+				_get_res_body(_client, _client._request.path);
 			_client._response.status = 200;
 		}
 	}
@@ -235,7 +235,7 @@ void _post(  Client & _client , Server &_server )
 				else
 				{
 					_client._response.status = 200;
-					_get_res_body(_client);
+					_get_res_body(_client, _client._request.path);
 				}
 			}
 		}

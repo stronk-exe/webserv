@@ -184,7 +184,7 @@ bool _Writing ( Socket & _socket , Client & _client , size_t e )
 	}
 	else
 	{
-		_get_res_body(_client);
+		_get_res_body(_client, _client._request.path);
 		_client.s = generate_response_str(_client);
 	}
 	return false ;
