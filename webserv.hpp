@@ -91,7 +91,7 @@ struct Redirection
 struct Location
 {
     bool						autoindex;
-    std::string					root_location, name, uploadDir;
+    std::string					root_location, name, uploadDir, chyata;
     std::vector<std::string> 	index;
     std::vector<std::string>	allows_methods;
 	Redirection					redirection;
@@ -100,6 +100,7 @@ struct Location
 	Location& operator=(const Location& loc)
 	{
 		this->name = loc.name;
+		this->chyata = loc.chyata;
 		this->root_location = loc.root_location;
 		this->autoindex = loc.autoindex;
 		this->index = loc.index;
@@ -113,6 +114,7 @@ struct Location
 	void clear(void)
 	{
 		name.clear();
+		chyata.clear();
 		root_location.clear();
 		autoindex = false;
 		index.clear();
@@ -126,22 +128,23 @@ struct Location
 
 struct Server
 {
-    std::string					name, root_location, client_max_body_size;
+    std::string					name, root_location, client_max_body_size, chyata;
     std::vector<std::string>	index;
     std::vector<Location>		locations;
     std::vector<error_page>		errors;
-	Redirection					redirection;
+	// Redirection					redirection;
     size_t						listen_port;
 
 	Server () { listen_port = 0; }
 	Server& operator=(const Server& serv) {
 		this->name = serv.name;
+		this->chyata = serv.chyata;
 		this->root_location = serv.root_location;
 		this->client_max_body_size = serv.client_max_body_size;
 		this->listen_port = serv.listen_port;
 		this->index = serv.index;
 		this->locations = serv.locations;
-		this->redirection = serv.redirection;
+		// this->redirection = serv.redirection;
 		this->errors = serv.errors;
     	return *this;
   	}
@@ -154,7 +157,8 @@ struct Server
 		listen_port = 0;
 		index.clear();
 		locations.clear();
-		redirection.clear();
+		chyata.clear();
+		// redirection.clear();
 		errors.clear();
 	};
 };

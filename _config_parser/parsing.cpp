@@ -210,10 +210,10 @@ void parss_info(Parsing &parss)
                     info_(++it);   
                 else if (*it == "location")
                     info_location(serv.locations, ++it);
-                else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
-                    serv.redirection.return_status = str_to_num(*(++it));
-                    serv.redirection.path = *(++it);
-                }
+                // else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
+                //     serv.redirection.return_status = str_to_num(*(++it));
+                //     serv.redirection.path = *(++it);
+                // }
                 else if (*it != ";")
                     error("not understood");
             }
@@ -279,6 +279,7 @@ void print_loc(std::vector<Location> &vec)
         std::cout << i << ":  "<< "location.name "  <<  (*it).name << std::endl;
         std::cout << i << ":  "<< "location.root_location " <<  (*it).root_location << std::endl;
         std::cout << i << ":  "<< "location.upload " <<  (*it).uploadDir << std::endl;
+        std::cout << i << ":  "<< "location.redirection path " <<  (*it).redirection.path << " - " << (*it).redirection.return_status << std::endl;
         print_str((*it).index, "index ");
         print_str((*it).allows_methods, "allows_methods ");
         print_cgi((*it).cgi_pass);

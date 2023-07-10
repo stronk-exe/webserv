@@ -132,8 +132,9 @@ void	_get( Client & _client, Server &_server )
 {
     _file_or_dir(_client);
 
-	if (!_client._response.status)
+	if (!_client._response.status || _client._request.redirection.size())
 	{
+		std::cerr << "yoooooooooooo" << _client._response.status << std::endl;
 		if (_client._request.type == "directory")
 		{
 			if (_client._request.path[_client._request.path.size()-1] != '/')
@@ -159,6 +160,7 @@ void	_get( Client & _client, Server &_server )
 						_client._response.status = 403;
 					else
 					{
+						std::cerr << "hola sir: " << _client._request.path << std::endl;
 						_get_listed_dir(_client);
 						_client._response.body = _client._request.body;
 						_client._response.content_type = "text/html";
