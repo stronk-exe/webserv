@@ -29,10 +29,8 @@
 #include <iterator>
 #include <sys/stat.h>
 #include <map>
-
-
-#include <errno.h>
-
+#include <sys/time.h>
+#include <netdb.h>
 
 #define _POSIX_SOURCE
 #include <dirent.h>
@@ -394,6 +392,7 @@ struct Socket
 {
 	int					_socket_fd, fd_size, x, coming_socket;
     struct sockaddr_in	address;
+	struct addrinfo		*bind_address;
     int					addrlen;
     int					default_port;
 	std::vector<int>	_socket_fds;
