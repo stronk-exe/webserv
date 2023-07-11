@@ -277,7 +277,7 @@ class Response
 
 		int			status;
 		std::string status_message;
-		size_t		content_length;
+		long long		content_length;
 		std::string content_type;
 		std::string path;
 		std::string data;
@@ -316,7 +316,7 @@ class Client {
 		int		_id;
 		pid_t	_cgi_pid;
 		bool	_kill_pid;
-		size_t	_wr;
+		long long	_wr;
 		int		pipe_fd[2];
 		std::string		file,  body, cookies;
 		int		_read_status, status;

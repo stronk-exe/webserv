@@ -15,7 +15,6 @@
 std::string	_get_ex( std::string _file_name )
 {
 	size_t dotPos = _file_name.find_last_of('.');
-    std::cerr << "_file_name.substr(dotPos + 1) : " << _file_name.substr(dotPos + 1) << std:: endl;
     if (dotPos != std::string::npos && dotPos < _file_name.length() - 1)
 		return _file_name.substr(dotPos + 1);
 	return "";
@@ -34,12 +33,11 @@ ssize_t getFileSize(const char* filename) {
     return fileSize;
 }
 
-int _get_res_body( Client & _client , std::string  path)
+int _get_res_body( Client & _client , std::string path )
 {
 	if (!_client.fd_file)
 	{
-        // std::cerr << "^^^^^^^^^^^^^^^^^^^^^^" << std::endl;
-		_client.fd_file = open(path.c_str(), O_RDONLY );
+		_client.fd_file = open( path.c_str(), O_RDONLY );
 
         int a = getFileSize(path.c_str());
         if (a != -1)
@@ -51,17 +49,16 @@ int _get_res_body( Client & _client , std::string  path)
 	data = read(_client.fd_file, buffer, 999999);
 	for (int i=0; i<data; i++)
 	    _client._response.body += buffer[i];
-    // std::cerr << "================= data : " << data  << " - lseek(_client.fd_file, 0, SEEK_END) : " << lseek(_client.fd_file, 0, SEEK_END) <<std::endl;
+	if (data > 0)
 	    _client._done_writing = 0;
-	if (data < 0 || _client._wr == _client._response.content_length || data == lseek(_client.fd_file, 0, SEEK_END))
+	else if (data < 0 || _client._wr == _client._response.content_length || _client._wr >= lseek(_client.fd_file, 0, SEEK_END))
 	{
-        // std::cerr << "~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
 	    _client._done_writing = 1;
 	    close(_client.fd_file);
 	}
 	if (_client._response.content_type.empty())
 	{
-	    _client._response.content_type = _client._response.mims[_get_ex(path)];
+	    _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
 	    if (!_client._response.content_type.size())
 	        _client._response.content_type = "text/html";
 	}
@@ -70,45 +67,21 @@ int _get_res_body( Client & _client , std::string  path)
 	return 1;
 }
 
-void    get_indexed_file_data( Client & _client)
+void    get_indexed_file_data( Client & _client )
 {
-    for (size_t i=0; i<_client._request.index.size(); i++)
+    for (size_t i=0; i< _client._request.index.size(); i++)
     {
-        // std::cerr << "#################### myfile : " << _client._request.index[i] << std::endl;
-        if (!access((_client._request.path + _client._request.index[i]).c_str(), F_OK))
-        {
-            _client.fd_file = 0;
-            _get_res_body(_client, (_client._request.path + _client._request.index[i]));
-            // _client._response.content_type = _client._response.mims[_get_ex((_client._request.path + _client._request.index[i]))];
-            // std:: cerr << "_response.content_type : " <<_client._response.content_type << " - _response.body.size() : " << _client._response.body.size() << std::endl;
+        std::cerr << "_request.path + _client._request.index[i]) : |" << (_client._request.path + _client._request.index[i]) << "|" << std::endl; 
+        _get_res_body(_client, (_client._request.path + _client._request.index[i]));
+        if (_client._done_writing)
             break ;
-        }
-        // std::ifstream myfile;
-        // myfile.open(path+_request.index[i]);
-        // std::string myline;
-        // _response.body = "";
-        // if ( myfile.is_open() )
-        // {
-        //     while ( myfile )
-		// 	{
-        //         std::getline (myfile, myline);
-        //         _response.body += myline;
-        //     }
-        //     myfile.close();
-        //         std::cerr <<  "!!!!!!!!!!!!!!!!" << std::endl;
-        //         _response.content_type = _response.mims[_get_ex(_request.index[i])];
-        //     break ;
-        // }
     }
-    // if (!_response.body.empty())
-    // {
-    // }
 }
 
 void    get_file_data( Response &_response, std::string & path )
 {
     std::ifstream myfile;
-		// std::cout << "path : " << path << std::endl;
+		std::cout << "path : " << path << std::endl;
 	myfile.open(path);
 	std::string myline;
 	_response.body = "";
@@ -211,6 +184,4 @@ void	_response( Client & _client )
     	_get_res_body(_client, _client._request.path);
     if (!_client._response.content_length)
         _client._response.content_length = _client._response.body.size();
-
-
 }
