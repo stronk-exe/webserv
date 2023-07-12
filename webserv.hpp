@@ -391,13 +391,14 @@ class Client {
 struct Socket 
 {
 	int					_socket_fd, fd_size, x, coming_socket;
+	struct addrinfo hints;
     struct sockaddr_in	address;
 	struct addrinfo		*bind_address;
     int					addrlen;
     int					default_port;
 	std::vector<int>	_socket_fds;
 	std::vector<Client> Clients;
-	fd_set				_sockets, _current_sockets, _readfds, _writefds;
+	fd_set				_read_sockets, _write_sockets, _readfds, _writefds;
 	Parsing 			_server;
 };
 

@@ -79,9 +79,9 @@ void _Droping ( Socket & _socket , Client & _client , size_t e )
 {
 	std::cerr << "\033[1;91mDROPIGGGGGGGGGG CLIENT \e[0m_id : "<< _client._id << std::endl;
 
-	close(_client._id);
 	FD_CLR(_client._id, &_socket._readfds);
 	FD_CLR(_client._id, &_socket._writefds);
+	close(_client._id);
 	std::vector<Client>::iterator it = _socket.Clients.begin();
 	std::advance(it, e);
 	_socket.Clients.erase(it);
@@ -89,19 +89,25 @@ void _Droping ( Socket & _socket , Client & _client , size_t e )
 
 bool _Accepting ( Socket & _socket )
 {
-	for (size_t e=0; e < _socket.Clients.size(); e++)
-	{
-		if (FD_ISSET(_socket.Clients[e]._id, &_socket._sockets) && FD_ISSET(_socket.Clients[e]._id, &_socket._current_sockets))
-			_Droping (_socket, _socket.Clients[e], e );
-	}
+	// for (size_t e=0; e < _socket.Clients.size(); e++)
+	// {
+	// 	if (_socket.x == _socket.Clients[e]._id)
+	// 	{
+	// 		std :: cerr << "+++++++++++++++ is ivailable +++++++++++++++++" << std::endl;
+	// 		break ;
+	// 	}
+	// 		// FD_CLR(_socket.Clients[e]._id, &_socket._writefds);
+	// 		// _Droping (_socket, _socket.Clients[e], e );
+	// }
 
 	if (std::find(_socket._socket_fds.begin(), _socket._socket_fds.end(), _socket.x) != _socket._socket_fds.end())
 	{
 		if ((_socket.coming_socket = accept(_socket.x, (struct sockaddr *)&_socket.address, (socklen_t*)&_socket.addrlen)) < 0)
 			print_error("acception failed!");
-		else
+		// else
 			std::cerr << "\033[1;92mACCEPTINGGGGGGGGGGGGGG\e[0m _id : " << _socket.coming_socket << std::endl;
 		fcntl(_socket.coming_socket, F_SETFL, O_NONBLOCK);
+
 		FD_SET(_socket.coming_socket, &_socket._readfds);
 		if (_socket.coming_socket > _socket.fd_size)
 			_socket.fd_size = _socket.coming_socket;
@@ -116,7 +122,8 @@ void _Reading ( Socket & _socket , Client & _client )
 	int 	_check = 0;
 	char	buffer[999999] = {0};
 
-	std::cerr << "\033[1;95mREADINGGGGGGGGGGGGGG \e[0m _id : "<< _client._id << std::endl;
+	// _client._read_status = 1;
+	// std::cerr << "\033[1;95mREADINGGGGGGGGGGGGGG \e[0m _id : "<< _client._id << std::endl;
 	_client.data = read(_client._id, buffer, 999999);
 	if (_client.data > 0)
 	{
@@ -150,7 +157,7 @@ void _Parsing ( Socket & _socket , Client & _client )
 {
 	Server _s;
 
-	std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id  << std::endl;
+	// std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id  << std::endl;
 	_request(_socket._server, _s, _client._request, _client._response, _client.prsing_req);
 	// Checking the method
 	if (_client._request.is_method_allowed && _client._response.status != 400)
@@ -172,12 +179,12 @@ void _Parsing ( Socket & _socket , Client & _client )
 
 bool _Writing ( Socket & _socket , Client & _client , size_t e )
 {
-	std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
+	// std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
 	if (isFileDescriptorAvailable(_client._id) && _client.s.size()-_client._wr)
 		_client.return_write = write(_client._id, &_client.s[_client._wr], _client.s.size()- _client._wr);
 	if (_client.return_write > 0)
 		_client._wr += _client.return_write;
-	if (_client._done_writing)
+	if (_client._done_writing )
 	{
 		_Droping (_socket, _client , e );
 		return true ;
@@ -211,56 +218,19 @@ void check_cgi_end(Client & _client )
 	}
 }
 
-// void init_socket( Socket &_socket , Parsing &_server )
-// {
-// 	_socket._server = _server;
-// 	_socket.addrlen = sizeof(_socket.address);
-// 	_socket.default_port = _get_ports(_socket._server)[0];
-
-// 	// Initializing the sockets
-// 	FD_ZERO(&_socket._sockets);
-// 	FD_ZERO(&_socket._current_sockets);
-// 	FD_ZERO(&_socket._readfds);
-// 	FD_ZERO(&_socket._writefds);
-// 	for (size_t i=0; i < _socket._server.servers.size(); i++)
-// 	{
-// 		// Creating a socket for each server
-// 		if ((_socket._socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-// 			print_error("socket creation failed!");
-		
-// 		// Binding the sockets of each server
-// 		memset((char *)&_socket.address, 0, sizeof(_socket.address));
-// 		_socket.address.sin_family = AF_INET;
-// 		_socket.address.sin_addr.s_addr = htonl(INADDR_ANY);
-// 		_socket.address.sin_port = htons(_socket._server.servers[i].listen_port);
-// 		int on = 1;
-// 		if (setsockopt(_socket._socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
-// 			print_error("port in use!");
-// 		fcntl(_socket._socket_fd, F_SETFL, O_NONBLOCK);
-
-// 		if ((bind(_socket._socket_fd, (struct sockaddr *)&_socket.address, sizeof(_socket.address))) < 0)
-// 			print_error("binding failed!");
-		
-// 		// Start listining..
-// 		if ((listen(_socket._socket_fd, SOMAXCONN)) < 0)
-// 			print_error("listining failed!");
-		
-// 		FD_SET(_socket._socket_fd, &_socket._readfds);
-// 		_socket._socket_fds.push_back(_socket._socket_fd);
-// 	}
-// 	_socket.fd_size = _socket._socket_fds[_socket._socket_fds.size() - 1];
-// }
 void init_socket( Socket &_socket , Parsing &_server )
 {
 	_socket._server = _server;
 	_socket.addrlen = sizeof(_socket.address);
+	std::cerr << "sizeof : " << sizeof(_socket.address) << std::endl;
 	_socket.default_port = _get_ports(_socket._server)[0];
 
 	// Initializing the sockets
-	FD_ZERO(&_socket._sockets);
-	FD_ZERO(&_socket._current_sockets);
+	FD_ZERO(&_socket._read_sockets);
+	FD_ZERO(&_socket._write_sockets);
 	FD_ZERO(&_socket._readfds);
 	FD_ZERO(&_socket._writefds);
+	struct addrinfo hints;
 	for (size_t i=0; i < _socket._server.servers.size(); i++)
 	{
 		// Creating a socket for each server
@@ -272,30 +242,29 @@ void init_socket( Socket &_socket , Parsing &_server )
 		// _socket.address.sin_addr.s_addr = htonl(INADDR_ANY);
 		// _socket.address.sin_port = htons(_socket._server.servers[i].listen_port);
 
-		struct addrinfo hints;
     	memset(&hints, 0, sizeof(hints));
     	hints.ai_family = AF_INET;
     	hints.ai_socktype = SOCK_STREAM;
     	hints.ai_flags = AI_PASSIVE;
 
-		// std::cerr << "ip address: " << (_socket._server.servers[i].name).c_str() << ", port: " << num_to_str(_socket._server.servers[i].listen_port).c_str() << std::endl;
-		getaddrinfo((_socket._server.servers[i].name).c_str(), num_to_str(_socket._server.servers[i].listen_port).c_str(), &hints, &_socket.bind_address);
+		// std::cerr << "ip address: " << (_socket._server.servers[i].ip_add).c_str() << ", port: " << num_to_str(_socket._server.servers[i].listen_port).c_str() << std::endl;
+		getaddrinfo((_socket._server.servers[i].ip_add).c_str(), num_to_str(_socket._server.servers[i].listen_port).c_str(), &hints, &_socket.bind_address);
 
 		if ((_socket._socket_fd = socket(_socket.bind_address->ai_family, _socket.bind_address->ai_socktype, _socket.bind_address->ai_protocol)) < 0)
 			print_error("socket creation failed!");
 		int on = 1;
+		fcntl(_socket._socket_fd, F_SETFL, O_NONBLOCK);
 		if (setsockopt(_socket._socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
 			print_error("port in use!");
-		fcntl(_socket._socket_fd, F_SETFL, O_NONBLOCK);
 
 		// if ((bind(_socket._socket_fd, (struct sockaddr *)&_socket.address, sizeof(_socket.address))) < 0)
 		if ((bind(_socket._socket_fd, _socket.bind_address->ai_addr, _socket.bind_address->ai_addrlen)) < 0)
 			print_error("binding failed!");
 		
+		freeaddrinfo(_socket.bind_address);
 		// Start listining..
 		if ((listen(_socket._socket_fd, SOMAXCONN)) < 0)
 			print_error("listining failed!");
-		freeaddrinfo(_socket.bind_address);
 		// std::cerr << "socket fd: " << _socket._socket_fd << std::endl; 
 		FD_SET(_socket._socket_fd, &_socket._readfds);
 		_socket._socket_fds.push_back(_socket._socket_fd);
@@ -303,86 +272,59 @@ void init_socket( Socket &_socket , Parsing &_server )
 	_socket.fd_size = _socket._socket_fds[_socket._socket_fds.size() - 1];
 }
 
-// void	_socket( Parsing &_server )
-// {
-// 	Socket _socket;
-	
-// 	init_socket(_socket, _server);
-//     while (1)
-//     {
-//         std::cout << "listening ..." << std::endl;
-		
-// 		_socket._sockets = _socket._readfds;
-// 		_socket._current_sockets = _socket._writefds;
-// 		if (select(_socket.fd_size + 1, &_socket._sockets, &_socket._current_sockets, NULL, NULL) < 0)
-// 			print_error("error in select");
-// 		_socket.coming_socket = 0;
-    
-// 		for (int x=0; x <= _socket.fd_size; x++)
-// 		{
-// 			_socket.x = x;
-// 			if (FD_ISSET(x, &_socket._sockets) || FD_ISSET(x, &_socket._current_sockets))
-// 			{
-// 				if (_Accepting ( _socket ))
-// 					break ;
-				
-// 				for (size_t e=0; e < _socket.Clients.size(); e++)
-// 				{
-// 					if (x == _socket.Clients[e]._id && (std::find(_socket._socket_fds.begin(), _socket._socket_fds.end(), _socket.Clients[e]._id) == _socket._socket_fds.end()) &&  _socket.Clients[e]._read_status)
-// 						_Reading ( _socket , _socket.Clients[e] );
-// 					// Request parsing
-// 					else if (x == _socket.Clients[e]._id && _socket.Clients[e]._done_reading && !_socket.Clients[e]._read_status && !_socket.Clients[e]._write_status)
-// 						_Parsing ( _socket , _socket.Clients[e] );
-// 					else if (x == _socket.Clients[e]._id && std::find(_socket._socket_fds.begin(), _socket._socket_fds.end(), _socket.Clients[e]._id) == _socket._socket_fds.end() && _socket.Clients[e]._write_status)
-// 					{
-// 						check_cgi_end( _socket.Clients[e] );
-// 						if (_socket.Clients[e]._kill_pid)
-// 						{
-// 							if (_Writing ( _socket , _socket.Clients[e] , e))
-// 								break ;
-// 						}
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// }
 void	_socket( Parsing &_server )
 {
 	Socket _socket;
 	
 	init_socket(_socket, _server);
+	struct timeval _timeout;
+		std::cerr << "_socket.fd_size : " << _socket.fd_size << std::endl;
     while (1)
     {
-		struct timeval _timeout;
-		_timeout.tv_sec = 1;
-		_timeout.tv_usec = 0;
         std::cout << "listening ..." << std::endl;
 		
-		_socket._sockets = _socket._readfds;
-		_socket._current_sockets = _socket._writefds;
-		if (select(_socket.fd_size + 1, &_socket._sockets, &_socket._current_sockets, NULL, &_timeout) < 0) {
+		_timeout.tv_sec = 0;
+		_timeout.tv_usec = 500000;
+		_socket._read_sockets = _socket._readfds;
+		_socket._write_sockets = _socket._writefds;
+		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, NULL) < 0) {
 			std::cerr	<< strerror(errno) << std::endl;
 			print_error("error in select");
 		}
 		_socket.coming_socket = 0;
     
+		// std::cerr << "_socket.fd_size : " << _socket.fd_size << std::endl;
 		for (int x=0; x <= _socket.fd_size; x++)
 		{
 			_socket.x = x;
-			if (FD_ISSET(x, &_socket._sockets) || FD_ISSET(x, &_socket._current_sockets))
+			// std::cerr << "x : " << x << std::endl;
+			if (FD_ISSET(x, &_socket._read_sockets) || FD_ISSET(x, &_socket._write_sockets))
 			{
+
 				if (_Accepting ( _socket ))
 					break ;
 				
 				for (size_t e=0; e < _socket.Clients.size(); e++)
 				{
+					if (FD_ISSET(_socket.Clients[e]._id, &_socket._read_sockets) && FD_ISSET(_socket.Clients[e]._id, &_socket._write_sockets))
+					{
+						std::cerr << "---------------- bothe  her ---------------" << std::endl;
+						_Droping( _socket , _socket.Clients[e], e );
+						// _socket.Clients[e]._wr = 0;
+						// _socket.Clients[e]._read_status = 1;
+						// _socket.Clients[e]._write_status = 0;
+
+						// FD_CLR(_socket.Clients[e]._id, &_socket._read_sockets);
+						// FD_CLR(_socket.Clients[e]._id, &_socket._write_sockets);
+						break ;
+					}
+					std::cerr  << "_socket.Clients[e]._read_status : " << _socket.Clients[e]._read_status << " - _socket.Clients[e]._write_status : " << _socket.Clients[e]._write_status << std::endl;
 					if (x == _socket.Clients[e]._id && (std::find(_socket._socket_fds.begin(), _socket._socket_fds.end(), _socket.Clients[e]._id) == _socket._socket_fds.end()) &&  _socket.Clients[e]._read_status)
 						_Reading ( _socket , _socket.Clients[e] );
 					// Request parsing
-					else if (x == _socket.Clients[e]._id && _socket.Clients[e]._done_reading && !_socket.Clients[e]._read_status && !_socket.Clients[e]._write_status)
+					if (x == _socket.Clients[e]._id && _socket.Clients[e]._done_reading && !_socket.Clients[e]._read_status && !_socket.Clients[e]._write_status)
 						_Parsing ( _socket , _socket.Clients[e] );
-					else if (x == _socket.Clients[e]._id && std::find(_socket._socket_fds.begin(), _socket._socket_fds.end(), _socket.Clients[e]._id) == _socket._socket_fds.end() && _socket.Clients[e]._write_status)
+					if (x == _socket.Clients[e]._id && std::find(_socket._socket_fds.begin(), _socket._socket_fds.end(), _socket.Clients[e]._id) == _socket._socket_fds.end() && _socket.Clients[e]._write_status)
 					{
 						check_cgi_end( _socket.Clients[e] );
 						if (_socket.Clients[e]._kill_pid)
@@ -394,5 +336,6 @@ void	_socket( Parsing &_server )
 				}
 			}
 		}
+		// exit(1);
 	}
 }

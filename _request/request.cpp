@@ -88,7 +88,7 @@ bool sub_location_uri(std::string & uri, std::string & name)
 		if (name[e] != uri[e])
 			break ;
 	}
-	std::cerr << "name : "  << name << std::endl;
+	// std::cerr << "name : "  << name << std::endl;
 	// std::cerr <<"e : " << e <<  " - uri.find('/', e +1) : "  << name.find("/", e +1) << " - uri.size() - 1 : " << name.size() - 1<< std::endl;
 	if (e == uri.size() && name.find("/", e + 1) == name.size() - 1)
 		return true;
@@ -457,9 +457,9 @@ void	_request( Parsing &_server, Server &_s, Request &_request, Response &_respo
 	check_QueryString(_request.uri, _request.queryString);
     _match_theServer(_server, _request, _s);
 
-	std::cerr << "_request.uri  " << _request.uri << std::endl;
-	int a = _match_theLocation(_s, _location, _request, _response );
-	std::cerr << "a " << a  << "_request.uri  " << _request.uri << std::endl;
+	// std::cerr << "_request.uri  " << _request.uri << std::endl;
+	_match_theLocation(_s, _location, _request, _response );
+	// std::cerr << "a " << a  << "_request.uri  " << _request.uri << std::endl;
 	// if ()
 	// {
 	// 	;
