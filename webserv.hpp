@@ -422,7 +422,7 @@ void	_cgi( Client & _client , Server &_server );
 std::string num_to_str(ssize_t num);
 
 // Request
-void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s );
+void	_request( Parsing &_server, Server &_s, Client & _client );
 
 // Response
 void		_response( Client & _client );

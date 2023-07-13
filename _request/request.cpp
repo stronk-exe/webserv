@@ -86,7 +86,7 @@ bool sub_location_uri(std::string & uri, std::string & name)
 	return false;
 }
 
-int _match_theLocation( Server &_server, Location &_location, Request &_request , Response & _response )
+void _match_theLocation( Server &_server, Location &_location, Request &_request , Response & _response )
 {
 	std::vector<int> v;
 	bool _find = false;
@@ -128,7 +128,7 @@ int _match_theLocation( Server &_server, Location &_location, Request &_request 
 			break ;
 		removeLastWord(names);
 		if (_ghayarha == names.size() - 1)
-			return 0;
+			break ;
 		check = true;
 	}
 	std::string chyata_pro_max;
@@ -145,8 +145,8 @@ int _match_theLocation( Server &_server, Location &_location, Request &_request 
 	if (!chyata_pro_max.empty())
 		_server.chyata = chyata_pro_max;
 	_request.uri = _location.root_location + _server.chyata;
+	std::cerr << "====== " << _request.uri << " ======" << std::endl;
 	_server.chyata.clear();
-	return 1;
 }
 
 bool isCharacterAllowed(std::string ss) {
@@ -385,16 +385,23 @@ std::string update_uri(std::string  uri)
 	return tmp;
 }
 
-void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s )
+void	_request( Parsing &_server, Server &_serv, Client & _client )
 {
 	Location _location;
 
-	_request_parser(_request, s);
-	_request.uri = update_uri(urlcode(_request.uri));
-	check_QueryString(_request.uri, _request.queryString);
-    _match_theServer(_server, _request, _s);
-	_match_theLocation(_s, _location, _request, _response );
-	_fill_request(_s, _location, _request);
-    _validate_request(_s, _location, _request, _response);
-	_get_mims(_response);
+	_request_parser(_client._request, _client.prsing_req);
+	_client._request.uri = update_uri(urlcode(_client._request.uri));
+	check_QueryString(_client._request.uri, _client._request.queryString);
+    _match_theServer(_server, _client._request, _serv);
+	_match_theLocation(_serv, _location, _client._request, _client._response );
+	std::cerr << "_location.name : " << _location.name <<std::endl;
+	std::cerr << "_location.root_location : " << _location.root_location <<std::endl;
+	std::cerr << "_request.uri : " << _client._request.uri << std::endl;
+	std::cerr << "_request.path : " << _client._request.path << std::endl;
+	_fill_request(_serv, _location, _client._request);
+
+	std::cerr << "      _request.uri : " << _client._request.uri << std::endl;
+	std::cerr << "      _request.path : " << _client._request.path << std::endl;
+    _validate_request(_serv, _location, _client._request, _client._response);
+	_get_mims(_client._response);
 }

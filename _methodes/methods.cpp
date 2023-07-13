@@ -22,6 +22,7 @@ void	_get_listed_dir( Client & _client )
 {
 	DIR *dir;
 	
+	std::cerr << "_get_listed_dir -> _client._request.path.c_str() : " << _client._request.path.c_str() << std::endl;
 	if ((dir = opendir(_client._request.path.c_str())) == NULL)
 	{
 		_client._response.status = 404;
@@ -249,7 +250,7 @@ void _delete( Client & _client )
 			_client._response.status = 409;//Conflict
 		else
 		{
-			if (std::system(("rm -rf " + _client._request.path).c_str())!= 0)
+			if (std::system(("rm -r " + _client._request.path).c_str())!= 0)
 			{
 				if (!access(_client._request.path.c_str(), W_OK))
 					_client._response.status = 500;// Internal Server Error

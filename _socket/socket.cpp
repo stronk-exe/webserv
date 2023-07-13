@@ -142,7 +142,7 @@ void _Parsing ( Socket & _socket , Client & _client )
 {
 	Server _s;
 
-	_request(_socket._server, _s, _client._request, _client._response, _client.prsing_req);
+	_request(_socket._server, _s, _client );
 
 	// Checking the method
 	if (_client._request.is_method_allowed && _client._response.status != 400)
@@ -249,16 +249,16 @@ void	_socket( Parsing &_server )
 	Socket _socket;
 	
 	init_socket(_socket, _server);
-	struct timeval _timeout;
+	// struct timeval _timeout;
     while (1)
     {
         std::cout << "listening ..." << std::endl;
 		
-		_timeout.tv_sec = 0;
-		_timeout.tv_usec = 500000;
+		// _timeout.tv_sec = 0;
+		// _timeout.tv_usec = 500000;
 		_socket._read_sockets = _socket._readfds;
 		_socket._write_sockets = _socket._writefds;
-		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, &_timeout) < 0) {
+		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, NULL) < 0) {
 			std::cerr	<< strerror(errno) << std::endl;
 			print_error("error in select");
 		}
