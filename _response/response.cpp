@@ -61,7 +61,7 @@ int _get_res_body( Client & _client , std::string path )
 	}
 	if (_client._response.content_type.empty())
 	{
-	    _client._response.content_type = _client._response.mims[_get_ex(_client._request.path)];
+	    _client._response.content_type = _client._response.mims[_get_ex(path)];
 	    if (!_client._response.content_type.size())
 	        _client._response.content_type = "text/html";
 	}
