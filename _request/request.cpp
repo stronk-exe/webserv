@@ -30,7 +30,7 @@ int	_max_element( std::vector<int> v )
 void  removeLastWord(std::vector <std::string >& strs) {
 
     int pos0, pos1;
-	// std::cerr << "####### " << str << std::endl;
+
 	for (size_t t = 0; t < strs.size(); t++)
 	{
 		pos0 = 0;
@@ -47,17 +47,14 @@ void  removeLastWord(std::vector <std::string >& strs) {
 			if (pos0 && pos1)
 				break;
 		}
-		// std::cerr << " pos0  " << pos0 << " - pos1 " << pos1 << std::endl;
 		strs[t].erase(pos1 + 1, pos0);
-		// std::cerr << " str : " << strs[t] << std::endl;
 	}
 }
 
 bool sub_location(std::string & name, std::string & uri, std::string & chyata)
 {
 	size_t e = 0;
-	// std::string shof_okan;
-	// std::cerr << "name  chyata to9adim : " << name << std::endl;
+
 	for (; e < name.size(); e++)
 	{
 		if (name[e] != uri[e])
@@ -65,10 +62,7 @@ bool sub_location(std::string & name, std::string & uri, std::string & chyata)
 	}
 	if (e == name.size())
 	{
-			chyata = uri.substr(e, uri.size());
-			// if (shof_okan.size() > chyata.size())
-			// 	chyata = shof_okan;
-			// std::cerr << "chyata : "<< chyata << std::endl;
+		chyata = uri.substr(e, uri.size());
 		return true;
 	}
 	return false; 
@@ -81,15 +75,12 @@ bool compareStringLength(const std::string& str1, const std::string& str2) {
 bool sub_location_uri(std::string & uri, std::string & name)
 {
 	size_t e = 0;
-	// std::string shof_okan;
-	// std::cerr << "name  chyata to9adim : " << name << std::endl;
+
 	for (; e < uri.size(); e++)
 	{
 		if (name[e] != uri[e])
 			break ;
 	}
-	// std::cerr << "name : "  << name << std::endl;
-	// std::cerr <<"e : " << e <<  " - uri.find('/', e +1) : "  << name.find("/", e +1) << " - uri.size() - 1 : " << name.size() - 1<< std::endl;
 	if (e == uri.size() && name.find("/", e + 1) == name.size() - 1)
 		return true;
 	return false;
@@ -98,14 +89,11 @@ bool sub_location_uri(std::string & uri, std::string & name)
 int _match_theLocation( Server &_server, Location &_location, Request &_request , Response & _response )
 {
 	std::vector<int> v;
-	std::vector<std::string> t;
-
-	// std::cerr << "+++++++++++++ " << _request.uri << std::endl;
-
 	bool _find = false;
 	bool check = false;
 	size_t len = 0;
-	// size_t len_b = 0;
+	std::vector<std::string> t;
+
 	std::vector<std::string> names;
 	for (size_t k =0 ; k < _server.locations.size(); k++ )
 		names.push_back(_server.locations[k].name);
@@ -157,7 +145,6 @@ int _match_theLocation( Server &_server, Location &_location, Request &_request 
 	if (!chyata_pro_max.empty())
 		_server.chyata = chyata_pro_max;
 	_request.uri = _location.root_location + _server.chyata;
-	// std::cerr << "iwa hada jhdna : " << _request.uri << " - _server.chyata : "  << _server.chyata << std::endl;
 	_server.chyata.clear();
 	return 1;
 }
@@ -204,50 +191,7 @@ void	_validate_request( Server &_server, Location &_location, Request &_request,
 			_request.is_method_allowed = 1;
 		else
 			_request.is_method_allowed = 0;
-		// if (!_match_theLocation(_server, _location, _request, _response ) || (_match_theLocation(_server, _location, _request) && _location.redirection.path.size()))
-		// {
-		// 	if (_location.redirection.path.size())
-		// 	{
-		// 		_request.redirection.push_back(_location.redirection.path);
-		// 		std::cerr << "REDIRECTION " << _request.redirection[0] << std::endl;
-		// 		int _x = 0;
-		// 		for (size_t i=0; i < _server.locations.size(); i++)
-		// 		{
-		// 			if (_server.locations[i].name == _request.redirection[0])
-		// 			{
-		// 				_location = _server.locations[i];
-		// 				_response.status = _location.redirection.return_status;
-		// 				_request.uri = _location.redirection.path;
-		// 				_request.is_method_allowed = 1;
-		// 				_x = 1;
-		// 				std::cerr << "tttttttttt " << _server.locations[i].name << std::endl;
-		// 				break;
-		// 			}
-		// 		}
-		// 		if (!_x)
-		// 			_response.status = 404;
-		// 	}
-		// 	else
-		// 		_response.status = 404;
-		// }
 	}
-	// if (_request.redirection.size())
-	// {
-	// 	// // verify the location
-	// 	// std::cerr << "WWW" << std::endl;
-	// 	// int _x = 0;
-	// 	// for (size_t i=0; i< _server.locations.size(); i++)
-	// 	// {
-	// 	// 	if (_server.locations[i].root_location == _request.redirection[0])
-	// 	// 	{
-	// 	// 		_location = _server.locations[i];
-	// 	// 		_response.status = _location.redirection.return_status;
-	// 	// 		_x = 1;
-	// 	// 	}
-	// 	// }
-	// 	// if (!_x)
-	// 	// 	_response.status = 404;
-	// }
 }
 
 void _extract_first_line( Request &_request, std::string s )
@@ -278,11 +222,6 @@ void _fill_request(Server &_server, Location &_location, Request &_request )
 	_location.autoindex ? _request.autoindex = 1 : _request.autoindex = 0;
 	_request.root = _location.root_location;
 	_request.path = _webserv_loc + "/public/" + _request.uri;
-	// std::cerr << "THE WHATT: " << _request.path << " THE HACK: " << _request.root << std::endl;
-	// std::cerr << "```````````" << _server.name << " -- " << _location.redirection.path << std::endl;
-	// if (_location.redirection.path.size())
-	// 	_request.redirection.push_back(_location.redirection.path);
-	// std::cerr << "```````````" << _server.name << " -- " << _request.redirection[0] << std::endl;
 	if (_location.cgi_pass.size())
 		for (size_t i=0; i<_location.cgi_pass.size(); i++)
 			_request.cgi.push_back(_location.cgi_pass[i]);
@@ -435,26 +374,27 @@ void check_QueryString(std::string & path, std::string & queryString)
 	path = path.substr(0, pos);
 }
 
+std::string update_uri(std::string  uri)
+{
+	std::string tmp;
+	for (size_t i =0; i < uri.size(); i++)
+	{
+		if (!(uri[i] == '/' && uri[i + 1] == '/'))
+			tmp += uri[i];
+	}
+	return tmp;
+}
+
 void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s )
 {
 	Location _location;
 
 	_request_parser(_request, s);
-	_request.uri = urlcode(_request.uri);
+	_request.uri = update_uri(urlcode(_request.uri));
 	check_QueryString(_request.uri, _request.queryString);
     _match_theServer(_server, _request, _s);
-
-	std::cerr << "_request.uri  " << _request.uri << std::endl;
 	_match_theLocation(_s, _location, _request, _response );
-	// std::cerr << "a " << a  << "_request.uri  " << _request.uri << std::endl;
-	// if ()
-	// {
-	// 	;
-	// }
-	
 	_fill_request(_s, _location, _request);
     _validate_request(_s, _location, _request, _response);
 	_get_mims(_response);
-	// std::cerr << "---------------" << _location.name << " -- " << _request.path << " -- " << _request.is_method_allowed << std::endl;
-
 }

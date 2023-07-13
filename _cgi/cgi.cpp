@@ -89,9 +89,7 @@ int createFile(const char* filename, std::string data) {
     
     int fd = open(filename, O_WRONLY | O_CREAT, 0644);
 
-    if (fd != -1)
-        write(fd, data.c_str(), data.size());
-    else
+    if (!(fd != -1 && write(fd, data.c_str(), data.size()) != -1))
         exit(12);
     close(fd);
     fd = open(filename, O_RDONLY, 0644);

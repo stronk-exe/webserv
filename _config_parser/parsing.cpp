@@ -161,18 +161,6 @@ void info_location(std::vector<Location> &locations, std::vector<std::string>::i
     it--;
 }
 
-// void info_nameServ(Server &serv, std::string &data)
-// {
-//     int pos = data.find(":");
-//     if (pos != -1)
-//     {
-//         serv.name = data.substr(0, pos);
-//         serv.listen_port = str_to_num(data.substr(pos + 1, data.size()));
-//     }
-//     else
-//         serv.name = data;
-// }
-
 void info_listen(Server &serv, std::vector<std::string>::iterator &it)
 {
 
@@ -311,9 +299,7 @@ void print_data(Parsing &parss)
         print_str((*it).index, "index ");
         print_err((*it).errors);
         print_loc((*it).locations);
-        // std::cout << "server.name " << i << " " <<  (it).name << std::endl;
         std::cout << "\n-------------------------------" << std::endl;
-        // std::cout << "server.name " << i << " " <<  (*it).name << std::endl;
     }
 
 }

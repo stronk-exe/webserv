@@ -35,6 +35,9 @@ ssize_t getFileSize(const char* filename) {
 
 int _get_res_body( Client & _client , std::string path )
 {
+
+	int data = 1;
+	char buffer[999999] = {0};
 	if (!_client.fd_file)
 	{
 		_client.fd_file = open( path.c_str(), O_RDONLY );
@@ -43,21 +46,17 @@ int _get_res_body( Client & _client , std::string path )
         if (a != -1)
 		    _client._response.content_length = a;
 	}
-
-	int data=1;
-	char buffer[999999] = {0};
 	data = read(_client.fd_file, buffer, 999999);
-	for (int i=0; i<data; i++)
-	    _client._response.body += buffer[i];
-        std::cerr << "befor _client.fd_file : " << _client.fd_file << std::endl;
 	if (data > 0)
+    {
+        for (int i=0; i < data; i++)
+            _client._response.body += buffer[i];
 	    _client._done_writing = 0;
+    }
 	else if (data < 0 || _client._wr == _client._response.content_length || _client._wr >= lseek(_client.fd_file, 0, SEEK_END))
 	{
 	    _client._done_writing = 1;
 	    close(_client.fd_file);
-        std::cerr << "after _client.fd_file : " << _client.fd_file << std::endl;
-        // _client.fd_file = 0;
 	}
 	if (_client._response.content_type.empty())
 	{
@@ -73,9 +72,7 @@ int _get_res_body( Client & _client , std::string path )
 void    get_indexed_file_data( Client & _client )
 {
     for (size_t i=0; i< _client._request.index.size(); i++)
-    {
-        // std::cerr << "_request.path + _client._request.index[i]) : |" << (_client._request.path + _client._request.index[i]) << "|" << std::endl; 
-        _get_res_body(_client, (_client._request.path + _client._request.index[i]));
+    {        _get_res_body(_client, (_client._request.path + _client._request.index[i]));
         if (_client._done_writing)
             break ;
     }
@@ -122,7 +119,6 @@ void	_response( Client & _client )
                 break;
         }
     }
-    // std::cerr << "_client._response.status : " << _client._response.status << " - status_found : " << _status_found << std::endl;
     if (!_status_found && _client._response.status != 200)
     {
         if (_client._response.status == 204)

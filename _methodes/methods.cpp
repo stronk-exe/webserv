@@ -61,8 +61,6 @@ void	_file_or_dir(  Client & _client )
 		_client._request.type = "file";
 	else
 		_client._response.status = 404;
-    // std::cerr << "_client._response.status : " << _client._response.status << std::endl;
-	// _cli
 }
 
 void _body_parser(  Client & _client )
@@ -136,7 +134,6 @@ void	_get( Client & _client, Server &_server )
 
 	if (!_client._response.status)
 	{
-		// std::cerr << "yoooooooooooo" << _client._response.status << std::endl;
 		if (_client._request.type == "directory")
 		{
 			if (_client._request.path[_client._request.path.size()-1] != '/')
@@ -162,7 +159,6 @@ void	_get( Client & _client, Server &_server )
 						_client._response.status = 403;
 					else
 					{
-						// std::cerr << "hola sir: " << _client._request.path << std::endl;
 						_get_listed_dir(_client);
 						_client._response.body = _client._request.body;
 						_client._response.content_type = "text/html";
@@ -260,7 +256,6 @@ void _delete( Client & _client )
 					_client._response.status = 500;// Internal Server Error
 				else
 					_client._response.status = 403;// Forbidden
-				// std::cerr << "------------" << std::endl;
 				strerror(errno);
 			}
 			else
@@ -271,7 +266,6 @@ void _delete( Client & _client )
 	{
 
 		_client._response.status = 204;// No Content
-		// std::cerr << "access(_client._request.path.c_str(), W_OK) " << access(_client._request.path.c_str(), W_OK) <<std::endl;
 		if (access(_client._request.path.c_str(), W_OK))
 			_client._response.status = 403;// Forbidden
 		else if (std::remove(_client._request.path.c_str()) != 0)
