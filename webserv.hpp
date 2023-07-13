@@ -39,6 +39,8 @@
 #undef _POSIX_SOURCE
 #include <stdio.h>
 
+#define _BUFFER_SIZE_ 999999
+
 extern std::string _webserv_loc;
 
 struct error_page
@@ -327,8 +329,7 @@ class Client {
 		int		fd_file, data;
 		int		firstTime_HuH;
 		ssize_t	post_legnth, read;
-		std::string	buffer, prsing_req;
-		std::string substring, s;
+		std::string substring,prsing_req, s;
 
 		Request		_request;
 		Response	_response;

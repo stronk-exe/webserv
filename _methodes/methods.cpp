@@ -178,7 +178,6 @@ void	_get( Client & _client, Server &_server )
 	}
 }
 
-
 void _post(  Client & _client , Server &_server )
 {
 	if (!_client._response.status)

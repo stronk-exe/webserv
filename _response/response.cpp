@@ -35,9 +35,8 @@ ssize_t getFileSize(const char* filename) {
 
 int _get_res_body( Client & _client , std::string path )
 {
-
 	int data = 1;
-	char buffer[999999] = {0};
+	char buffer[_BUFFER_SIZE_] = {0};
 	if (!_client.fd_file)
 	{
 		_client.fd_file = open( path.c_str(), O_RDONLY );
@@ -46,11 +45,13 @@ int _get_res_body( Client & _client , std::string path )
         if (a != -1)
 		    _client._response.content_length = a;
 	}
-	data = read(_client.fd_file, buffer, 999999);
+	data = read(_client.fd_file, buffer, _BUFFER_SIZE_);
 	if (data > 0)
     {
+        std::string temp="";
         for (int i=0; i < data; i++)
-            _client._response.body += buffer[i];
+            temp += buffer[i];
+        _client._response.body += temp;
 	    _client._done_writing = 0;
     }
 	else if (data < 0 || _client._wr == _client._response.content_length || _client._wr >= lseek(_client.fd_file, 0, SEEK_END))
@@ -72,7 +73,8 @@ int _get_res_body( Client & _client , std::string path )
 void    get_indexed_file_data( Client & _client )
 {
     for (size_t i=0; i< _client._request.index.size(); i++)
-    {        _get_res_body(_client, (_client._request.path + _client._request.index[i]));
+    {
+        _get_res_body(_client, (_client._request.path + _client._request.index[i]));
         if (_client._done_writing)
             break ;
     }
@@ -81,7 +83,6 @@ void    get_indexed_file_data( Client & _client )
 void    get_file_data( Response &_response, std::string & path )
 {
     std::ifstream myfile;
-		std::cout << "path : " << path << std::endl;
 	myfile.open(path);
 	std::string myline;
 	_response.body = "";

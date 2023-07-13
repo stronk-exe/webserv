@@ -14,9 +14,9 @@
 
 std::string _webserv_loc;
 
-
-int main(int ac, char **av)
+void f(int ac, char **av)
 {
+    
     std::string  str;
     Parsing _server;
     
@@ -39,5 +39,10 @@ int main(int ac, char **av)
     }
     else
         std::cerr << "invalid number of arguments!" << std::endl;
+}
+
+int main(int ac, char **av)
+{
+    f(ac, av);
     return 0;
 }

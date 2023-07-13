@@ -108,14 +108,17 @@ bool _Accepting ( Socket & _socket )
 
 bool _Reading ( Socket & _socket , Client & _client )
 {
-	char	buffer[999999] = {0};
+	char	buffer[_BUFFER_SIZE_] = {0};
 
-	_client.data = read(_client._id, buffer, 999999);
+	_client.data = read(_client._id, buffer, _BUFFER_SIZE_);
 	if (_client.data == -1)
 		return false;
 	if (_client.data > 0)
 	{
-		_client.prsing_req += buffer;
+		std::string temp="";
+		for ( int i=0; i<_client.data; i++)
+			temp += buffer[i];
+		_client.prsing_req += temp;
 		_client.post_legnth = get_content_length(_client.prsing_req);
 	}
 	if (_client.post_legnth && static_cast<ssize_t>(_client.prsing_req.size()) > _client.post_legnth)
@@ -161,7 +164,6 @@ void _Parsing ( Socket & _socket , Client & _client )
 
 bool _Writing ( Socket & _socket , Client & _client , size_t e )
 {
-	std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
 	if (isFileDescriptorAvailable(_client._id) && _client.s.size()-_client._wr)
 		_client.return_write = write(_client._id, &_client.s[_client._wr], _client.s.size() - _client._wr);
 	if (_client.return_write > 0)
@@ -204,7 +206,6 @@ void init_socket( Socket &_socket , Parsing &_server )
 {
 	_socket._server = _server;
 	_socket.addrlen = sizeof(_socket.address);
-	std::cerr << "sizeof : " << sizeof(_socket.address) << std::endl;
 	_socket.default_port = _get_ports(_socket._server)[0];
 
 	// Initializing the sockets
