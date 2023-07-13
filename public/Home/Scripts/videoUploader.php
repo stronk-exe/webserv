@@ -1,7 +1,7 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Specify the directory where the uploaded videos will be stored
-    $targetDir = 'uploads/a/';
+    $targetDir = '../uploads/a/';
 
     // Check if the uploads directory exists, create it if not
     if (!file_exists($targetDir)) {
