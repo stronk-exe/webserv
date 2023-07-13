@@ -108,23 +108,14 @@ int _match_theLocation( Server &_server, Location &_location, Request &_request 
 	// size_t len_b = 0;
 	std::vector<std::string> names;
 	for (size_t k =0 ; k < _server.locations.size(); k++ )
-	{
-
-		// std::cerr << "------- " << _server.locations[k].name << std::endl;
 		names.push_back(_server.locations[k].name);
-	}
-	// std::sort(names.begin(), names.end(), compareStringLength);
 	while (!_find)
 	{
 		size_t _ghayarha=0;
 		for (size_t k =0 ; k < names.size(); k++ )
 		{
-			// if 
-			// std::cerr << "-----------------------------k = " << k  << std::endl;
-			// std::cerr << "_server.locations[k].name : " << _server.locations[k].name << " - name[k] : " << names[k] << std::endl; 
 			if ((!check && names[k] == _request.uri) || (check && _server.locations[k].name == names[k]))
 			{
-			// std::cerr << "++++++++++++++++++++++++++k = " << k  << std::endl;
 				_find = true;
 				_location = _server.locations[k];
 				_server.chyata = _server.locations[k].chyata;
@@ -132,14 +123,12 @@ int _match_theLocation( Server &_server, Location &_location, Request &_request 
 			}
 			else if (sub_location_uri(_request.uri, names[k]))
 			{
-				// std::cerr <<  "$$$$$$$" << std::endl;
 				_location = _server.locations[k];
 				_server.chyata = _server.locations[k].chyata;
 				break ;
 			}
 			else if (sub_location(names[k], _request.uri, _server.locations[k].chyata) && names[k].size() > len)
 			{
-				// std::cerr <<  "=========" << std::endl;
 				_location = _server.locations[k];
 				_server.chyata = _server.locations[k].chyata;
 				len = names[k].size();
@@ -155,13 +144,11 @@ int _match_theLocation( Server &_server, Location &_location, Request &_request 
 		check = true;
 	}
 	std::string chyata_pro_max;
-	// std::cerr << "_location.name : " << _location.name << std::endl;
 	if (access((_webserv_loc + "/public" + _location.root_location).c_str(), F_OK))
 	{
 		if (_location.redirection.path.empty())
 			_response.status = 404;
 		else {
-			// std::cerr << "wraha zahyaaaaaaaaaaaaa" << std::endl;
 			_request.uri = _location.redirection.path;
 			chyata_pro_max = _server.chyata;
 			_match_theLocation(_server, _location, _request, _response);
@@ -457,7 +444,7 @@ void	_request( Parsing &_server, Server &_s, Request &_request, Response &_respo
 	check_QueryString(_request.uri, _request.queryString);
     _match_theServer(_server, _request, _s);
 
-	// std::cerr << "_request.uri  " << _request.uri << std::endl;
+	std::cerr << "_request.uri  " << _request.uri << std::endl;
 	_match_theLocation(_s, _location, _request, _response );
 	// std::cerr << "a " << a  << "_request.uri  " << _request.uri << std::endl;
 	// if ()

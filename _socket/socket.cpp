@@ -119,7 +119,7 @@ bool _Accepting ( Socket & _socket )
 
 void _Reading ( Socket & _socket , Client & _client )
 {
-	int 	_check = 0;
+	// int 	_check = 0;
 	char	buffer[999999] = {0};
 
 	// _client._read_status = 1;
@@ -127,15 +127,8 @@ void _Reading ( Socket & _socket , Client & _client )
 	_client.data = read(_client._id, buffer, 999999);
 	if (_client.data > 0)
 	{
-		for (int i=0; i<_client.data; i++)
-			_client.buffer += buffer[i];
-		if (_client.prsing_req.empty())
-			_check = 1;///////// intial 
-
-		_client.prsing_req = _client.buffer;
-		if (_check == 1)
-			_client.post_legnth = get_content_length(_client.prsing_req);
-
+		_client.prsing_req += buffer;
+		_client.post_legnth = get_content_length(_client.prsing_req);
 	}
 	if (_client.post_legnth && static_cast<ssize_t>(_client.prsing_req.size()) > _client.post_legnth)
 	{
@@ -157,7 +150,7 @@ void _Parsing ( Socket & _socket , Client & _client )
 {
 	Server _s;
 
-	// std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id  << std::endl;
+	std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id  << std::endl;
 	_request(_socket._server, _s, _client._request, _client._response, _client.prsing_req);
 	// Checking the method
 	if (_client._request.is_method_allowed && _client._response.status != 400)
@@ -181,7 +174,7 @@ bool _Writing ( Socket & _socket , Client & _client , size_t e )
 {
 	// std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
 	if (isFileDescriptorAvailable(_client._id) && _client.s.size()-_client._wr)
-		_client.return_write = write(_client._id, &_client.s[_client._wr], _client.s.size()- _client._wr);
+		_client.return_write = write(_client._id, &_client.s[_client._wr], _client.s.size() - _client._wr);
 	if (_client.return_write > 0)
 		_client._wr += _client.return_write;
 	if (_client._done_writing )
@@ -287,7 +280,8 @@ void	_socket( Parsing &_server )
 		_timeout.tv_usec = 500000;
 		_socket._read_sockets = _socket._readfds;
 		_socket._write_sockets = _socket._writefds;
-		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, NULL) < 0) {
+		// _socket.fd_size = select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, &_timeout);
+		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, &_timeout) < 0) {
 			std::cerr	<< strerror(errno) << std::endl;
 			print_error("error in select");
 		}
@@ -306,35 +300,31 @@ void	_socket( Parsing &_server )
 				
 				for (size_t e=0; e < _socket.Clients.size(); e++)
 				{
-					if (FD_ISSET(_socket.Clients[e]._id, &_socket._read_sockets) && FD_ISSET(_socket.Clients[e]._id, &_socket._write_sockets))
+					if (x == _socket.Clients[e]._id && (FD_ISSET(x, &_socket._read_sockets) || FD_ISSET(x, &_socket._write_sockets)))
 					{
-						std::cerr << "---------------- bothe  her ---------------" << std::endl;
-						_Droping( _socket , _socket.Clients[e], e );
-						// _socket.Clients[e]._wr = 0;
-						// _socket.Clients[e]._read_status = 1;
-						// _socket.Clients[e]._write_status = 0;
-
-						// FD_CLR(_socket.Clients[e]._id, &_socket._read_sockets);
-						// FD_CLR(_socket.Clients[e]._id, &_socket._write_sockets);
-						break ;
-					}
-					std::cerr  << "_socket.Clients[e]._read_status : " << _socket.Clients[e]._read_status << " - _socket.Clients[e]._write_status : " << _socket.Clients[e]._write_status << std::endl;
-					if (x == _socket.Clients[e]._id && (std::find(_socket._socket_fds.begin(), _socket._socket_fds.end(), _socket.Clients[e]._id) == _socket._socket_fds.end()) &&  _socket.Clients[e]._read_status)
-						_Reading ( _socket , _socket.Clients[e] );
-					// Request parsing
-					if (x == _socket.Clients[e]._id && _socket.Clients[e]._done_reading && !_socket.Clients[e]._read_status && !_socket.Clients[e]._write_status)
-						_Parsing ( _socket , _socket.Clients[e] );
-					if (x == _socket.Clients[e]._id && std::find(_socket._socket_fds.begin(), _socket._socket_fds.end(), _socket.Clients[e]._id) == _socket._socket_fds.end() && _socket.Clients[e]._write_status)
-					{
-						check_cgi_end( _socket.Clients[e] );
-						if (_socket.Clients[e]._kill_pid)
+						if (FD_ISSET(_socket.Clients[e]._id, &_socket._read_sockets) && FD_ISSET(_socket.Clients[e]._id, &_socket._write_sockets))
 						{
-							if (_Writing ( _socket , _socket.Clients[e] , e))
-								break ;
+							_Droping( _socket , _socket.Clients[e], e );
+							break ;
+						}
+						if (_socket.Clients[e]._read_status)
+							_Reading ( _socket , _socket.Clients[e] );
+						// Request parsing
+						if (_socket.Clients[e]._done_reading && !_socket.Clients[e]._read_status && !_socket.Clients[e]._write_status)
+							_Parsing ( _socket , _socket.Clients[e] );
+						if (_socket.Clients[e]._write_status)
+						{
+							check_cgi_end( _socket.Clients[e] );
+							if (_socket.Clients[e]._kill_pid)
+							{
+								if (_Writing ( _socket , _socket.Clients[e] , e))
+									break ;
+							}
 						}
 					}
 				}
 			}
+
 		}
 		// exit(1);
 	}
