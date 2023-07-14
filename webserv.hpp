@@ -315,12 +315,12 @@ class Client {
 
 	public:
 
-		int		_id;
+		int		_id, _cgi_in, _cgi_out, _cgi_id;
 		pid_t	_cgi_pid;
 		bool	_kill_pid;
 		long long	_wr;
 		int		pipe_fd[2];
-		std::string		file,  body, cookies;
+		std::string		_cgi_rd, _cgi_wr,  body, cookies;
 		int		_read_status, status;
 		int		_write_status, _done_writing;
 		long return_write;
@@ -340,7 +340,9 @@ class Client {
 			_id = id;
 			_wr = 0;
 			data = 0;
-			_read_status = 1;
+			_cgi_in = -1;
+ 			_cgi_out = -1;
+ 			_read_status = 1;
 			post_legnth  = 0;
 			read  = 0;
 			status = 0;
@@ -350,7 +352,7 @@ class Client {
 			return_write = 0;
 			firstTime_HuH= 0;
 			_done_writing = 0;
-			fd_file = 0;
+			fd_file = -1;
 			_cgi_pid = -2;
 			_kill_pid = true;
 		};
@@ -360,7 +362,11 @@ class Client {
 		Client& operator= (const Client & client) { 
 			_id = client._id;
 			_wr = client._wr;
+			_cgi_wr = client._cgi_wid;
+ 			_cgi_rd = client._cgi_rid;
 			data = client.data;
+			_cgi_in = client._cgi_in;
+ 			_cgi_out = client._cgi_out;
 			read = client.read;
 			post_legnth = client.post_legnth;
 			prsing_req = client.prsing_req;
@@ -407,8 +413,7 @@ struct Socket
 void	_socket( Parsing &_server );
 
 //cgi
-std::string generateRandomString(int length);
-void parent_process(std::string &result, int *pipe_fd);
+// bool parent_process(std::string &result, int *pipe_fd);
 void get_body(Client & client);
 
 // Methodes

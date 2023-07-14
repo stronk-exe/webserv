@@ -73,26 +73,38 @@ std::string get_content_type(char *buffer)
 }
 
 
-void parent_process(std::string &result, int *pipe_fd)
-{
-    char buffer[4056];
-    int nbytes;
+// bool parent_process(std::string &result, int *pipe_fd)
+// {
+//     char buffer[4056];
+//     int nbytes;
 
-    close(pipe_fd[1]);
-    while ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
-        result.append(buffer, nbytes);
-    close(pipe_fd[0]);
-}
+//     close(pipe_fd[1]);
+// 			std::cerr <<  "********  HELLO  *********" << std::endl;
+//             exit(1);
+
+//     if ((nbytes = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
+//         result.append(buffer, nbytes);
+//     std::cerr << "nbytes : " << nbytes << std::endl;
+//     if (nbytes <= 0 || nbytes =)
+//     {
+//         if (nbytes == -1)
+//             std::cerr << strerror(errno) << std::endl;
+//         close(pipe_fd[0]);
+//         return true;
+//     }
+//     return false;
+// }
 
 
-int createFile(const char* filename, std::string data) {
+int createFile(const char* filename, std::string data, int type) {
     
-    int fd = open(filename, O_WRONLY | O_CREAT, 0644);
-
+    int fd;
+    if (!type)
+        fd = open(filename, O_WRONLY | O_CREAT, 0644);
+    else
+        fd = open(filename, O_RDWR | O_CREAT, 0644);
     if (!(fd != -1 && write(fd, data.c_str(), data.size()) != -1))
         exit(12);
-    close(fd);
-    fd = open(filename, O_RDONLY, 0644);
 
     return fd;
 }
@@ -100,7 +112,7 @@ int createFile(const char* filename, std::string data) {
 void exec_file_cgi(std::string &scriptPath, Client & client)
 {
     char *av[3];
-    int fd;
+    // int fd;
     
     std::string result, arg, args[2];
     
@@ -112,22 +124,26 @@ void exec_file_cgi(std::string &scriptPath, Client & client)
     }
     av[2] = NULL;
     client._kill_pid = false;
-    client.file = _webserv_loc +  generateRandomString(7, ".h");
-    fd = createFile(client.file.c_str() , client._request.body);
-    if (!(pipe(client.pipe_fd) > -1 && (client._cgi_pid = fork()) > -1))
+    client._cgi_id = client._id;
+    client._cgi_out = _webserv_loc + "/_cgi/" +  generateRandomString(7, ".h");
+    client._cgi_in = _webserv_loc + "/_cgi/" +  generateRandomString(7, ".h");
+    client._cgi_wr = createFile(client._cgi_wid.c_str() , client._request.body, 0);
+    client._cgi_rd = createFile(client._cgi_rid.c_str() , client._request.body, 1);
+    if ((client._cgi_pid = fork()) > -1)
         exit(12);
     if (client._cgi_pid == 0)
     {
-        dup2(fd, STDIN_FILENO);
-        close(client.pipe_fd[0]);
-        dup2(client.pipe_fd[1], STDOUT_FILENO);
-        close(client.pipe_fd[1]);
+        dup2(client._cgi_in, STDIN_FILENO);
+        close(client._cgi_in);
+        dup2(client._cgi_out, STDOUT_FILENO);
+        close(client._cgi_out);
         alarm(25);
         execve(av[0], av, client._request.env);
         exit(1337);
     }
     else
         waitpid(client._cgi_pid, &client.status, WNOHANG);
+    close(client._cgi_in);
 }
 
 std::vector<std::string> extractSetCookieSubstrings(const std::string& text) {
@@ -165,21 +181,15 @@ void get_body( Client & client)
     int pos0, pos1;
     
     set_cookies(client.cookies, client.body);
-    pos0 = client.body.find("Content-Type:");
+    pos0 = client._response.body.find("Content-Type:");
     if (pos0 == -1)
-        pos0 = client.body.find("Content-type:");
-    pos1 = client.body.find("\n", pos0);
+        pos0 = client._response.body.find("Content-type:");
+    pos1 = client._response.body.find("\n", pos0);
     if (pos0 != -1)
     {
-        client._response.content_type = client.body.substr(pos0 + 13 , pos1 - pos0 - 13);
-        client.body.erase(0, pos1 + 1);
+        client._response.content_type = client._response.body.substr(pos0 + 13 , pos1 - pos0 - 13);
+        client._response.body.erase(0, pos1 + 1);
     }
-    else
-        client._response.content_type = "text/html";
-    
-    client._response.body = client.body;
-    client._response.content_length = client.body.size();
-    client._response.status = 200;
 }
 
 std::string generateRandomString(int length, std::string ss) {

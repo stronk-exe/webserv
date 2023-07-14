@@ -37,7 +37,7 @@ int _get_res_body( Client & _client , std::string path )
 {
 	int data = 1;
 	char buffer[_BUFFER_SIZE_] = {0};
-	if (!_client.fd_file)
+	if (_client.fd_file == -1)
 	{
         // std::cerr << "~~~~~~~~~~~~~~~" <<std::endl;
 		_client.fd_file = open( path.c_str(), O_RDONLY );
@@ -56,10 +56,10 @@ int _get_res_body( Client & _client , std::string path )
 	    _client._done_writing = 0;
     }
 	
-    // std::cerr << "#####_client._response.content_length : " << _client._response.content_length  << " - _client._wr : " <<  _client._wr<< std::endl;
+    std::cerr << "#####_client._response.content_length : " << _client._response.content_length  << " - _client._wr : " <<  _client._wr<< std::endl;
     if (data < 0 || _client._wr >= _client._response.content_length || _client._wr >= lseek(_client.fd_file, 0, SEEK_END))
 	{
-        // std::cerr << "!!!!!!!!!!!!!!!!!" <<std::endl;
+        std::cerr << "!!!!!!!!!!!!!!!!!" <<std::endl;
         _client._wr = 0;
 	    _client._done_writing = 1;
 	    close(_client.fd_file);
