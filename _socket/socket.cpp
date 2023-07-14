@@ -164,10 +164,14 @@ void _Parsing ( Socket & _socket , Client & _client )
 
 bool _Writing ( Socket & _socket , Client & _client , size_t e )
 {
+	// std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
 	if (isFileDescriptorAvailable(_client._id) && _client.s.size()-_client._wr)
 		_client.return_write = write(_client._id, &_client.s[_client._wr], _client.s.size() - _client._wr);
 	if (_client.return_write > 0)
 		_client._wr += _client.return_write;
+	// std::cerr << "lseek(_client.fd_file, 0, SEEK_END) : " << lseek(_client.fd_file, 0, SEEK_END)<< std::endl;
+    // std::cerr  << " - _client._response.content_length : " <<_client._response.content_length << std::endl;
+    // std::cerr << "_client._wr : "<< _client._wr << std::endl;
 	if (_client.return_write == -1 ||  _client._done_writing)
 	{
 		_Droping (_socket, _client , e );
@@ -177,6 +181,12 @@ bool _Writing ( Socket & _socket , Client & _client , size_t e )
 	{
 		_get_res_body(_client, _client._request.path);
 		_client.s = generate_response_str(_client);
+		if (_client._done_writing)
+		{
+			_Droping (_socket, _client , e );
+			return true ;
+		}
+
 	}
 	return false ;
 }

@@ -22,7 +22,7 @@ void	_get_listed_dir( Client & _client )
 {
 	DIR *dir;
 	
-	std::cerr << "_get_listed_dir -> _client._request.path.c_str() : " << _client._request.path.c_str() << std::endl;
+	// std::cerr << "_get_listed_dir -> _client._request.path.c_str() : " << _client._request.path.c_str() << std::endl;
 	if ((dir = opendir(_client._request.path.c_str())) == NULL)
 	{
 		_client._response.status = 404;
