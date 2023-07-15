@@ -12,6 +12,8 @@
 
 NAME = webserv
 
+INC = webserv.hpp
+
 SRCS =  main.cpp \
 		_config_parser/parsing.cpp\
 		_socket/socket.cpp\
@@ -22,21 +24,39 @@ SRCS =  main.cpp \
 
 OBJS = $(SRCS:.cpp=.o)
 
-FLAGS =  -Wall -Wextra -Werror -std=c++98
+
+CPP = c++
+FLAGS =  -Wall -Wextra -Werror #-std=c++98
+
+#colors
+
+YELLOW = $(shell echo "\033[1;93m")
+PURPLE = $(shell echo "\033[1;95m")
+GREEN = $(shell echo "\033[1;92m")
+WHITE = $(shell echo "\033[1;97m")
+BLUE = ${shell echo "\033[1;94m"}
+RED = $(shell echo "\033[1;91m")
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
+$(NAME): ${OBJS} ${INC}
+	@ echo "\n$                             ${YELLOW}}}}.....${GREEN}!Compile :-> ${NAME} <-: Successe!${YELLOW}.....{{{${WHITE}                           \n"
 	@rm -rf _cgi/cgi_utils/* 
 	@rm -rf _cgi/cgi_utils/.h* 
-	c++ -g -fsanitize=address $(FLAGS) $^ -o $@
+	@$(CPP) $(FLAGS) ${OBJS} -o $@
 
-clean:
-	@rm -rf _cgi/cgi_utils/* 
-	@rm -rf _cgi/cgi_utils/.h* 
+%.o : %.cpp
+	@ echo "${BLUE}Generating Webserv objects... ${PURPLE}" $@ "${WHITE}"
+	$(CPP) $(FLAGS) -c $< -o $@
+
+
+clean:  
+	@rm -rf _cgi/.h*  
+	@ echo "${YELLOW}-> ${PURPLE}Delete the object files.....${WHITE}"
 	rm -f $(OBJS)
 
 fclean: clean
+	@ echo "${YELLOW}-> ${RED}fclean : Deleting executable done.${WHITE}"
 	rm -f $(NAME)
 
 re: fclean all
