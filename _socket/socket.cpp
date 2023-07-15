@@ -81,6 +81,8 @@ void _Droping ( Socket & _socket , Client & _client , size_t e )
 
 	FD_CLR(_client._id, &_socket._readfds);
 	FD_CLR(_client._id, &_socket._writefds);
+	if (remove(_client._cgi_wr.c_str()) && remove(_client._cgi_wr.c_str()))
+    	strerror(errno);
 	close(_client._id);
 	std::vector<Client>::iterator it = _socket.Clients.begin();
 	std::advance(it, e);
@@ -177,29 +179,44 @@ bool _Writing ( Socket & _socket , Client & _client , size_t e )
 	{
 		_get_res_body(_client, _client._request.path);
 		_client.s = generate_response_str(_client);
+		if (_client._done_writing)
+		{
+			_Droping (_socket, _client , e );
+			return true ;
+		}
 	}
 	return false ;
 }
-
+int a  = 0;
 void check_cgi_end(Client & _client )
 {
-	if (waitpid(_client._cgi_pid, &_client.status, WNOHANG) > 0)
-	{
-		if (remove(_client.file.c_str()))
-    		 strerror(errno);
+		std::cerr << "-------- CHECK ------- pid : " << _client._cgi_pid  << " - _client..pipe[0]" << _client.pipe_fd[0] <<  std::endl;
+	if (_client._cgi_pid != -2 && waitpid(_client._cgi_pid, &_client.status, WNOHANG) == _client._cgi_pid)
 		_client._kill_pid = true;
-		if (WIFSIGNALED(_client.status) && (WTERMSIG(_client.status) == SIGALRM))
+
+	if (_client._cgi_pid != -2 && _client._kill_pid)
+	{
+		std::cerr << "-------- Hello my friend -------"<< std::endl;
+
+		_client._done_reading = 0;
+		if (_client._cgi_pid != -2 && WIFSIGNALED(_client.status) && (WTERMSIG(_client.status) == SIGALRM))
 		{
 			_client._response.status = 508;
 			_response(_client);
 		}
 		else
         {
-			parent_process( _client.body, _client.pipe_fd);
-			get_body(_client);
+			std::cerr << "client.post_legnth : " << _client.post_legnth << std::endl;
+			parent_process( _client );
+				// get_body(_client);
+				
+			// if (a == 1)
+			// 	while(1);
+			// a++;
 		}
 		_client.s = generate_response_str(_client);
 	}
+	std::cerr << "errno : " << errno << std::endl;
 }
 
 void init_socket( Socket &_socket , Parsing &_server )
@@ -276,7 +293,7 @@ void	_socket( Parsing &_server )
 				{
 					if (x == _socket.Clients[e]._id && (FD_ISSET(x, &_socket._read_sockets) || FD_ISSET(x, &_socket._write_sockets)))
 					{
-						if (FD_ISSET(_socket.Clients[e]._id, &_socket._read_sockets) && FD_ISSET(_socket.Clients[e]._id, &_socket._write_sockets))
+						if ( FD_ISSET(_socket.Clients[e]._id, &_socket._read_sockets) && FD_ISSET(_socket.Clients[e]._id, &_socket._write_sockets))
 						{
 							_Droping( _socket , _socket.Clients[e], e );
 							break ;
@@ -294,8 +311,9 @@ void	_socket( Parsing &_server )
 							_Parsing ( _socket , _socket.Clients[e] );
 						if (_socket.Clients[e]._write_status)
 						{
+							std::cerr << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << std::endl;
 							check_cgi_end( _socket.Clients[e] );
-							if (_socket.Clients[e]._kill_pid)
+							if (_socket.Clients[e]._kill_pid )
 							{
 								if (_Writing ( _socket , _socket.Clients[e] , e))
 									break ;

@@ -390,16 +390,18 @@ void	_request( Parsing &_server, Server &_serv, Client & _client )
 	Location _location;
 
 	_request_parser(_client._request, _client.prsing_req);
+	_client.post_legnth = str_to_num(_client._request.headers["Content-Length"]);
 	_client._request.uri = update_uri(urlcode(_client._request.uri));
 	check_QueryString(_client._request.uri, _client._request.queryString);
     _match_theServer(_server, _client._request, _serv);
 	_match_theLocation(_serv, _location, _client._request, _client._response );
-	std::cerr << "_location.name : " << _location.name <<std::endl;
-	std::cerr << "_location.root_location : " << _location.root_location <<std::endl;
-	std::cerr << "_request.uri : " << _client._request.uri << std::endl;
-	std::cerr << "_request.path : " << _client._request.path << std::endl;
+	// std::cerr << "_location.name : " << _location.name <<std::endl;
+	// std::cerr << "_location.root_location : " << _location.root_location <<std::endl;
+	// std::cerr << "_request.uri : " << _client._request.uri << std::endl;
+	// std::cerr << "_request.path : " << _client._request.path << std::endl;
 	_fill_request(_serv, _location, _client._request);
 
+	std::cerr <<"_client.post_legnth : " << _client.post_legnth << std::endl;
 	std::cerr << "      _request.uri : " << _client._request.uri << std::endl;
 	std::cerr << "      _request.path : " << _client._request.path << std::endl;
     _validate_request(_serv, _location, _client._request, _client._response);

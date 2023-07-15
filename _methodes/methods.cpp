@@ -184,14 +184,21 @@ void _post(  Client & _client , Server &_server )
 {
 	if (!_client._response.status)
 	{
+		// _client.post_legnth  = str_to_num(_client);
 		if (_client._request.upload_path.size())
 		{
 			_client._response.content_length = _client._request.body.size();
 			_client._response.content_type = "text/html";
+			        			std::ofstream outputFile((_webserv_loc + "/_cgi/file")); // Create an output file stream
 
+			// if (outputFile.is_open()) {
+			// 	outputFile << (_client._request.body +  "\n"); // Write data to the file
+			// 	outputFile.close(); // 
+			// }
 			_cgi(_client, _server);
-			if (!_client._response.body.size())
+			if (_client._cgi_pid == -2 && !_client._response.body.size())
 			{
+				exit(1);
 				_body_parser(_client);
 				std::ofstream _upload_file(_client._request.path+'/'+_client._request.upload_file_name);
 				

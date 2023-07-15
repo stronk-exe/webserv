@@ -317,15 +317,14 @@ class Client {
 
 	public:
 
-		int		_id;
+		int		_id, _cgi_in, _cgi_out, _cgi_id;
 		pid_t	_cgi_pid;
 		bool	_kill_pid;
-		long long	_wr;
+		long long	_wr, _cgi_size, return_write;
 		int		pipe_fd[2];
-		std::string		file,  body, cookies;
+		std::string		_cgi_rd, _cgi_wr,  body, cookies;
 		int		_read_status, status;
 		int		_write_status, _done_writing;
-		long return_write;
 		int		_done_reading;
 		int		_file_done_reading;
 		int		fd_file, data;
@@ -342,9 +341,12 @@ class Client {
 			_id = id;
 			_wr = 0;
 			data = 0;
-			_read_status = 1;
+			_cgi_in = -1;
+ 			_cgi_out = -1;
+ 			_read_status = 1;
 			post_legnth  = 0;
 			read  = 0;
+			_cgi_size = 0;
 			status = 0;
 			_write_status = 0;
 			_done_reading = 0;
@@ -352,7 +354,7 @@ class Client {
 			return_write = 0;
 			firstTime_HuH= 0;
 			_done_writing = 0;
-			fd_file = 0;
+			fd_file = -1;
 			_cgi_pid = -2;
 			_kill_pid = true;
 		};
@@ -362,7 +364,12 @@ class Client {
 		Client& operator= (const Client & client) { 
 			_id = client._id;
 			_wr = client._wr;
+			_cgi_wr = client._cgi_wr;
+ 			_cgi_rd = client._cgi_rd;
+			_cgi_size = client._cgi_size;
 			data = client.data;
+			_cgi_in = client._cgi_in;
+ 			_cgi_out = client._cgi_out;
 			read = client.read;
 			post_legnth = client.post_legnth;
 			prsing_req = client.prsing_req;
@@ -387,8 +394,6 @@ class Client {
 
 		bool operator ==(Client &b ) { return _id == b._id; }
 
-
-
 };
 
 struct Socket 
@@ -409,8 +414,9 @@ struct Socket
 void	_socket( Parsing &_server );
 
 //cgi
+void _body_parser(  Client & _client );
 std::string generateRandomString(int length);
-void parent_process(std::string &result, int *pipe_fd);
+void parent_process(Client & client);
 void get_body(Client & client);
 
 // Methodes
