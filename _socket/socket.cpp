@@ -21,9 +21,9 @@ std::string	num_to_str(ssize_t num)
 
 std::string	generate_response_str(Client & client )
 {
-	std::string response = "HTTP/1.1 "+ num_to_str(client._response.status)+" "+client._response.status_message+\
+	std::string response = "HTTP/1.1 "+ std::to_string(client._response.status)+" "+client._response.status_message+\
 					"\nContent-Type: "+client._response.content_type+\
-					"\nContent-Length: "+ num_to_str(client._response.content_length);
+					"\nContent-Length: "+std::to_string(client._response.content_length);
 	
 	if (!client.cookies.empty())
 		response += "\n" + client.cookies;
@@ -61,17 +61,15 @@ bool	isFileDescriptorAvailable(int fd) {
 
 ssize_t get_content_length(std::string &req)
 {
-	ssize_t pos0, pos1;
+	int pos0, pos1;
 	std::string s;
     
 
     pos0 = req.find("Content-Length:");
     if (pos0 == -1)
-	{
         pos0 = req.find("Content-length:");
-		if (pos0 == -1)
-			return 0;
-	}
+	if (pos0 == -1)
+		return 0;
     pos1 = req.find("\n", pos0);
 	s = req.substr(pos0 + 15 , pos1 - pos0 - 16);
 	return (str_to_num(s));
@@ -112,7 +110,6 @@ bool _Reading ( Socket & _socket , Client & _client )
 {
 	char	buffer[_BUFFER_SIZE_] = {0};
 
-std::cerr << "\033[1;95mREADINGGGGGGGGGGGGGG \e[0m _id : "<< _client._id << std::endl;
 	_client.data = read(_client._id, buffer, _BUFFER_SIZE_);
 	if (_client.data == -1)
 		return false;
@@ -145,8 +142,6 @@ void _Parsing ( Socket & _socket , Client & _client )
 {
 	Server _s;
 
-	std::cerr << "\033[38;5;214mPARSINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id  << std::endl;
-
 	_request(_socket._server, _s, _client );
 
 	// Checking the method
@@ -159,7 +154,6 @@ void _Parsing ( Socket & _socket , Client & _client )
 		else if (_client._request.method == "DELETE")
 			_delete(_client);
 	}
-		std::cerr << "#####################################" << std::endl;
 	
 	_response(_client);
 	_client.s = generate_response_str(_client);
@@ -170,14 +164,10 @@ void _Parsing ( Socket & _socket , Client & _client )
 
 bool _Writing ( Socket & _socket , Client & _client , size_t e )
 {
-	std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
 	if (isFileDescriptorAvailable(_client._id) && _client.s.size()-_client._wr)
 		_client.return_write = write(_client._id, &_client.s[_client._wr], _client.s.size() - _client._wr);
 	if (_client.return_write > 0)
 		_client._wr += _client.return_write;
-	// std::cerr << "lseek(_client.fd_file, 0, SEEK_END) : " << lseek(_client.fd_file, 0, SEEK_END)<< std::endl;
-    // std::cerr  << " - _client._response.content_length : " <<_client._response.content_length << std::endl;
-    // std::cerr << "_client._wr : "<< _client._wr << std::endl;
 	if (_client.return_write == -1 ||  _client._done_writing)
 	{
 		_Droping (_socket, _client , e );
@@ -187,45 +177,28 @@ bool _Writing ( Socket & _socket , Client & _client , size_t e )
 	{
 		_get_res_body(_client, _client._request.path);
 		_client.s = generate_response_str(_client);
-		if (_client._done_writing)
-		{
-			_Droping (_socket, _client , e );
-			return true ;
-		}
-
 	}
 	return false ;
 }
 
 void check_cgi_end(Client & _client )
 {
-		std::cerr << "-------- CHECK -------"<< std::endl;
 	if (waitpid(_client._cgi_pid, &_client.status, WNOHANG) > 0)
 	{
-		std::cerr << "-------- Hello my friend -------"<< std::endl;
+		if (remove(_client.file.c_str()))
+    		 strerror(errno);
+		_client._kill_pid = true;
 		if (WIFSIGNALED(_client.status) && (WTERMSIG(_client.status) == SIGALRM))
 		{
-			std::cerr << "*****************" <<std::endl;
 			_client._response.status = 508;
 			_response(_client);
 		}
 		else
         {
-			std::cerr << "##############" <<std::endl;
-			parent_process( _client);
+			parent_process( _client.body, _client.pipe_fd);
 			get_body(_client);
-			std::ofstream outputFile((_webserv_loc + "/_cgi/file")); // Create an output file stream
-
-			if (outputFile.is_open()) {
-				outputFile << (_client._response.body +  "\n"); // Write data to the file
-				outputFile.close(); // 
-			}
 		}
 		_client.s = generate_response_str(_client);
-
-		if ((remove(_client._cgi_rd.c_str()) && remove(_client._cgi_wr.c_str())))
-    		 strerror(errno);
-		_client._kill_pid = true;
 	}
 }
 

@@ -24,7 +24,7 @@ void f(int ac, char **av)
     {
         _webserv_loc = getcwd(NULL, 0);
         _server.file = av[1];
-        std::ifstream file(_server.file.c_str());
+        std::ifstream file(_server.file);
         while (std::getline(file, str))
             split_conf(_server.data, str);
 

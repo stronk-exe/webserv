@@ -40,164 +40,145 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-// #undef _POSIX_SOURCE
 
 #define _BUFFER_SIZE_ 999999
 
 extern std::string _webserv_loc;
 
-class error_page
+struct error_page
 {
-	public :
-		std::vector<int>  error_status;
-		std::string       path;
+    std::vector<int>  error_status;
+    std::string       path;
 
-		error_page () {}
-		error_page (const error_page & err) { *this = err; }
-		error_page &operator= (const error_page & err)
-		{
-			this->path = err.path;
-			this->error_status = err.error_status;
-			return *this;
-		}
+	error_page &operator= (const error_page & err)
+	{
+		this->path = err.path;
+		this->error_status = err.error_status;
+		return *this;
+	}
 };
 
-class CGI
+struct CGI
 {
-	public :
-		std::string		extension;
-		std::string     path;
+    std::string		extension;
+    std::string     path;
 
-		CGI () {}
-		CGI (const CGI & _cgi) { *this = _cgi; }
-		CGI &operator= (const CGI & _cgi)
-		{
-			this->path = _cgi.path;
-			this->extension = _cgi.extension;
-			return *this;
-		}
+	CGI &operator= (const CGI & _cgi)
+	{
+		this->path = _cgi.path;
+		this->extension = _cgi.extension;
+		return *this;
+	}
 };
 
-class Redirection
+struct Redirection
 {
-	public :
-		size_t            return_status;
-		std::string       path;
+    size_t            return_status;
+    std::string       path;
 
-		Redirection() {return_status= 0;}
-		Redirection (const Redirection & red) { *this = red; }
-		Redirection& operator=(const Redirection& red)
-		{
-			this->return_status = red.return_status;
-			this->path = red.path;
-			return *this;
-		}
-		
-		void clear(void)
-		{
-			return_status = 0;
-			path.clear();
-		}
+	Redirection& operator=(const Redirection& red)
+	{
+		this->return_status = red.return_status;
+		this->path = red.path;
+		return *this;
+	}
+	
+	void clear(void)
+	{
+		return_status = 0;
+		path.clear();
+	}
 };
 
-class Location
+struct Location
 {
-	public :
-		bool						autoindex;
-		std::string					root_location, name, uploadDir, chyata;
-		std::vector<std::string> 	index;
-		std::vector<std::string>	allows_methods;
-		Redirection					redirection;
-		std::vector<CGI>			cgi_pass;
+    bool						autoindex;
+    std::string					root_location, name, uploadDir, chyata;
+    std::vector<std::string> 	index;
+    std::vector<std::string>	allows_methods;
+	Redirection					redirection;
+    std::vector<CGI>			cgi_pass;
 
-		Location () { }
-		Location (const Location & loc) { *this = loc; }
-		Location& operator=(const Location& loc)
-		{
-			this->name = loc.name;
-			this->chyata = loc.chyata;
-			this->root_location = loc.root_location;
-			this->autoindex = loc.autoindex;
-			this->index = loc.index;
-			this->allows_methods = loc.allows_methods;
-			this->redirection = loc.redirection;
-			this->cgi_pass = loc.cgi_pass;
-			this->uploadDir = loc.uploadDir;
-			return *this;
-		}
+	Location& operator=(const Location& loc)
+	{
+		this->name = loc.name;
+		this->chyata = loc.chyata;
+		this->root_location = loc.root_location;
+		this->autoindex = loc.autoindex;
+		this->index = loc.index;
+		this->allows_methods = loc.allows_methods;
+		this->redirection = loc.redirection;
+		this->cgi_pass = loc.cgi_pass;
+		this->uploadDir = loc.uploadDir;
+		return *this;
+	}
 
-		void clear(void)
-		{
-			name.clear();
-			chyata.clear();
-			root_location.clear();
-			autoindex = false;
-			index.clear();
-			allows_methods.clear();
-			redirection.clear();
-			cgi_pass.clear();
-			uploadDir.clear();
-		};
+	void clear(void)
+	{
+		name.clear();
+		chyata.clear();
+		root_location.clear();
+		autoindex = false;
+		index.clear();
+		allows_methods.clear();
+		redirection.clear();
+		cgi_pass.clear();
+		uploadDir.clear();
+	};
 };
     
 
-class Server
+struct Server
 {
-	public :
-		std::string					name, root_location, client_max_body_size, chyata, ip_add;
-		std::vector<std::string>	index;
-		std::vector<Location>		locations;
-		std::vector<error_page>		errors;
-		// Redirection					redirection;
-		size_t						listen_port;
+    std::string					name, root_location, client_max_body_size, chyata, ip_add;
+    std::vector<std::string>	index;
+    std::vector<Location>		locations;
+    std::vector<error_page>		errors;
+	// Redirection					redirection;
+    size_t						listen_port;
 
-		Server () { listen_port = 0; }
-		Server(const Server& serv) { *this = serv; }
+	Server () { listen_port = 0; }
+	Server& operator=(const Server& serv) {
+		this->name = serv.name;
+		this->ip_add = serv.ip_add;
+		this->chyata = serv.chyata;
+		this->root_location = serv.root_location;
+		this->client_max_body_size = serv.client_max_body_size;
+		this->listen_port = serv.listen_port;
+		this->index = serv.index;
+		this->locations = serv.locations;
+		// this->redirection = serv.redirection;
+		this->errors = serv.errors;
+    	return *this;
+  	}
 
-		Server& operator=(const Server& serv) {
-			this->name = serv.name;
-			this->ip_add = serv.ip_add;
-			this->chyata = serv.chyata;
-			this->root_location = serv.root_location;
-			this->client_max_body_size = serv.client_max_body_size;
-			this->listen_port = serv.listen_port;
-			this->index = serv.index;
-			this->locations = serv.locations;
-			// this->redirection = serv.redirection;
-			this->errors = serv.errors;
-			return *this;
-		}
-
-		void clear (void)
-		{
-			name.clear();
-			ip_add.clear();
-			root_location.clear();
-			client_max_body_size.clear();
-			listen_port = 0;
-			index.clear();
-			locations.clear();
-			chyata.clear();
-			// redirection.clear();
-			errors.clear();
-		};
+	void clear (void)
+	{
+		name.clear();
+		ip_add.clear();
+		root_location.clear();
+		client_max_body_size.clear();
+		listen_port = 0;
+		index.clear();
+		locations.clear();
+		chyata.clear();
+		// redirection.clear();
+		errors.clear();
+	};
 };
 
-class Parsing
+struct Parsing
 {
-	public :
-		std::string					file;
-		std::vector<std::string>	data;
-		std::vector<Server>			servers;
-		
-		Parsing() {}
-		Parsing(const Parsing& pars) { *this = pars; }
-		Parsing& operator=(const Parsing& pars) {
-			this->file = pars.file;
-			this->data = pars.data;
-			this->servers = pars.servers;
-			return *this;
-		}
+	std::string					file;
+	std::vector<std::string>	data;
+	std::vector<Server>			servers;
+	
+	Parsing& operator=(const Parsing& pars) {
+		this->file = pars.file;
+		this->data = pars.data;
+		this->servers = pars.servers;
+    	return *this;
+  	}
 
 };
 
@@ -331,16 +312,17 @@ class Response
 
 };
 
+
 class Client {
 
 	public:
 
-		int		_id, _cgi_in, _cgi_out, _cgi_id;
+		int		_id;
 		pid_t	_cgi_pid;
 		bool	_kill_pid;
 		long long	_wr;
 		int		pipe_fd[2];
-		std::string		_cgi_rd, _cgi_wr,  body, cookies;
+		std::string		file,  body, cookies;
 		int		_read_status, status;
 		int		_write_status, _done_writing;
 		long return_write;
@@ -360,9 +342,7 @@ class Client {
 			_id = id;
 			_wr = 0;
 			data = 0;
-			_cgi_in = -1;
- 			_cgi_out = -1;
- 			_read_status = 1;
+			_read_status = 1;
 			post_legnth  = 0;
 			read  = 0;
 			status = 0;
@@ -372,7 +352,7 @@ class Client {
 			return_write = 0;
 			firstTime_HuH= 0;
 			_done_writing = 0;
-			fd_file = -1;
+			fd_file = 0;
 			_cgi_pid = -2;
 			_kill_pid = true;
 		};
@@ -382,11 +362,7 @@ class Client {
 		Client& operator= (const Client & client) { 
 			_id = client._id;
 			_wr = client._wr;
-			_cgi_wr = client._cgi_wr;
- 			_cgi_rd = client._cgi_rd;
 			data = client.data;
-			_cgi_in = client._cgi_in;
- 			_cgi_out = client._cgi_out;
 			read = client.read;
 			post_legnth = client.post_legnth;
 			prsing_req = client.prsing_req;
@@ -411,14 +387,16 @@ class Client {
 
 		bool operator ==(Client &b ) { return _id == b._id; }
 
+
+
 };
 
 struct Socket 
 {
 	int					_socket_fd, fd_size, x, coming_socket;
-	class addrinfo hints;
-    class sockaddr_in	address;
-	class addrinfo		*bind_address;
+	struct addrinfo hints;
+    struct sockaddr_in	address;
+	struct addrinfo		*bind_address;
     int					addrlen;
     int					default_port;
 	std::vector<int>	_socket_fds;
@@ -432,7 +410,7 @@ void	_socket( Parsing &_server );
 
 //cgi
 std::string generateRandomString(int length);
-void parent_process(Client & client);
+void parent_process(std::string &result, int *pipe_fd);
 void get_body(Client & client);
 
 // Methodes

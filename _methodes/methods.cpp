@@ -22,7 +22,7 @@ void	_get_listed_dir( Client & _client )
 {
 	DIR *dir;
 	
-	// std::cerr << "_get_listed_dir -> _client._request.path.c_str() : " << _client._request.path.c_str() << std::endl;
+	std::cerr << "_get_listed_dir -> _client._request.path.c_str() : " << _client._request.path.c_str() << std::endl;
 	if ((dir = opendir(_client._request.path.c_str())) == NULL)
 	{
 		_client._response.status = 404;
@@ -31,27 +31,20 @@ void	_get_listed_dir( Client & _client )
 	else
 	{
 		struct dirent *entry;// = readdir(dir);
-		std::string data_name;
+		std::string _name;
 		_client._request.body = "<html>\n"
 						"<head><title>Index of " + _client._request.path + "</title></head>\n"
 						"<body>\n";
 
-		data_name = ".";
-		_client._request.body += "<h4><a href=\""+data_name+"/\">"+data_name+"</a><br/></h4>\n";
-		data_name = "..";
-		_client._request.body += "<h4><a href=\""+data_name+"/\">"+data_name+"</a><br/></h4>\n";
-
 		while ((entry = readdir(dir)) != NULL)
 		{
-			data_name = entry->d_name;
-			if (data_name == "." || data_name == "..")
-				continue;
-			std::cerr << "name : " << data_name <<std::endl;
+			std::string data_name = entry->d_name;
 			if (entry->d_type == DT_DIR)
 				_client._request.body += "<h4><a href=\""+data_name+"/\">"+data_name+"</a><br/></h4>\n";
 			else
 				_client._request.body += "<h4><a href=\""+data_name+"\">"+data_name+"</a><br/></h4>\n";
 		}
+		std::cerr << "check errno: " << errno << std::endl;
 		closedir(dir);
 	}
 	_client._response.body = _client._request.body;
