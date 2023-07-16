@@ -26,7 +26,7 @@ OBJS = $(SRCS:.cpp=.o)
 
 
 CPP = c++
-FLAGS =  #-Wall -Wextra -Werror -std=c++98
+FLAGS =  -Wall -Wextra -Werror -std=c++98
 
 #colors
 
@@ -50,8 +50,9 @@ $(NAME): ${OBJS} ${INC}
 	$(CPP) $(FLAGS) -c $< -o $@
 
 
-clean: 
-	@rm -rf _cgi/.h* 
+clean:
+	@rm -rf _cgi/cgi_utils/* 
+	@rm -rf _cgi/cgi_utils/.h* 
 	@ echo "${YELLOW}-> ${PURPLE}Delete the object files.....${WHITE}"
 	rm -f $(OBJS)
 

@@ -72,117 +72,45 @@ std::string get_content_type(char *buffer)
     return (str);
 }
 
-void parent_process(Client & client)
+
+void parent_process(Client & _client)
 {
-    char buffer[_BUFFER_SIZE_] = {0};
+    char buffer[4056];
     int nbytes;
 
-    // if (client.madani == -1) {
-    //     client.madani  = client.pipe_fd[0];
-    // }
-    if (client.post_legnth)
-    {
-    std::cerr << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"  << std::endl;
-
-			_body_parser(client);
-		std::ofstream _upload_file(client._request.path+'/'+client._request.upload_file_name);
-		
-		_upload_file << client._request.upload_data;
-		client._response.content_type = client._response.mims[_get_ex(client._request.upload_file_name)];
-		client._response.body = client._request.body;
-		client._response.content_length = client._response.body.size();
-	    client._done_writing = 1;
-        return ;
-    }
-    client._cgi_out = open(client._cgi_wr.c_str(), O_RDONLY);
-    std::cerr << "  -  client.madani : " << client._cgi_out << std::endl;
-    std::cerr <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!: " << std::endl;
-    if ((nbytes = read(client._cgi_out, buffer, _BUFFER_SIZE_)) > 0)
-    {
-            std::string temp="";
-            for (int i=0; i < nbytes; i++)
-                temp += buffer[i];
-            client._response.body += temp;
-            // client._response.body.append(buffer, nbytes);
-            // std::cerr << "client._response.body : " << client._response.body << std::endl;
-        // }
-            client._cgi_size += nbytes;
-    }
-        close(client._cgi_out);
-    std::cerr << "nbytes : " << nbytes << " - client._response.body.size : " << client._response.body.size() << " - client.post_legnth : " << client.post_legnth << std::endl;
+    close(_client.pipe_fd[1]);
+    // while ((nbytes = read(_client.pipe_fd[0], buffer, sizeof(buffer))) > 0)
+    if ((nbytes = read(_client.pipe_fd[0], buffer, sizeof(buffer))) > 0)
+        _client.body.append(buffer, nbytes);
+    std::cerr << " nbytes : " << nbytes << std::endl;
     if (nbytes >= 0)
     {
-        std::cerr << "##################################################################################"  << std::endl;
-            get_body(client);
-        	// 		std::ofstream outputFile((_webserv_loc + "/_cgi/file")); // Create an output file stream
-
-			// if (outputFile.is_open()) {
-			// 	outputFile << (client._response.body +  "\n"); // Write data to the file
-			// 	outputFile.close(); // 
-			// }
-	    client._done_writing = 1;
-        // client._done_reading = 1;
-        // return true;
+        std::cerr << "--------- finish -----------" << std::endl;
+        close(_client.pipe_fd[0]);
+        get_body(_client);
     }
     else
-	    client._done_writing = 1;
-        
-    // else if (nbytes == -1)
-    // return false;
+        close(_client.pipe_fd[0]);
+
 }
 
 
-int createFile(const char* filename, std::string data, int type) {
+int createFile(const char* filename, std::string data) {
     
-    int fd;
-    if (!type)
-        fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    else
-        fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
+    int fd = open(filename, O_WRONLY | O_CREAT, 0644);
+
     if (!(fd != -1 && write(fd, data.c_str(), data.size()) != -1))
         exit(12);
+    close(fd);
+    fd = open(filename, O_RDONLY, 0644);
 
     return fd;
 }
 
-// void exec_file_cgi(std::string &scriptPath, Client & client)
-// {
-//     char *av[3];
-//     int fd;
-    
-//     std::string result, arg, args[2];
-    
-//     std::istringstream ss(scriptPath);
-//     for (int i = 0; i < 2; i++) {
-//         std::getline(ss, arg, ' ');
-//         args[i] = arg;
-//         av[i] = const_cast<char*>(args[i].c_str());
-//     }
-//     av[2] = NULL;
-//     client._kill_pid = false;
-//     client.file = _webserv_loc + "/_cgi/" + generateRandomString(7, ".h");
-//     fd = createFile(client.file.c_str() , client._request.body);
-//     if (!(pipe(client.pipe_fd) > -1 && (client._cgi_pid = fork()) > -1))
-//         exit(12);
-//     if (client._cgi_pid == 0)
-//     {
-//         dup2(fd, STDIN_FILENO);
-//         close(client.pipe_fd[0]);
-//         dup2(client.pipe_fd[1], STDOUT_FILENO);
-//         close(client.pipe_fd[1]);
-//         alarm(25);
-//         execve(av[0], av, client._request.env);
-//         exit(1337);
-//     }
-//     else
-//         waitpid(client._cgi_pid, &client.status, WNOHANG);
-//     close(fd);
-// }
-
 void exec_file_cgi(std::string &scriptPath, Client & client)
 {
     char *av[3];
-    // int fd;
+    int fd;
     
     std::string result, arg, args[2];
     
@@ -194,27 +122,22 @@ void exec_file_cgi(std::string &scriptPath, Client & client)
     }
     av[2] = NULL;
     client._kill_pid = false;
-    client._cgi_id = client._id;
-    client._cgi_wr = _webserv_loc + "/_cgi/" +  generateRandomString(7, ".h");
-    client._cgi_rd = _webserv_loc + "/_cgi/" +  generateRandomString(7, ".h");
-    client._cgi_in = createFile(client._cgi_rd.c_str() , client._request.body, 0);
-    client._cgi_out = createFile(client._cgi_wr.c_str() , client._request.body, 1);
-		std::cerr << "-------- CGI -------"<< std::endl;
-    if ((client._cgi_pid = fork()) == -1)
+    client.file = _webserv_loc +  generateRandomString(7, ".h");
+    fd = createFile(client.file.c_str() , client._request.body);
+    if (!(pipe(client.pipe_fd) > -1 && (client._cgi_pid = fork()) > -1))
         exit(12);
     if (client._cgi_pid == 0)
     {
-        dup2(client._cgi_in, STDIN_FILENO);
-        close(client._cgi_in);
-        dup2(client._cgi_out, STDOUT_FILENO);
-        // close(client._cgi_out);
+        dup2(fd, STDIN_FILENO);
+        close(client.pipe_fd[0]);
+        dup2(client.pipe_fd[1], STDOUT_FILENO);
+        close(client.pipe_fd[1]);
         alarm(25);
         execve(av[0], av, client._request.env);
         exit(1337);
     }
     else
         waitpid(client._cgi_pid, &client.status, WNOHANG);
-    close(client._cgi_in);
 }
 
 std::vector<std::string> extractSetCookieSubstrings(const std::string& text) {
@@ -250,21 +173,23 @@ void get_body( Client & client)
 {
     std::string arg;
     int pos0, pos1;
+		std::cerr <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     
-    set_cookies(client.cookies, client._response.body);
-    pos0 = client._response.body.find("Content-Type:");
+    set_cookies(client.cookies, client.body);
+    pos0 = client.body.find("Content-Type:");
     if (pos0 == -1)
-        pos0 = client._response.body.find("Content-type:");
-    pos1 = client._response.body.find("\n", pos0);
+        pos0 = client.body.find("Content-type:");
+    pos1 = client.body.find("\n", pos0);
     if (pos0 != -1)
     {
-        client._response.content_type = client._response.body.substr(pos0 + 13 , pos1 - pos0 - 13);
-        client._response.body.erase(0, pos1 + 1);
+        client._response.content_type = client.body.substr(pos0 + 13 , pos1 - pos0 - 13);
+        client.body.erase(0, pos1 + 1);
     }
     else
         client._response.content_type = "text/html";
     
-    client._response.content_length = client._response.body.size();
+    client._response.body = client.body;
+    client._response.content_length = client.body.size();
     client._response.status = 200;
 }
 
