@@ -164,15 +164,14 @@ void _Parsing ( Socket & _socket , Client & _client )
 
 bool _Writing ( Socket & _socket , Client & _client , size_t e )
 {
-	std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
-    std::cerr << "befor  _client._wr : "<< _client._wr << std::endl;
+	// std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
 	if (isFileDescriptorAvailable(_client._id) && _client.s.size()-_client._wr)
 		_client.return_write = write(_client._id, &_client.s[_client._wr], _client.s.size() - _client._wr);
 	if (_client.return_write > 0)
 		_client._wr += _client.return_write;
 	// std::cerr << "lseek(_client.fd_file, 0, SEEK_END) : " << lseek(_client.fd_file, 0, SEEK_END)<< std::endl;
     // std::cerr  << " - _client._response.content_length : " <<_client._response.content_length << std::endl;
-    std::cerr << "after _client._wr : "<< _client._wr << " _ _client.return_write : "<< _client.return_write <<  std::endl;
+    // std::cerr << "_client._wr : "<< _client._wr << std::endl;
 	if (_client.return_write == -1 ||  _client._done_writing)
 	{
 		_Droping (_socket, _client , e );
@@ -194,15 +193,12 @@ bool _Writing ( Socket & _socket , Client & _client , size_t e )
 
 void check_cgi_end(Client & _client )
 {
-			// std::cerr <<  "CGI HMIDA : " << _client.body.size() << std::endl;
-
 	if (waitpid(_client._cgi_pid, &_client.status, WNOHANG) > 0)
 	{
-		std::cerr << "@@@@@@@@@@@@@" <<std::endl;
+		std::cerr <<"1111111####################################" << std::endl;
 		if (remove(_client.file.c_str()))
     		 strerror(errno);
 		_client._kill_pid = true;
-		_client._wr = 0;
 		if (WIFSIGNALED(_client.status) && (WTERMSIG(_client.status) == SIGALRM))
 		{
 			_client._response.status = 508;
@@ -210,8 +206,9 @@ void check_cgi_end(Client & _client )
 		}
 		else
         {
-			_get_res_body( _client , "");
-			std::cerr <<  "_client.body.size : " << _client.body.size() << std::endl;
+		std::cerr <<"22222222####################################" << std::endl;
+			parent_process( _client);
+			
 		}
 		_client.s = generate_response_str(_client);
 	}

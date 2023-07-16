@@ -30,15 +30,23 @@ void	_get_listed_dir( Client & _client )
 	}
 	else
 	{
-		struct dirent *entry = readdir(dir);
-		std::string _name;
+		struct dirent *entry;// = readdir(dir);
+		std::string data_name;
 		_client._request.body = "<html>\n"
 						"<head><title>Index of " + _client._request.path + "</title></head>\n"
 						"<body>\n";
 
+		data_name = ".";
+		_client._request.body += "<h4><a href=\""+data_name+"/\">"+data_name+"</a><br/></h4>\n";
+		data_name = "..";
+		_client._request.body += "<h4><a href=\""+data_name+"/\">"+data_name+"</a><br/></h4>\n";
+
 		while ((entry = readdir(dir)) != NULL)
 		{
-			std::string data_name = entry->d_name;
+			data_name = entry->d_name;
+			if (data_name == "." || data_name == "..")
+				continue;
+			std::cerr << "name : " << data_name <<std::endl;
 			if (entry->d_type == DT_DIR)
 				_client._request.body += "<h4><a href=\""+data_name+"/\">"+data_name+"</a><br/></h4>\n";
 			else
@@ -131,6 +139,7 @@ void _body_parser(  Client & _client )
 
 void	_get( Client & _client, Server &_server )
 {
+	std::cerr << "--------\033[1;35m GET \033[0m--------" <<std::endl;
     _file_or_dir(_client);
 
 	if (!_client._response.status)
@@ -147,11 +156,11 @@ void	_get( Client & _client, Server &_server )
 			{
 				if (_client._request.index.size())
 				{
+					_client._response.status = 200;
 					if (_client._request.cgi.size())
 						_cgi(_client, _server);
 					else
 						get_indexed_file_data(_client);
-					_client._response.status = 200;
 				}
 				else
 				{
@@ -160,27 +169,28 @@ void	_get( Client & _client, Server &_server )
 						_client._response.status = 403;
 					else
 					{
+						_client._response.status = 200;
 						_get_listed_dir(_client);
 						_client._response.body = _client._request.body;
 						_client._response.content_type = "text/html";
-						_client._response.status = 200;
 					}
 				}
 			}
 		}
 		else if (_client._request.type == "file")
 		{
+			_client._response.status = 200;
 			if (_client._request.cgi.size())
 				_cgi(_client, _server);
 			else
 				_get_res_body(_client, _client._request.path);
-			_client._response.status = 200;
 		}
 	}
 }
 
 void _post(  Client & _client , Server &_server )
 {
+	std::cerr << "--------\033[1;35m POST \033[0m--------" <<std::endl;
 	if (!_client._response.status)
 	{
 		if (_client._request.upload_path.size())
@@ -191,6 +201,7 @@ void _post(  Client & _client , Server &_server )
 			_cgi(_client, _server);
 			if (!_client._response.body.size())
 			{
+				std::cerr << "HLAWIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII" << std::endl;
 				_body_parser(_client);
 				std::ofstream _upload_file(_client._request.path+'/'+_client._request.upload_file_name);
 				
