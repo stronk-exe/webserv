@@ -145,7 +145,6 @@ void _match_theLocation( Server &_server, Location &_location, Request &_request
 	if (!chyata_pro_max.empty())
 		_server.chyata = chyata_pro_max;
 	_request.uri = _location.root_location + _server.chyata;
-	// std::cerr << "====== " << _request.uri << " ======" << std::endl;
 	_server.chyata.clear();
 }
 
@@ -389,20 +388,12 @@ void	_request( Parsing &_server, Server &_serv, Client & _client )
 {
 	Location _location;
 
-	std::cerr << "_client._request.body" <<_client._request.body <<std::endl;
 	_request_parser(_client._request, _client.prsing_req);
 	_client._request.uri = update_uri(urlcode(_client._request.uri));
 	check_QueryString(_client._request.uri, _client._request.queryString);
     _match_theServer(_server, _client._request, _serv);
 	_match_theLocation(_serv, _location, _client._request, _client._response );
-	// std::cerr << "_location.name : " << _location.name <<std::endl;
-	// std::cerr << "_location.root_location : " << _location.root_location <<std::endl;
-	// std::cerr << "_request.uri : " << _client._request.uri << std::endl;
-	// std::cerr << "_request.path : " << _client._request.path << std::endl;
 	_fill_request(_serv, _location, _client._request);
-
-	std::cerr << "      _request.uri : " << _client._request.uri << std::endl;
-	std::cerr << "      _request.path : " << _client._request.path << std::endl;
     _validate_request(_serv, _location, _client._request, _client._response);
 	_get_mims(_client._response);
 }

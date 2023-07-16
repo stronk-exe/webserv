@@ -79,18 +79,18 @@ void parent_process(Client & _client)
     int nbytes;
 
     close(_client.pipe_fd[1]);
-    // while ((nbytes = read(_client.pipe_fd[0], buffer, sizeof(buffer))) > 0)
     if ((nbytes = read(_client.pipe_fd[0], buffer, sizeof(buffer))) > 0)
         _client.body.append(buffer, nbytes);
-    std::cerr << " nbytes : " << nbytes << std::endl;
     if (nbytes >= 0)
     {
-        std::cerr << "--------- finish -----------" << std::endl;
         close(_client.pipe_fd[0]);
         get_body(_client);
     }
     else
+    {
         close(_client.pipe_fd[0]);
+        _client._done_writing = 1;
+    }
 
 }
 
@@ -100,7 +100,7 @@ int createFile(const char* filename, std::string data) {
     int fd = open(filename, O_WRONLY | O_CREAT, 0644);
 
     if (!(fd != -1 && write(fd, data.c_str(), data.size()) != -1))
-        exit(12);
+        return -1;
     close(fd);
     fd = open(filename, O_RDONLY, 0644);
 
@@ -122,8 +122,13 @@ void exec_file_cgi(std::string &scriptPath, Client & client)
     }
     av[2] = NULL;
     client._kill_pid = false;
-    client.file = _webserv_loc +  generateRandomString(7, ".h");
+    client.file = _webserv_loc + "/_cgi/" + generateRandomString(7, ".h");
     fd = createFile(client.file.c_str() , client._request.body);
+    if (fd == -1)
+    {
+        client._response.status = 500;
+        return ;
+    }
     if (!(pipe(client.pipe_fd) > -1 && (client._cgi_pid = fork()) > -1))
         exit(12);
     if (client._cgi_pid == 0)
@@ -173,7 +178,6 @@ void get_body( Client & client)
 {
     std::string arg;
     int pos0, pos1;
-		std::cerr <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     
     set_cookies(client.cookies, client.body);
     pos0 = client.body.find("Content-Type:");

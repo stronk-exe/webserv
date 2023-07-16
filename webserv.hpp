@@ -32,12 +32,9 @@
 #include <sys/time.h>
 #include <netdb.h>
 
-#define _POSIX_SOURCE
 #include <dirent.h>
 #include <errno.h>
 #include <sys/types.h>
-#undef _POSIX_SOURCE
-#include <stdio.h>
 
 #define _BUFFER_SIZE_ 999999
 
@@ -132,7 +129,6 @@ struct Server
     std::vector<std::string>	index;
     std::vector<Location>		locations;
     std::vector<error_page>		errors;
-	// Redirection					redirection;
     size_t						listen_port;
 
 	Server () { listen_port = 0; }
@@ -145,7 +141,6 @@ struct Server
 		this->listen_port = serv.listen_port;
 		this->index = serv.index;
 		this->locations = serv.locations;
-		// this->redirection = serv.redirection;
 		this->errors = serv.errors;
     	return *this;
   	}
@@ -160,7 +155,6 @@ struct Server
 		index.clear();
 		locations.clear();
 		chyata.clear();
-		// redirection.clear();
 		errors.clear();
 	};
 };
@@ -345,11 +339,11 @@ class Client {
 			read  = 0;
 			status = 0;
 			_write_status = 0;
+			_done_writing = 0;
 			_done_reading = 0;
 			_file_done_reading = 0;
 			return_write = 0;
 			firstTime_HuH= 0;
-			_done_writing = 0;
 			fd_file = 0;
 			_cgi_pid = -2;
 			_kill_pid = true;
@@ -406,10 +400,6 @@ struct Socket
 // Socket
 void	_socket( Parsing &_server );
 
-//cgi
-std::string generateRandomString(int length);
-void parent_process(Client & client);
-void get_body(Client & client);
 
 // Methodes
 void	_get( Client & _client, Server &_server );
@@ -417,6 +407,9 @@ void	_post( Client & _client, Server &_server );
 void	_delete( Client & _client );
 
 // CGI
+std::string generateRandomString(int length);
+void parent_process(Client & client);
+void get_body(Client & client);
 std::string generateRandomString(int length, std::string ss);
 void	_cgi( Client & _client , Server &_server );
 std::string num_to_str(ssize_t num);

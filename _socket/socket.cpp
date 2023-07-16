@@ -81,6 +81,8 @@ void _Droping ( Socket & _socket , Client & _client , size_t e )
 
 	FD_CLR(_client._id, &_socket._readfds);
 	FD_CLR(_client._id, &_socket._writefds);
+	if (remove(_client.file.c_str()))
+		strerror(errno);
 	close(_client._id);
 	std::vector<Client>::iterator it = _socket.Clients.begin();
 	std::advance(it, e);
@@ -164,14 +166,10 @@ void _Parsing ( Socket & _socket , Client & _client )
 
 bool _Writing ( Socket & _socket , Client & _client , size_t e )
 {
-	// std::cerr << "\033[1;94mWRITINGGGGGGGGGGGGGG \e[0m_id : "<< _client._id << std::endl;
 	if (isFileDescriptorAvailable(_client._id) && _client.s.size()-_client._wr)
 		_client.return_write = write(_client._id, &_client.s[_client._wr], _client.s.size() - _client._wr);
 	if (_client.return_write > 0)
 		_client._wr += _client.return_write;
-	// std::cerr << "lseek(_client.fd_file, 0, SEEK_END) : " << lseek(_client.fd_file, 0, SEEK_END)<< std::endl;
-    // std::cerr  << " - _client._response.content_length : " <<_client._response.content_length << std::endl;
-    // std::cerr << "_client._wr : "<< _client._wr << std::endl;
 	if (_client.return_write == -1 ||  _client._done_writing)
 	{
 		_Droping (_socket, _client , e );
@@ -195,9 +193,6 @@ void check_cgi_end(Client & _client )
 {
 	if (waitpid(_client._cgi_pid, &_client.status, WNOHANG) > 0)
 	{
-		std::cerr <<"1111111####################################" << std::endl;
-		if (remove(_client.file.c_str()))
-    		 strerror(errno);
 		_client._kill_pid = true;
 		if (WIFSIGNALED(_client.status) && (WTERMSIG(_client.status) == SIGALRM))
 		{
@@ -205,11 +200,7 @@ void check_cgi_end(Client & _client )
 			_response(_client);
 		}
 		else
-        {
-		std::cerr <<"22222222####################################" << std::endl;
 			parent_process( _client);
-			
-		}
 		_client.s = generate_response_str(_client);
 	}
 }
@@ -261,13 +252,10 @@ void	_socket( Parsing &_server )
 	Socket _socket;
 	
 	init_socket(_socket, _server);
-	// struct timeval _timeout;
     while (1)
     {
         std::cout << "listening ..." << std::endl;
 		
-		// _timeout.tv_sec = 0;
-		// _timeout.tv_usec = 500000;
 		_socket._read_sockets = _socket._readfds;
 		_socket._write_sockets = _socket._writefds;
 		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, NULL) < 0) {

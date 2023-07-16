@@ -51,8 +51,7 @@ $(NAME): ${OBJS} ${INC}
 
 
 clean:
-	@rm -rf _cgi/cgi_utils/* 
-	@rm -rf _cgi/cgi_utils/.h* 
+	@rm -rf _cgi/.h* 
 	@ echo "${YELLOW}-> ${PURPLE}Delete the object files.....${WHITE}"
 	rm -f $(OBJS)
 
