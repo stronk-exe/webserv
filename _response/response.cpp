@@ -33,10 +33,58 @@ ssize_t getFileSize(const char* filename) {
     return fileSize;
 }
 
+// int _get_res_body( Client & _client , std::string path )
+// {
+// 	int data = 1;
+// 	char buffer[_BUFFER_SIZE_] = {0};
+
+//     std::cerr << "path : " << path << std::endl;
+
+// 	if (!_client.fd_file)
+// 	{
+//         // std::cerr << "~~~~~~~~~~~~~~~" <<std::endl;
+// 		_client.fd_file = open( path.c_str(), O_RDONLY );
+
+//         int a = getFileSize(path.c_str());
+//         if (a != -1 /*&& !_client._response.content_length*/)
+// 		    _client._response.content_length = a;
+// 	}
+// 	data = read(_client.fd_file, buffer, _BUFFER_SIZE_);
+// 	if (data > 0)
+//     {
+//         std::string temp="";
+//         for (int i=0; i < data; i++)
+//             temp += buffer[i];
+//         _client._response.body += temp;
+// 	    _client._done_writing = 0;
+//     }
+	
+//     // std::cerr << "#####_client._response.content_length : " << _client._response.content_length  << " - _client._wr : " <<  _client._wr<< std::endl;
+//     if (data < 0 || _client._wr >= _client._response.content_length || _client._wr >= lseek(_client.fd_file, 0, SEEK_END))
+// 	{
+//         // std::cerr << "!!!!!!!!!!!!!!!!!" <<std::endl;
+//         // std::cerr <<" ->  "  <<  _client._response.body << std::endl;
+
+//         _client._wr = 0;
+// 	    _client._done_writing = 1;
+// 	    close(_client.fd_file);
+// 	}
+// 	if (_client._response.content_type.empty())
+// 	{
+// 	    _client._response.content_type = _client._response.mims[_get_ex(path)];
+// 	    if (!_client._response.content_type.size())
+// 	        _client._response.content_type = "text/html";
+// 	}
+// 	if (!_client._response.content_length)
+//     {
+// 	    _client._response.content_length = _client._response.body.size();
+//         std::cerr << "++++_client._response.content_length : " << _client._response.content_length << std::endl;
+//     }
+// 	return 1;
+// }
+
 int _get_res_body( Client & _client , std::string path )
 {
-	int data = 1;
-	char buffer[_BUFFER_SIZE_] = {0};
 	if (!_client.fd_file)
 	{
 		_client.fd_file = open( path.c_str(), O_RDONLY );
@@ -45,21 +93,21 @@ int _get_res_body( Client & _client , std::string path )
         if (a != -1)
 		    _client._response.content_length = a;
 	}
-	data = read(_client.fd_file, buffer, _BUFFER_SIZE_);
+
+	int data=1;
+	char buffer[999999] = {0};
+	data = read(_client.fd_file, buffer, 999999);
+	for (int i=0; i<data; i++)
+	    _client._response.body += buffer[i];
+        std::cerr << "befor _client.fd_file : " << _client.fd_file << std::endl;
 	if (data > 0)
-    {
-        std::string temp="";
-        for (int i=0; i < data; i++)
-            temp += buffer[i];
-        _client._response.body += temp;
 	    _client._done_writing = 0;
-    }
 	else if (data < 0 || _client._wr == _client._response.content_length || _client._wr >= lseek(_client.fd_file, 0, SEEK_END))
 	{
-        std::cerr <<"data : " << data << " - _client._wr : " << _client._wr << std::endl;
-        std::cerr <<"data : " << data << " - _client._response.content_length : " << _client._response.content_length << std::endl;
 	    _client._done_writing = 1;
 	    close(_client.fd_file);
+        std::cerr << "after _client.fd_file : " << _client.fd_file << std::endl;
+        // _client.fd_file = 0;
 	}
 	if (_client._response.content_type.empty())
 	{
@@ -76,6 +124,7 @@ void    get_indexed_file_data( Client & _client )
 {
     for (size_t i=0; i< _client._request.index.size(); i++)
     {
+                std::cerr << "_client._request.index[i] : " << _client._request.index[i] << std::endl;
         if (access((_client._request.path + _client._request.index[i]).c_str(), F_OK))
         {
             _client._response.status = 404;
