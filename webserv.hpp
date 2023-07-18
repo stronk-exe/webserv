@@ -29,10 +29,8 @@
 #include <iterator>
 #include <sys/stat.h>
 #include <map>
-
-
-#include <errno.h>
-
+#include <sys/time.h>
+#include <netdb.h>
 
 #define _POSIX_SOURCE
 #include <dirent.h>
@@ -40,6 +38,8 @@
 #include <sys/types.h>
 #undef _POSIX_SOURCE
 #include <stdio.h>
+
+#define _BUFFER_SIZE_ 999999
 
 extern std::string _webserv_loc;
 
@@ -80,12 +80,18 @@ struct Redirection
 		this->path = red.path;
 		return *this;
 	}
+	
+	void clear(void)
+	{
+		return_status = 0;
+		path.clear();
+	}
 };
 
 struct Location
 {
     bool						autoindex;
-    std::string					root_location, name, uploadDir;
+    std::string					root_location, name, uploadDir, chyata;
     std::vector<std::string> 	index;
     std::vector<std::string>	allows_methods;
 	Redirection					redirection;
@@ -94,6 +100,7 @@ struct Location
 	Location& operator=(const Location& loc)
 	{
 		this->name = loc.name;
+		this->chyata = loc.chyata;
 		this->root_location = loc.root_location;
 		this->autoindex = loc.autoindex;
 		this->index = loc.index;
@@ -103,29 +110,56 @@ struct Location
 		this->uploadDir = loc.uploadDir;
 		return *this;
 	}
+
+	void clear(void)
+	{
+		name.clear();
+		chyata.clear();
+		root_location.clear();
+		autoindex = false;
+		index.clear();
+		allows_methods.clear();
+		redirection.clear();
+		cgi_pass.clear();
+		uploadDir.clear();
+	};
 };
     
 
 struct Server
 {
-    std::string					name, root_location, client_max_body_size;
+    std::string					name, root_location, client_max_body_size, chyata, ip_add;
     std::vector<std::string>	index;
     std::vector<Location>		locations;
     std::vector<error_page>		errors;
-	Redirection					redirection;
     size_t						listen_port;
 
+	Server () { listen_port = 0; }
 	Server& operator=(const Server& serv) {
 		this->name = serv.name;
+		this->ip_add = serv.ip_add;
+		this->chyata = serv.chyata;
 		this->root_location = serv.root_location;
 		this->client_max_body_size = serv.client_max_body_size;
 		this->listen_port = serv.listen_port;
 		this->index = serv.index;
 		this->locations = serv.locations;
-		this->redirection = serv.redirection;
 		this->errors = serv.errors;
-    return *this;
-  }
+    	return *this;
+  	}
+
+	void clear (void)
+	{
+		name.clear();
+		ip_add.clear();
+		root_location.clear();
+		client_max_body_size.clear();
+		listen_port = 0;
+		index.clear();
+		locations.clear();
+		chyata.clear();
+		errors.clear();
+	};
 };
 
 struct Parsing
@@ -133,6 +167,14 @@ struct Parsing
 	std::string					file;
 	std::vector<std::string>	data;
 	std::vector<Server>			servers;
+	
+	Parsing& operator=(const Parsing& pars) {
+		this->file = pars.file;
+		this->data = pars.data;
+		this->servers = pars.servers;
+    	return *this;
+  	}
+
 };
 
 class Request
@@ -234,7 +276,7 @@ class Response
 
 		int			status;
 		std::string status_message;
-		size_t		content_length;
+		long long		content_length;
 		std::string content_type;
 		std::string path;
 		std::string data;
@@ -273,7 +315,7 @@ class Client {
 		int		_id;
 		pid_t	_cgi_pid;
 		bool	_kill_pid;
-		size_t	_wr;
+		long long	_wr;
 		int		pipe_fd[2];
 		std::string		file,  body, cookies;
 		int		_read_status, status;
@@ -283,8 +325,8 @@ class Client {
 		int		_file_done_reading;
 		int		fd_file, data;
 		int		firstTime_HuH;
-		std::string	buffer, prsing_req;
-		std::string substring, s;
+		ssize_t	post_legnth, read;
+		std::string substring,prsing_req, s;
 
 		Request		_request;
 		Response	_response;
@@ -296,6 +338,8 @@ class Client {
 			_wr = 0;
 			data = 0;
 			_read_status = 1;
+			post_legnth  = 0;
+			read  = 0;
 			status = 0;
 			_write_status = 0;
 			_done_reading = 0;
@@ -314,6 +358,8 @@ class Client {
 			_id = client._id;
 			_wr = client._wr;
 			data = client.data;
+			read = client.read;
+			post_legnth = client.post_legnth;
 			prsing_req = client.prsing_req;
 			return_write = client.return_write;
 			status = client.status;
@@ -340,18 +386,32 @@ class Client {
 
 };
 
+struct Socket 
+{
+	int					_socket_fd, fd_size, x, coming_socket;
+	struct addrinfo hints;
+    struct sockaddr_in	address;
+	struct addrinfo		*bind_address;
+    int					addrlen;
+    int					default_port;
+	std::vector<int>	_socket_fds;
+	std::vector<Client> Clients;
+	fd_set				_read_sockets, _write_sockets, _readfds, _writefds;
+	Parsing 			_server;
+};
+
 // Socket
 void	_socket( Parsing &_server );
 
 //cgi
 std::string generateRandomString(int length);
-void parent_process(std::string &result, int *pipe_fd);
+void parent_process(Client & client);
 void get_body(Client & client);
 
 // Methodes
 void	_get( Client & _client, Server &_server );
 void	_post( Client & _client, Server &_server );
-void	_delete( Client & _client ,Server &_server );
+void	_delete( Client & _client );
 
 // CGI
 std::string generateRandomString(int length, std::string ss);
@@ -359,12 +419,12 @@ void	_cgi( Client & _client , Server &_server );
 std::string num_to_str(ssize_t num);
 
 // Request
-void	_request( Parsing &_server, Server &_s, Request &_request, Response &_response, std::string s );
+void	_request( Parsing &_server, Server &_s, Client & _client );
 
 // Response
 void		_response( Client & _client );
-int			_get_res_body( Client & _client );
-void    	get_indexed_file_data( Request &_request, Response &_response, std::string path );
+int			_get_res_body( Client & _client , std::string path );
+void    	get_indexed_file_data( Client & _client );
 std::string	_get_ex( std::string _file_name );
 
 // Utils
@@ -372,13 +432,15 @@ void	print_error(std::string s);
 
 // Parsing
 void	error(std::string err);
-int		str_to_num(std::string str);
+size_t str_to_num(std::string str);
 void	parss_info(Parsing &parss);
 void	info_autoindex(Location &loc, std::string &str);
-void	split_conf(std::vector<std::string> &data, std::string str);
+void 	split_conf(std::vector<std::string> &data, std::string str);
 void	info_err_status(std::vector<error_page> &errors, std::vector<std::string>::iterator &it);
 void	info_location(std::vector<Location> &locations, std::vector<std::string>::iterator &it);
 void	print_data(Parsing &parss);
 std::vector<std::string>	info_(std::vector<std::string>::iterator &it);
 int createFile(const char* filename, std::string data);
+
+
 #endif
