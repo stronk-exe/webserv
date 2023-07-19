@@ -25,3 +25,6 @@ else:
 # End HTML response
 print("</body>")
 print("</html>")
+
+while 1:
+    a = 1
