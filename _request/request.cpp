@@ -146,6 +146,8 @@ void _match_theLocation( Server &_server, Location &_location, Request &_request
 		_server.chyata = chyata_pro_max;
 	_request.uri = _location.root_location + _server.chyata;
 	_server.chyata.clear();
+	if (_location.name.empty())
+		_response.status = 404;
 }
 
 bool isCharacterAllowed(std::string ss) {
@@ -159,12 +161,14 @@ bool isCharacterAllowed(std::string ss) {
 
 int    _is_method_allowed( Location _location, Request &_request, Response &_response )
 {
+	std::cerr << "request_method: " << _request.method << std::endl;
+	std::cerr << "location name: " << _location.name << std::endl;
     for (size_t i=0 ; i<_location.allows_methods.size(); i++)
         if (_location.allows_methods[i] == _request.method)
             return 1;
     if (_request.method == "PUT" || _request.method == "HEAD" || _request.method == "PATCH" || _request.method == "OPTIONS" || _request.method == "TRACE")
         _response.status = 501;
-    else
+    else 
         _response.status = 405;
     return 0;
 }
@@ -393,6 +397,7 @@ void	_request( Parsing &_server, Server &_serv, Client & _client )
 	check_QueryString(_client._request.uri, _client._request.queryString);
     _match_theServer(_server, _client._request, _serv);
 	_match_theLocation(_serv, _location, _client._request, _client._response );
+	std::cerr << "location name: " << _location.name << std::endl;
 	_fill_request(_serv, _location, _client._request);
     _validate_request(_serv, _location, _client._request, _client._response);
 	_get_mims(_client._response);

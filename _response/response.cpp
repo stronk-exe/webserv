@@ -35,29 +35,24 @@ ssize_t getFileSize(const char* filename) {
 
 int _get_res_body( Client & _client , std::string path )
 {
-	int data = 1;
-	char buffer[_BUFFER_SIZE_] = {0};
-
 	if (!_client.fd_file)
 	{
 		_client.fd_file = open( path.c_str(), O_RDONLY );
 
         int a = getFileSize(path.c_str());
-        if (a != -1 && !_client._response.content_length)
+        if (a != -1)
 		    _client._response.content_length = a;
 	}
-	data = read(_client.fd_file, buffer, _BUFFER_SIZE_);
+
+	int data=1;
+	char buffer[999999] = {0};
+	data = read(_client.fd_file, buffer, 999999);
+	for (int i=0; i<data; i++)
+	    _client._response.body += buffer[i];
 	if (data > 0)
-    {
-        std::string temp="";
-        for (int i=0; i < data; i++)
-            temp += buffer[i];
-        _client._response.body += temp;
 	    _client._done_writing = 0;
-    }
-    if (data < 0 || _client._wr >= _client._response.content_length || _client._wr >= lseek(_client.fd_file, 0, SEEK_END))
+	else if (data < 0 || _client._wr == _client._response.content_length || _client._wr >= lseek(_client.fd_file, 0, SEEK_END))
 	{
-        _client._wr = 0;
 	    _client._done_writing = 1;
 	    close(_client.fd_file);
 	}
@@ -102,7 +97,7 @@ void    get_file_data( Response &_response, std::string & path )
 		}
 	}
 	else
-		std::cout << "-------Couldn't open file\n";
+		std::cerr << "Couldn't open file\n";
     myfile.close();
 }
 

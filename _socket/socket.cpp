@@ -81,8 +81,6 @@ void _Droping ( Socket & _socket , Client & _client , size_t e )
 
 	FD_CLR(_client._id, &_socket._readfds);
 	FD_CLR(_client._id, &_socket._writefds);
-	if (remove(_client.file.c_str()))
-		strerror(errno);
 	close(_client._id);
 	std::vector<Client>::iterator it = _socket.Clients.begin();
 	std::advance(it, e);
@@ -193,6 +191,8 @@ void check_cgi_end(Client & _client )
 {
 	if (waitpid(_client._cgi_pid, &_client.status, WNOHANG) > 0)
 	{
+		if (remove(_client.file.c_str()))
+    		 strerror(errno);
 		_client._kill_pid = true;
 		if (WIFSIGNALED(_client.status) && (WTERMSIG(_client.status) == SIGALRM))
 		{
@@ -252,10 +252,13 @@ void	_socket( Parsing &_server )
 	Socket _socket;
 	
 	init_socket(_socket, _server);
+	// struct timeval _timeout;
     while (1)
     {
         std::cout << "listening ..." << std::endl;
 		
+		// _timeout.tv_sec = 0;
+		// _timeout.tv_usec = 500000;
 		_socket._read_sockets = _socket._readfds;
 		_socket._write_sockets = _socket._writefds;
 		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, NULL) < 0) {

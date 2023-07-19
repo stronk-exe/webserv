@@ -21,7 +21,7 @@ void print_error(std::string s)
 void	_get_listed_dir( Client & _client )
 {
 	DIR *dir;
-	
+
 	if ((dir = opendir(_client._request.path.c_str())) == NULL)
 	{
 		_client._response.status = 404;
@@ -156,7 +156,7 @@ void	_get( Client & _client, Server &_server )
 					_client._response.status = 200;
 					if (_client._request.cgi.size())
 						_cgi(_client, _server);
-					else
+					if (_client._response.body.empty())
 						get_indexed_file_data(_client);
 				}
 				else
@@ -194,7 +194,6 @@ void _post(  Client & _client , Server &_server )
 			_client._response.content_length = _client._request.body.size();
 			_client._response.content_type = "text/html";
 
-			_client._response.status = 200;
 			_cgi(_client, _server);
 			if (!_client._response.body.size())
 			{
@@ -206,6 +205,7 @@ void _post(  Client & _client , Server &_server )
 				_client._response.body = _client._request.body;
 				_client._response.content_length = _client._response.body.size();
 			}
+			_client._response.status = 200;
 		}
 		else
 		{
@@ -253,31 +253,31 @@ void _delete( Client & _client )
 	if (_client._request.type == "directory")
 	{
 		if (_client._request.path[_client._request.path.size()-1] != '/')
-			_client._response.status = 409;//Conflict
+			_client._response.status = 409;	//Conflict
 		else
 		{
 			if (std::system(("rm -r " + _client._request.path).c_str())!= 0)
 			{
 				if (!access(_client._request.path.c_str(), W_OK))
-					_client._response.status = 500;// Internal Server Error
+					_client._response.status = 500;	// Internal Server Error
 				else
-					_client._response.status = 403;// Forbidden
+					_client._response.status = 403;	// Forbidden
 				strerror(errno);
 			}
 			else
-				_client._response.status = 204;// No Content
+				_client._response.status = 204;	// No Content
 		}
 	}
 	else if (_client._request.type == "file")
 	{
 
-		_client._response.status = 204;// No Content
+		_client._response.status = 204;	// No Content
 		if (access(_client._request.path.c_str(), W_OK))
-			_client._response.status = 403;// Forbidden
+			_client._response.status = 403;	// Forbidden
 		else if (std::remove(_client._request.path.c_str()) != 0)
 		{
 			if (!access(_client._request.path.c_str(), W_OK))
-				_client._response.status = 500;// Internal Server Error
+				_client._response.status = 500;	// Internal Server Error
 			strerror(errno);
 		}
 	}
