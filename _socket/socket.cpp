@@ -21,9 +21,9 @@ std::string	num_to_str(ssize_t num)
 
 std::string	generate_response_str(Client & client )
 {
-	std::string response = "HTTP/1.1 "+ std::to_string(client._response.status)+" "+client._response.status_message+\
+	std::string response = "HTTP/1.1 "+  num_to_str(client._response.status)+" "+client._response.status_message+\
 					"\nContent-Type: "+client._response.content_type+\
-					"\nContent-Length: "+std::to_string(client._response.content_length);
+					"\nContent-Length: "+ num_to_str(client._response.content_length);
 	
 	if (!client.cookies.empty())
 		response += "\n" + client.cookies;
@@ -224,23 +224,23 @@ void init_socket( Socket &_socket , Parsing &_server )
     	hints.ai_socktype = SOCK_STREAM;
     	hints.ai_flags = AI_PASSIVE;
 		if (getaddrinfo((_socket._server.servers[i].ip_add).c_str(), num_to_str(_socket._server.servers[i].listen_port).c_str(), &hints, &_socket.bind_address))
-			print_error("getaddrinfo failed!");
+			error("getaddrinfo failed!");
 
 		if ((_socket._socket_fd = socket(_socket.bind_address->ai_family, _socket.bind_address->ai_socktype, _socket.bind_address->ai_protocol)) < 0)
 			print_error("socket creation failed!");
 		int on = 1;
 		fcntl(_socket._socket_fd, F_SETFL, O_NONBLOCK);
 		if (setsockopt(_socket._socket_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
-			print_error("port in use!");
+			error("port in use!");
 
 		if ((bind(_socket._socket_fd, _socket.bind_address->ai_addr, _socket.bind_address->ai_addrlen)) < 0)
-			print_error("binding failed!");
+			error("binding failed!");
 		
 		freeaddrinfo(_socket.bind_address);
 
 		// Start listining..
 		if ((listen(_socket._socket_fd, SOMAXCONN)) < 0)
-			print_error("listining failed!");
+			error("listining failed!");
 		FD_SET(_socket._socket_fd, &_socket._readfds);
 		_socket._socket_fds.push_back(_socket._socket_fd);
 	}

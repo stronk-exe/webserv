@@ -188,7 +188,7 @@ void	_validate_request( Server &_server, Location &_location, Request &_request,
 			_response.status = 400;
 		if ((_request.uri).size() > 2048)
 			_response.status = 414;
-		if (static_cast<int>(_request.body.size()) > (str_to_num(_server.client_max_body_size)* 1e6) )
+		if (static_cast<int>(_request.body.size()) > (_server.client_max_body_size * 1e6) )
 			_response.status = 413;
 		if (_is_method_allowed(_location, _request, _response))
 			_request.is_method_allowed = 1;

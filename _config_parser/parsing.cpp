@@ -47,7 +47,7 @@ size_t str_to_num(std::string str)
     ssize_t _int;
     
     _int = std::strtol(str.c_str(), &_p, 10);
-    if (*_p != '\0')
+    if (*_p != '\0' || _int < 0)
         error("number error");
     return _int;
 }
@@ -199,7 +199,7 @@ void parss_info(Parsing &parss)
                 else if (*it == "root" && *(it + 1) != ";" && *(it + 2) == ";")
                     info_root_loc(serv.root_location, *(++it), "root_location");
                 else if (*it == "client_max_body_size" && *(it + 1) != ";" && *(it + 2) == ";")
-                    serv.client_max_body_size = *(++it);   
+                    serv.client_max_body_size = str_to_num(*(++it));   
                 else if (*it == "listen" && *(it + 1) != ";" && *(it + 2) == ";")
                     info_listen(serv, ++it);
                 else if (*it == "error_page")
@@ -208,10 +208,6 @@ void parss_info(Parsing &parss)
                     info_(++it);   
                 else if (*it == "location")
                     info_location(serv.locations, ++it);
-                // else if (*it == "return" && *(it + 1) != ";" && *(it + 2) != ";" && *(it + 3) == ";"){
-                //     serv.redirection.return_status = str_to_num(*(++it));
-                //     serv.redirection.path = *(++it);
-                // }
                 else if (*it != ";")
                     error("not understood");
             }
