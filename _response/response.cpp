@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:15:45 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/11 20:39:38 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/07/28 20:18:05 by ael-asri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ void    get_indexed_file_data( Client & _client )
     }
 }
 
-void    get_file_data( Response &_response, std::string & path )
+void    get_file_data( Response &_response, std::string & path, bool _status_found )
 {
     std::ifstream myfile;
 	myfile.open(path);
@@ -95,9 +95,13 @@ void    get_file_data( Response &_response, std::string & path )
 			std::getline (myfile, myline);
 			_response.body += myline;
 		}
+        _status_found = true;
 	}
 	else
-		std::cerr << "Couldn't open file\n";
+	{
+        _status_found = false;
+    	std::cerr << "Couldn't open file\n";
+    }
     myfile.close();
 }
 
@@ -112,8 +116,7 @@ void	_response( Client & _client )
             {
 				if (_client._response.status == _client._request.error_pages[i].error_status[j])
                 {
-                    get_file_data(_client._response, _client._request.error_pages[i].path);
-                    _status_found = true;
+                    get_file_data(_client._response, _client._request.error_pages[i].path, &_status_found);
                     _client._response.content_type = "text/html";
                     break;
                 }

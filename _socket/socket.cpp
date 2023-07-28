@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mait-jao <mait-jao@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ael-asri <ael-asri@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 11:14:33 by ael-asri          #+#    #+#             */
-/*   Updated: 2023/06/11 20:39:05 by mait-jao         ###   ########.fr       */
+/*   Updated: 2023/07/28 20:18:05 by ael-asri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,16 +252,16 @@ void	_socket( Parsing &_server )
 	Socket _socket;
 	
 	init_socket(_socket, _server);
-	// struct timeval _timeout;
+	struct timeval _timeout;
     while (1)
     {
         std::cout << "listening ..." << std::endl;
 		
-		// _timeout.tv_sec = 0;
-		// _timeout.tv_usec = 500000;
+		_timeout.tv_sec = 0;
+		_timeout.tv_usec = 500000;
 		_socket._read_sockets = _socket._readfds;
 		_socket._write_sockets = _socket._writefds;
-		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, NULL) < 0) {
+		if (select(_socket.fd_size + 1, &_socket._read_sockets, &_socket._write_sockets, NULL, &_timeout) < 0) {
 			std::cerr	<< strerror(errno) << std::endl;
 			print_error("error in select");
 		}
