@@ -11,7 +11,7 @@ ______________________________________
 <br />
 <br />
 
-<strong>Here are some key aspects this project typically coveres:</strong>
+<strong>Here are some key aspects this project typically covers:</strong>
 
 <br />
 
