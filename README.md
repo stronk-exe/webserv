@@ -1,7 +1,9 @@
 ### `why a URL starts with HTTP`
 
 <h6>This project involves creating a HTTP web server from scratch using C++. The server must be capable of handling HTTP requests, responses and serve static files.</h6>
+
 ______________________________________
+
 <br />
 
 <p align="center"><img src="https://c.tenor.com/qg324pNzm50AAAAC/tenor.gif" alt="server"></p>
