@@ -1,41 +1,30 @@
-# webserv
-The project typically involves implementing a HTTP server that can handle basic HTTP requests and serve static files.
-<br/> <br/>
-> usage
+### `why a URL starts with HTTP`
 
+<h6>This project involves creating a HTTP web server from scratch using C++. The server must be capable of handling HTTP requests, responses and serve static files.</h6>
+______________________________________
+<br />
 
-`$ make all`
-<br/>
-`$ ./webserv <config_file_name>`
+<p align="center"><img src="https://c.tenor.com/qg324pNzm50AAAAC/tenor.gif" alt="server"></p>
 
-<br/>
-___________________________________________________________________________
-<br/><br/>
+<br />
+<br />
 
-## Here are some key points that are commonly covered in the web server project:
+<strong>Here are some key aspects this project typically coveres:</strong>
 
-### 1- Understanding HTTP:
-  We are expected to have a solid understanding of the HTTP protocol, including the different HTTP methods (GET, POST, etc.), headers, and response codes.
+<br />
 
-### 2- Socket Programming:
-  The project involves socket programming to establish a connection with clients and handle incoming HTTP requests. We typically used system calls like socket(), bind(), listen(), and accept() to create and manage server sockets.
+<p><strong>◦  Configuration File Parsing:</strong> <h6>Reading and interpreting configuration files to customize server behavior (e.g., port numbers, root directory, MIME types).</h6></p>
 
-### 3- Parsing HTTP Requests:
-  We had to parse incoming HTTP requests to extract relevant information such as the requested file path, query parameters, and headers. Proper parsing and handling of the HTTP request is essential for responding appropriately.
+<p><strong>◦  HTTP Protocol Handling:</strong> <h6>Implementing parsing and processing logic for HTTP requests and generating appropriate responses (handling GET, POST, DELETE methods, status codes, headers, etc.).</h6></p>
 
-### 4- Handling Static Files:
-  The web server should be able to serve static files such as HTML, CSS, JavaScript, images, etc. We need to read and send file contents in response to the client's request.
+<p><strong>◦  Socket Programming:</strong> <h6>Understanding and utilizing socket programming to create a network server that listens for incoming connections.</h6></p>
 
-### 5- Response Generation:
-  We are responsible for generating proper HTTP responses based on the received requests. This includes setting the appropriate response headers, response codes, and sending the response body (file content or error messages).
+<p><strong>◦  Concurrency and Multi-threading:</strong> <h6>Handling multiple client requests concurrently by implementing multi-threading or other approaches for managing parallel connections.</h6></p>
 
-### 6- Concurrent Connections:
-  Implementing support for handling multiple concurrent connections is an important aspect of a web server. We explored techniques such as threading, forking, or non-blocking I/O to handle multiple client connections efficiently.
+<p><strong>◦  Error Handling and Logging:</strong> <h6>Implementing error handling mechanisms and logging functionalities for server operations and client interactions.</h6></p>
 
-### 7- Error Handling and Security:
-  It is crucial to handle errors gracefully and implement basic security measures to protect against common vulnerabilities, such as path traversal attacks or unauthorized access to sensitive files.
+<p><strong>◦  Security Considerations:</strong> <h6>Basic security measures such as input validation, preventing common attacks (e.g., buffer overflow, DoS), and ensuring proper handling of client requests.</h6></p>
 
-<br/>
+<br />
 
-![server-is-fine-burn](https://github.com/stronk-exe/webserv/assets/94312066/dc336a27-51c4-40db-b760-beb160137e3a)
-
+<h5>By the end of this project, I got a hands-on experience in low-level networking concepts, HTTP protocol implementation, and server-side development. and understood the foundational aspects of web servers and HTTP.</h5>
